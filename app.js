@@ -428,10 +428,20 @@ window.KWU_READY.then(function () {
     });
     var nauw = ds.map(fijnBij), split = nauw.findIndex(function (n) { return n === 0; });
     if (split < 0) split = ds.length;
-    var groep = function (kop, sub, items) { return items.length ? '<div class="dgroep"><h4>' + kop + ' <i>' + sub + '</i></h4><div class="weekstrip">' + items.join("") + '</div></div>' : ""; };
-    $("weekstrip").innerHTML = groep("Nauwkeurig", "fijne modellen, 2 km", kaarten.slice(0, split)) +
-      groep("Indicatie", "grove modellen, kans uit de ensembles", kaarten.slice(split)) +
+    /* Eén rij voor alle dagen; de scheiding tussen fijn en grof is een element in de rij: op breed scherm een kopregel, op mobiel een verticale streep. */
+    var kop = function (k, sub, cls) { return '<div class="dsep' + (cls ? " " + cls : "") + '"><b>' + k + '</b><i>' + sub + '</i></div>'; };
+    $("weekstrip").innerHTML = kop("Nauwkeurig", "fijne modellen, 2 km", "eerste") + kaarten.slice(0, split).join("") +
+      (split < ds.length ? kop("Indicatie", "grove modellen, kans uit de ensembles", "grof") + kaarten.slice(split).join("") : "") +
       (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
+    /* Mini-overzicht boven de rij (mobiel): per dag een staafje per uur, klik springt naar de kaart. */
+    var maxKn = Math.max(30, Math.max.apply(null, ds.map(function (d) { return top(d.uren).kn; })));
+    $("weekmini").hidden = false;
+    $("weekmini").innerHTML = ds.map(function (d, i) {
+      var o = dagOordeel(d);
+      return '<button type="button" class="wm' + (i === st.dag ? " aan" : "") + (i === split ? " grof" : "") + '" data-dag="' + i + '" data-spring="1" aria-label="' + dagStr(d.uren[0].t) + '" style="--tint:' + tint(o.n) + '">' +
+        '<span class="wmk">' + (i === 0 ? "nu" : DAGK[new Date(d.uren[0].t).getDay()]) + '</span><span class="wmb">' +
+        d.uren.map(function (u) { return '<i style="height:' + Math.max(8, Math.round(u.kn / maxKn * 100)) + '%;background:' + knKleur(u.kn, niveau(u)) + '"></i>'; }).join("") + '</span></button>';
+    }).join("");
   }
 
   // ── uur voor uur: één dag, tabel zoals Windfinder ────
@@ -586,7 +596,8 @@ window.KWU_READY.then(function () {
     if (e.target.closest("[data-info=\"kite\"]")) return openKite();
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
-    var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; return teken(); }
+    var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; teken();
+      if (dg.dataset.spring) { var k = document.querySelector(".dagkaart.aan"); if (k) k.scrollIntoView({ block: "nearest", inline: "start", behavior: "smooth" }); } return; }
     var bl = e.target.closest("[data-t]"); if (bl) { st.t = bl.dataset.t; return teken(); }
   });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("sheet").hidden) sluit(); });
@@ -594,6 +605,7 @@ window.KWU_READY.then(function () {
   $("schuif").addEventListener("input", function (e) { st.t = huidigeDag().uren[+e.target.value].t; teken(); });
   $("kg").addEventListener("input", function (e) { var v = parseInt(e.target.value,10); if (v >= 40 && v <= 140) { st.kg = v; teken(); } });
 
+  $("legenda-box").open = window.matchMedia("(min-width:601px)").matches;
   $("kg").value = st.kg;
   document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
   if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";

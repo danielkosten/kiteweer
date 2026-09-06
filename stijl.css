@@ -164,7 +164,8 @@ main{padding-bottom:64px}
 
 
 /* ── week in één blik ────────────────────────────── */
-.weekstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}
+.weekstrip{display:flex;flex-wrap:wrap;gap:8px}
+.weekstrip .dagkaart{flex:1 1 112px}
 .dagkaart{display:block;background:var(--tint-v);border:1px solid var(--lijn);border-radius:var(--r-s);
   padding:12px 12px 10px;text-decoration:none;border-top:4px solid var(--tint);transition:transform var(--t)}
 .dagkaart:hover{transform:translateY(-2px)}
@@ -199,7 +200,13 @@ main{padding-bottom:64px}
 
 .wijzer{width:14px;height:14px;flex:none;vertical-align:middle}
 .wijzer path{fill:currentColor}
-.legenda{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--zacht)}
+.legenda-box{margin-top:14px;border-top:1px solid var(--lijn-2);padding-top:10px}
+.legenda-box summary{cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--zacht);list-style:none;display:flex;align-items:center;gap:8px}
+.legenda-box summary::-webkit-details-marker{display:none}
+.legenda-box summary::before{content:"";width:6px;height:6px;border-right:1.5px solid var(--zacht);border-bottom:1.5px solid var(--zacht);transform:rotate(-45deg);transition:transform var(--t);flex:none}
+.legenda-box[open] summary::before{transform:rotate(45deg)}
+.legenda-box summary i{font-style:normal;letter-spacing:0;text-transform:none;font-weight:500;opacity:.8}
+.legenda{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--zacht)}
 .lg{display:inline-flex;align-items:center;gap:6px}
 .lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
 
@@ -296,7 +303,6 @@ main{padding-bottom:64px}
   .hero{padding:18px 16px}
   .verdict{font-size:28px}
   .venster .vt{font-size:19px}
-  .weekstrip{grid-template-columns:repeat(2,1fr)}
   .scene-uitleg{grid-template-columns:1fr}
   .schuifrij{padding:10px 12px 4px}
 }
@@ -326,12 +332,13 @@ main{padding-bottom:64px}
 .dagkaart .dvl{display:block;font-size:11px;color:var(--zacht);margin:-1px 0 4px}
 .venster .vk small{font-size:11.5px;color:var(--zacht);font-family:var(--tekst);font-weight:700;margin-left:4px}
 .redenen li{margin-bottom:5px}
-#weekstrip{display:block}
-.dgroep{margin-bottom:14px}
-.dgroep h4{font-family:var(--tekst);font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--zacht);margin:0 0 8px;padding-bottom:6px;border-bottom:1.5px dashed var(--lijn)}
-.dgroep h4 i{font-style:normal;letter-spacing:0;text-transform:none;font-weight:500;opacity:.8}
-.dgroep+.dgroep h4{color:var(--flauw)}
-.dgroep+.dgroep .dagkaart{border-style:dashed}
+/* scheiding fijn/grof in de dagenrij: breed scherm een kopregel over de hele breedte */
+.dsep{flex:1 0 100%;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--zacht);padding-bottom:6px;border-bottom:1.5px dashed var(--lijn)}
+.dsep.grof{margin-top:6px;color:var(--flauw)}
+.dsep i{font-style:normal;letter-spacing:0;text-transform:none;font-weight:500;opacity:.8;margin-left:6px}
+.dsep.grof~.dagkaart{border-style:dashed}
+/* mini-overzicht van de week: alleen op mobiel */
+.weekmini{display:none}
 
 /* samenvatting onder de tabel */
 .hero{padding:18px 18px 14px}
@@ -397,7 +404,17 @@ details.modellen>div{margin-top:12px}
   /* dagkaarten: één rij, swipen, geen weeskaart */
   .weekstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
   .weekstrip .dagkaart{flex:0 0 44%;scroll-snap-align:start}
-  .dgroep .weekstrip{display:flex}
+  .weekstrip .dsep{flex:0 0 auto;writing-mode:vertical-rl;padding:8px 0;border-bottom:0;border-left:1.5px dashed var(--lijn);font-size:10.5px;text-align:center}
+  .weekstrip .dsep.eerste{display:none}
+  .weekstrip .dsep i{display:none}
+  .weekstrip .kans-ens{display:none}
+  .weekmini{display:flex;gap:3px;margin-bottom:10px;padding:6px 6px 4px;background:var(--kaart);border:1px solid var(--lijn);border-radius:var(--r-s)}
+  .wm{flex:1 1 0;min-width:0;padding:3px 2px 2px;border-radius:6px;cursor:pointer;background:none}
+  .wm.aan{background:var(--lijn-2);box-shadow:0 0 0 1.5px var(--inkt) inset}
+  .wm.grof{border-left:1.5px dashed var(--lijn);border-radius:0 6px 6px 0}
+  .wmk{display:block;font-size:10.5px;font-weight:700;color:var(--tint);text-align:center;margin-bottom:3px}
+  .wmb{display:flex;align-items:flex-end;gap:1px;height:26px}
+  .wmb i{flex:1 1 0;border-radius:1px 1px 0 0;min-width:1px}
   .scene-label b{font-size:20px}
 }
 
