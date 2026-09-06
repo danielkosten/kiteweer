@@ -2,22 +2,20 @@
    Lukt dat niet, dan valt hij terug op uur.js, de laatst gebundelde versie. Zelfde vorm als gen-uur.mjs. */
 (function () {
   "use strict";
-  var SPOTS = [
-    { id: "zandmotor", lat: 52.052, lon: 4.185 },
-    { id: "kijkduin", lat: 52.0581, lon: 4.1983 },
-    { id: "wassenaar", lat: 52.1648, lon: 4.3491 },
-    { id: "noordpier", lat: 52.493, lon: 4.593 }
-  ];
+  // spots komen uit data.js (window.KW.spots, met lat/lon); laden gebeurt per spot, pas als je hem kiest
   // klasse + gewicht = Arthurs gemeten skill (windcalendar SPEC.md §13); klassen wegen 50/50 in de AJK-mix
   var MODELLEN = [
     { id: "knmi_harmonie_arome_netherlands", naam: "KNMI Harmonie 2 km", dagen: 2.5, arthur: true, klasse: "regionaal", w: 0.88 },
     { id: "meteofrance_arome_france_hd", naam: "AROME-HD 1,3 km", dagen: 2, arthur: true, klasse: "regionaal", w: 1.16 },
     { id: "icon_d2", naam: "ICON-D2 2 km", dagen: 2, arthur: true, klasse: "regionaal", w: 1.03 },
     { id: "ukmo_uk_deterministic_2km", naam: "UKV 2 km", dagen: 2, arthur: true, klasse: "regionaal", w: 0.93 },
-    { id: "ecmwf_ifs025", naam: "ECMWF 25 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },
+    { id: "ecmwf_ifs", naam: "ECMWF 9 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },   // volle 9 km HRES, gratis sinds okt 2025; de 25 km-versie zat 5,5 kn te laag (toets-horizon.mjs)
     { id: "gfs_seamless", naam: "GFS 13 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },
     { id: "icon_seamless", naam: "ICON 7 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },
-    { id: "meteofrance_seamless", naam: "ARPEGE 10 km", dagen: 4, arthur: false, klasse: "globaal", w: 1 }
+    { id: "meteofrance_seamless", naam: "ARPEGE 10 km", dagen: 4, arthur: false, klasse: "globaal", w: 1 },
+    // opt-in: op 60 dagen HvH de trefzekerste 7-daagse modellen op dag 3–7 (JMA fout 3,4–4,7 kn, GEM 4,0–4,8; GFS 4,2–5,3, ECMWF 9 km 4,7–5,5)
+    { id: "jma_seamless", naam: "JMA 10 km", dagen: 7, arthur: false, klasse: "globaal", w: 1 },
+    { id: "gem_global", naam: "GEM 15 km", dagen: 7, arthur: false, klasse: "globaal", w: 1 }
   ];
   var r1 = function (x) { return x == null ? null : Math.round(x * 10) / 10; };
 
@@ -44,21 +42,33 @@
     });
   }
 
+  /* Cache 30 minuten per spot in de browser: Open-Meteo is gratis maar telt aanvragen. */
+  var VERS = 30 * 60e3, MODEL_INFO = { gegenereerd: new Date().toISOString(), bron: "Open-Meteo, live", live: true, modellen: MODELLEN, spots: {} };
+  function uitCache(id) { try { var c = JSON.parse(localStorage.getItem("kiteweer-uur:" + id) || "null"); return c && Date.now() - c.op < VERS ? c.data : null; } catch (e) { return null; } }
+  function naarCache(id, data) { try { localStorage.setItem("kiteweer-uur:" + id, JSON.stringify({ op: Date.now(), data: data })); } catch (e) {} }
+
+  window.KWU = MODEL_INFO;
+  var bezig = {};
+  /* Zorgt dat KWU.spots[id] bestaat. Volgorde: geheugen → browsercache → live → uur.js-bundel. */
+  window.KWU_LAAD = function (id) {
+    if (window.KWU.spots[id]) return Promise.resolve();
+    if (bezig[id]) return bezig[id];
+    var s = (window.KW.spots || []).filter(function (x) { return x.id === id; })[0];
+    if (!s) return Promise.reject(new Error("onbekende spot " + id));
+    var c = uitCache(id);
+    if (c) { window.KWU.spots[id] = c; return Promise.resolve(); }
+    bezig[id] = spot(s).then(function (data) { naarCache(id, data); window.KWU.spots[id] = data; })
+      .catch(function (e) { console.warn("live data mislukt voor " + id + ", terugval op uur.js", e); return terugval().then(function () {
+        if (!window.KWU.spots[id]) throw new Error("geen data voor " + id); }); })
+      .then(function () { delete bezig[id]; });
+    return bezig[id];
+  };
   function terugval() {
-    return new Promise(function (ok) {
-      var el = document.createElement("script"); el.src = "uur.js"; el.onload = ok; el.onerror = ok; document.head.appendChild(el);
-    }).then(function () { if (window.KWU) window.KWU.live = false; });
+    if (window.KWU_BUNDEL) return Promise.resolve();
+    return new Promise(function (ok) { var el = document.createElement("script"); el.src = "uur.js"; el.onload = ok; el.onerror = ok;
+      var live = window.KWU; window.KWU_BUNDEL = true;
+      el.onload = function () { var b = window.KWU; window.KWU = live; Object.keys(b.spots || {}).forEach(function (k) { if (!live.spots[k]) live.spots[k] = b.spots[k]; }); live.live = false; live.gegenereerd = b.gegenereerd; ok(); };
+      document.head.appendChild(el); });
   }
-
-  /* Cache 30 minuten in de browser: Open-Meteo is gratis maar telt aanvragen, en 12 per bezoek is genoeg. */
-  var CACHE = "kiteweer-uur", VERS = 30 * 60e3;
-  function uitCache() { try { var c = JSON.parse(localStorage.getItem(CACHE) || "null"); return c && Date.now() - new Date(c.gegenereerd).getTime() < VERS ? c : null; } catch (e) { return null; } }
-  function naarCache(out) { try { localStorage.setItem(CACHE, JSON.stringify(out)); } catch (e) {} }
-
-  var cached = uitCache();
-  window.KWU_READY = cached ? Promise.resolve(window.KWU = cached) : Promise.all(SPOTS.map(spot)).then(function (alle) {
-    var out = { gegenereerd: new Date().toISOString(), bron: "Open-Meteo, live", live: true, modellen: MODELLEN, spots: {} };
-    SPOTS.forEach(function (s, i) { out.spots[s.id] = alle[i]; });
-    naarCache(out); window.KWU = out;
-  }).catch(function (e) { console.warn("live data mislukt, terugval op uur.js", e); return terugval(); });
+  window.KWU_READY = Promise.resolve();
 })();

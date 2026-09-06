@@ -15,14 +15,16 @@
 <div class="wrap">
   <header class="top">
     <div class="merk"><span class="mark" aria-hidden="true"></span><h1>Kiteweer</h1></div>
-    <div class="seg" id="spotkeuze" role="group" aria-label="Spot"></div>
+    <div class="filters">
+      <button type="button" class="filter" id="spotknop" data-open-spot="1" aria-haspopup="dialog"></button>
+      <button type="button" class="filter" id="modelknop" data-open-modellen="1" aria-haspopup="dialog"></button>
+    </div>
     <div class="rider">
       <label class="invoer"><input id="kg" type="number" min="40" max="140" step="1" value="85" aria-label="Gewicht"><b>kg</b></label>
       <div class="seg klein" role="group" aria-label="Board">
         <button type="button" class="on" data-board="twintip">Twintip</button>
         <button type="button" data-board="directional">Directional</button>
       </div>
-      <button type="button" class="filter" id="modelknop" data-open-modellen="1" aria-haspopup="dialog"></button>
     </div>
   </header>
 </div>

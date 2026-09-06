@@ -1,7 +1,7 @@
 // Toets elk model en elke mix tegen wat KNMI Hoek van Holland (330) echt mat, afgelopen week.
 //   node verifieer.mjs            (pas S/E aan voor een andere week)
 // Let op: HvH staat op een pier, meet hoger dan een strand; één week is één week.
-const M=[["knmi_harmonie_arome_netherlands","Harmonie","r",0.88],["meteofrance_arome_france_hd","AROME-HD","r",1.16],["icon_d2","ICON-D2","r",1.03],["ukmo_uk_deterministic_2km","UKV","r",0.93],["ecmwf_ifs025","ECMWF","g",1],["gfs_seamless","GFS","g",1],["icon_seamless","ICON","g",1],["meteofrance_seamless","ARPEGE","g",1]];
+const M=[["knmi_harmonie_arome_netherlands","Harmonie","r",0.88],["meteofrance_arome_france_hd","AROME-HD","r",1.16],["icon_d2","ICON-D2","r",1.03],["ukmo_uk_deterministic_2km","UKV","r",0.93],["ecmwf_ifs","ECMWF","g",1],["gfs_seamless","GFS","g",1],["icon_seamless","ICON","g",1],["meteofrance_seamless","ARPEGE","g",1]];
 const S="2026-08-30",E="2026-09-05";
 // voorspellingen (Open-Meteo bewaart de run van ~1 dag vooruit) op de Zandmotor
 const f=await (await fetch(`https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=52.052&longitude=4.185&start_date=${S}&end_date=${E}&hourly=wind_speed_10m,wind_direction_10m&wind_speed_unit=kn&models=${M.map(m=>m[0]).join(",")}&timezone=Europe/Amsterdam`)).json();

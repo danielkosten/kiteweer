@@ -13,10 +13,11 @@ window.KWU_READY.then(function () {
 
   var BOARDS = { twintip:1, directional:0.8 };
   var ARTHUR = KWU.modellen.filter(function (m) { return m.arthur; }).map(function (m) { return m.id; });
-  var st = { board:"twintip", kg:85, spot:KW.spots[0].id, dag:0, t:null, modellen:ARTHUR.slice(), mix:"dajk" };
+  var st = { board:"twintip", kg:85, spot:"kijkduin", dag:0, t:null, modellen:ARTHUR.slice(), mix:"dajk" };
   try { var bewaard = JSON.parse(localStorage.getItem("kiteweer") || "{}");
     ["board","kg","spot","modellen","mix"].forEach(function (k) { if (bewaard[k] != null) st[k] = bewaard[k]; });
     if (!KW.spots.some(function (s) { return s.id === st.spot; })) st.spot = KW.spots[0].id;
+    st.modellen = st.modellen.map(function (m) { return m === "ecmwf_ifs025" ? "ecmwf_ifs" : m; });   // oude opgeslagen keuze: 25 km → 9 km
     st.modellen = st.modellen.filter(function (m) { return KWU.modellen.some(function (x) { return x.id === m; }); }); if (!st.modellen.length) st.modellen = ARTHUR.slice();
   } catch (e) {}
   function bewaar() { try { localStorage.setItem("kiteweer", JSON.stringify({ board:st.board, kg:st.kg, spot:st.spot, modellen:st.modellen, mix:st.mix })); } catch (e) {} }
@@ -385,7 +386,7 @@ window.KWU_READY.then(function () {
     if (split < 0) split = ds.length;
     var groep = function (kop, sub, items) { return items.length ? '<div class="dgroep"><h4>' + kop + ' <i>' + sub + '</i></h4><div class="weekstrip">' + items.join("") + '</div></div>' : ""; };
     $("weekstrip").innerHTML = groep("Nauwkeurig", "fijne modellen, 2 km", kaarten.slice(0, split)) +
-      groep("Indicatie", "alleen grove modellen, 7–25 km", kaarten.slice(split)) +
+      groep("Indicatie", "alleen grove modellen, 7–15 km", kaarten.slice(split)) +
       (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
   }
 
@@ -448,7 +449,7 @@ window.KWU_READY.then(function () {
     $("sheet-b").innerHTML =
       '<ul class="redenen">' +
       '<li class="p"><b>Middelste waarde</b> van de aangevinkte modellen, het trefzekerste model weegt het zwaarst.</li>' +
-      '<li class="p"><b>Fijn</b> (2 km) ziet de kust, reikt 2 dagen. <b>Grof</b> (7–25 km) reikt 7 dagen.</li>' +
+      '<li class="p"><b>Fijn</b> (2 km) ziet de kust, reikt 2 dagen. <b>Grof</b> (7–15 km) reikt 7 dagen; na dag 3 lopen ze uiteen, kijk naar laagste–hoogste.</li>' +
       '<li class="p"><b>AJK-mix</b>: fijn en grof tellen altijd 50/50. <a href="https://ajk68.com/kiteweer/" target="_blank" rel="noopener">Uitleg en gewichten op ajk68.com</a>.</li>' +
       '<li class="p"><b>DAJK-mix</b>: alleen fijn zolang het reikt, daarna grof. Afgelopen week 1 kn dichter bij de meting dan AJK; bij jouw 3 sessies zat grof 8–10 kn te laag.</li>' +
       '<li class="m">Na 2 dagen is alles grof: indicatie, geen plan.</li>' +
@@ -467,7 +468,7 @@ window.KWU_READY.then(function () {
     var mixKnop = function (id, lbl, sub) { return '<button type="button" class="mixknop' + (st.mix === id ? " aan" : "") + '" data-mset="' + id + '" aria-pressed="' + (st.mix === id) + '"><b>' + lbl + '</b><span>' + sub + '</span></button>'; };
     return '<div class="mixen">' +
       mixKnop("dajk", "DAJK-mix", "fijn zolang het reikt (2 dagen), daarna grof · afgelopen week 1 kn dichter bij de meting") +
-      mixKnop("arthur", "AJK-mix", "fijn en grof altijd 50/50, zoals op ajk68.com") + '</div>' +
+      mixKnop("ajk", "AJK-mix", "fijn en grof altijd 50/50, zoals op ajk68.com") + '</div>' +
       '<div class="mkop"><span>Los aan- of uitzetten</span><button type="button" class="link" data-mset="' + (st.modellen.length === alle.length ? "een" : "alle") + '">' + (st.modellen.length === alle.length ? "alleen fijn" : "alles aan") + '</button></div>' +
       '<div class="mchips">' + KWU.modellen.map(function (m) {
         var aan = st.modellen.indexOf(m.id) >= 0;
@@ -481,18 +482,41 @@ window.KWU_READY.then(function () {
   }
 
   function tekenSpotkeuze() {
-    $("spotkeuze").innerHTML = KW.spots.map(function (s) { return '<button type="button" class="' + (s.id === st.spot ? "on" : "") + '" data-spot="' + s.id + '">' + esc(s.naam) + '</button>'; }).join("");
+    var s = spot();
+    $("spotknop").innerHTML = '<b>' + esc(s.naam) + '</b><span>' + esc(s.regio || "") + ' · ' + esc(s.vorm) + '</span>';
+  }
+  var zoek = "";
+  function tekenSpots() {
+    var q = zoek.trim().toLowerCase();
+    var kaart = function (s) { return '<button type="button" class="spotkeus' + (s.id === st.spot ? " aan" : "") + '" data-spot="' + s.id + '" aria-pressed="' + (s.id === st.spot) + '"><b>' + esc(s.naam) + '</b><span>' + esc(s.regio || "") + (s.metingen && s.metingen.length ? " · meetstation" : "") + '</span></button>'; };
+    var aanb = (KW.aanbevolen || []).map(function (id) { return KW.spots.filter(function (s) { return s.id === id; })[0]; }).filter(Boolean);
+    var treffers = q ? KW.spots.filter(function (s) { return (s.naam + " " + (s.regio || "")).toLowerCase().indexOf(q) >= 0; }) : [];
+    return '<input type="search" id="spotzoek" placeholder="Zoek een spot, bijv. Texel of Zeeland" value="' + esc(zoek) + '" autocomplete="off">' +
+      (q ? '<div class="spotlijst">' + (treffers.length ? treffers.map(kaart).join("") : '<p class="sv flauw">niets gevonden</p>') + '</div>'
+         : '<p class="sv flauw">Aanbevolen</p><div class="spotlijst">' + aanb.map(kaart).join("") + '</div><p class="sv flauw">Alle ' + KW.spots.length + ' spots van ajk68.com: typ hierboven.</p>');
+  }
+  function openSpotPaneel() {
+    $("sheet-t").textContent = "Welke spot";
+    $("sheet-b").innerHTML = tekenSpots();
+    $("sheet").hidden = false; $("spotzoek").focus();
+  }
+  /* Spot wisselen: eerst de data van die spot ophalen, dan pas tekenen. Ondertussen staat de knop op "laden". */
+  function kiesSpot(id) {
+    $("spotknop").innerHTML = '<b>' + esc((KW.spots.filter(function (s) { return s.id === id; })[0] || {}).naam || id) + '</b><span>laden…</span>';
+    window.KWU_LAAD(id).then(function () { st.spot = id; st.t = null; st.dag = 0; cache.key = null; sluit(); teken(); })
+      .catch(function (e) { $("spotknop").innerHTML = '<b>' + esc(spot().naam) + '</b><span style="color:var(--aflandig)">laden mislukt, probeer opnieuw</span>'; console.warn(e); });
   }
   function teken() { bewaar(); tekenSpotkeuze(); tekenHero(); tekenNu(); tekenModelknop(); tekenWeek(); tekenDag(); tekenSamenvatting(); tekenScene();
     if (!$("sheet").hidden && $("sheet-t").textContent === "Windmodellen") $("sheet-b").innerHTML = tekenModellen(); }
 
   document.addEventListener("click", function (e) {
-    var sp = e.target.closest("[data-spot]"); if (sp) { st.spot = sp.dataset.spot; st.t = null; return teken(); }
+    if (e.target.closest("[data-open-spot]")) return openSpotPaneel();
+    var sp = e.target.closest("[data-spot]"); if (sp) return kiesSpot(sp.dataset.spot);
     var bd = e.target.closest("[data-board]");
     if (bd) { bd.parentNode.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); }); bd.classList.add("on"); st.board = bd.dataset.board; return teken(); }
     var ms = e.target.closest("[data-mset]");
     if (ms) { var k = ms.dataset.mset;
-      if (k === "dajk" || k === "arthur") { st.mix = k === "dajk" ? "dajk" : "ajk"; st.modellen = ARTHUR.slice(); }
+      if (k === "dajk" || k === "ajk") { st.mix = k; st.modellen = ARTHUR.slice(); }
       else st.modellen = k === "alle" ? KWU.modellen.map(function (m) { return m.id; }) : KWU.modellen.filter(function (m) { return m.klasse === "regionaal"; }).map(function (m) { return m.id; });
       st.t = null; return teken(); }
     var mc = e.target.closest("[data-model]");
@@ -505,11 +529,15 @@ window.KWU_READY.then(function () {
     var bl = e.target.closest("[data-t]"); if (bl) { st.t = bl.dataset.t; return teken(); }
   });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("sheet").hidden) sluit(); });
+  document.addEventListener("input", function (e) { if (e.target.id === "spotzoek") { zoek = e.target.value; var lijst = $("sheet-b"); lijst.innerHTML = tekenSpots(); var z = $("spotzoek"); z.focus(); z.setSelectionRange(z.value.length, z.value.length); } });
   $("schuif").addEventListener("input", function (e) { st.t = huidigeDag().uren[+e.target.value].t; teken(); });
   $("kg").addEventListener("input", function (e) { var v = parseInt(e.target.value,10); if (v >= 40 && v <= 140) { st.kg = v; teken(); } });
 
   $("kg").value = st.kg;
   document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
-  $("ververst").textContent = (KWU.live ? "live opgehaald " : "gebundeld, niet live: ") + new Date(KWU.gegenereerd).toLocaleString("nl-NL");
-  teken();
+  if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";
+  window.KWU_LAAD(st.spot).catch(function () { st.spot = "kijkduin"; return window.KWU_LAAD(st.spot); }).then(function () {
+    $("ververst").textContent = (KWU.live ? "live opgehaald " : "gebundeld, niet live: ") + new Date(KWU.gegenereerd).toLocaleString("nl-NL");
+    teken();
+  });
 });

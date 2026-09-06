@@ -353,3 +353,15 @@ details.modellen>div{margin-top:12px}
 .mixknop b{font-size:15px}
 .mixknop span{font-size:12.5px;color:var(--zacht)}
 .sheet-in{max-width:520px}
+
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
+.rider{width:100%;border-top:1px solid var(--lijn-2);padding-top:10px}
+.filter b{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#spotzoek{width:100%;font:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--lijn);border-radius:var(--r-s);margin-bottom:10px;background:var(--papier);color:var(--inkt)}
+#spotzoek:focus{outline:2px solid var(--inkt);border-color:var(--inkt)}
+.spotlijst{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px;max-height:50vh;overflow:auto;margin-bottom:8px}
+.spotkeus{text-align:left;border:1.5px solid var(--lijn);border-radius:var(--r-s);padding:9px 11px;display:flex;flex-direction:column}
+.spotkeus.aan{border-color:var(--perfect);background:var(--perfect-v)}
+.spotkeus b{font-size:14px}
+.spotkeus span{font-size:11.5px;color:var(--zacht)}
+@media(max-width:600px){.filters{margin-left:0;width:100%}.filter{flex:1}}
