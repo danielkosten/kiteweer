@@ -61,7 +61,7 @@
     var sp = KWU.spots[st.spot], s = spot();
     cache.uren = sp.uren.map(function (u, i) {
       var ids = st.modellen.filter(function (m) { return sp.modellen[m] && sp.modellen[m][i]; });
-      if (!ids.length) return Object.assign({}, u, { nModellen:0 });
+      if (!ids.length) return st.modellen.length ? null : Object.assign({}, u, { nModellen:0 });   // buiten horizon van alles wat aanstaat: geen uur
       var rows = ids.map(function (m) { return sp.modellen[m][i]; }), ws = gewichten(ids);
       var sx = 0, sy = 0, ja = 0; rows.forEach(function (r, j) {
         sx += ws[j]*Math.cos(r[2]*Math.PI/180); sy += ws[j]*Math.sin(r[2]*Math.PI/180);
@@ -79,6 +79,7 @@
   function dagen() {
     var sp = KWU.spots[st.spot], map = {}, volg = [];
     uren().forEach(function (u) {
+      if (!u) return;
       var k = u.t.slice(0,10), z = sp.zon.filter(function (z) { return z.d === k; })[0];
       if (!z) return;
       var h = u.t.slice(11,16);
@@ -143,13 +144,17 @@
   /* ── golven in gewone woorden ── */
   function golfOordeel(g) {
     if (!g) return { niveau:"weinig", kop:"Golven onbekend", punten:[] };
-    var h = g.m, kop = h < 0.4 ? "Vlak water" : h < 0.8 ? "Kleine golfjes" : h < 1.5 ? "Golven" : "Flinke golven";
-    var p = [];
-    if (g.chop >= 0.2) p.push("windchop " + g.chop.toFixed(1) + " m, korte hakkerige golfjes (om de " + g.chopS + " s)");
-    if (g.swell >= 0.2) p.push("deining " + g.swell.toFixed(1) + " m uit " + kompas(g.swellDir) + ", lange glooiende golven (om de " + g.swellS + " s)" + (g.swellS >= 8 ? ": lekker om te springen" : ""));
+    /* Chop en deining tellen samen als energie (h² = chop² + deining²), maar betekenen iets anders:
+       chop (3–4 s) = hobbelig, remt en vermoeit; deining (≥6 s) = lange golven, bruikbaar als schans. */
+    var h = g.m, ch = g.chop || 0, sw = g.swell || 0, p = [];
+    var chopN = ch < 0.3 ? "perfect" : ch < 0.7 ? "goed" : ch < 1.2 ? "matig" : "aflandig";
+    var kop = ch < 0.3 ? "Vlak water" : ch < 0.7 ? "Beetje chop" : ch < 1.2 ? "Hobbelig" : "Ruig";
+    p.push(ch < 0.3 ? "nauwelijks windchop, glad om te rijden" : "windchop " + ch.toFixed(1) + " m om de " + g.chopS + " s: " + (ch < 0.7 ? "kleine hobbels, prima" : ch < 1.2 ? "hakkerig, kost snelheid en benen" : "steile korte golven, vermoeiend"));
+    if (sw >= 0.3 && g.swellS >= 6) p.push("deining " + sw.toFixed(1) + " m uit " + kompas(g.swellDir) + " om de " + g.swellS + " s: lange glooiende golven, mooie schansen om te springen");
+    else if (sw >= 0.3) p.push("deining " + sw.toFixed(1) + " m om de " + g.swellS + " s: te kort om echt als schans te dienen");
     else p.push("geen deining, alleen wat de wind zelf maakt");
-    p.push(h < 0.4 ? "ideaal om te leren en voor freestyle" : h < 0.8 ? "prima om te rijden" : h < 1.5 ? "leuk om te springen" : "groot, alleen als je dat leuk vindt");
-    return { niveau: h < 0.8 ? "perfect" : h < 1.5 ? "goed" : "matig", kop: kop + ", " + h.toFixed(1) + " m", punten:p };
+    p.push("samen " + h.toFixed(1) + " m");
+    return { niveau: chopN === "aflandig" ? "matig" : chopN, kop: kop + ", " + h.toFixed(1) + " m", punten:p };
   }
 
   /* ── kitemaat ──────────────────────────────────────
@@ -160,9 +165,16 @@
     return r > 1.22 ? "over" : r > 1.08 ? "iets over" : r < 0.80 ? "te klein" : r < 0.93 ? "iets under" : "goed";
   }
   /* Welke maat past bij een windbereik: afgerond op hele meters, hoog naar laag. */
+  /* Maat op de gemiddelde wind. Trekkracht groeit met wind², dus bij vlaag/wind ≥ 1,5 één maat kleiner.
+     Geijkt op één sessie (30-08, 19 kn → 10 m bij 85 kg): medium zekerheid. */
+  function kiteAdvies(kn, vl) {
+    var m = Math.round(ideaal(kn)), vlagerig = vl / kn >= 1.5;
+    return { maat:m, klein:vlagerig ? Math.max(5, m - 2) : null, vlagerig:vlagerig };
+  }
   function kiteBereik(lo, hi, vl) {
-    var a = Math.round(ideaal(vl ? (hi + vl) / 2 : hi)), b = Math.round(ideaal(lo));   // onderkant rekent de vlagen half mee
-    return a === b ? a + " m" : a + "–" + b + " m";
+    var a = kiteAdvies(hi, vl), b = kiteAdvies(lo, vl);
+    var tekst = a.maat === b.maat ? a.maat + " m" : a.maat + "–" + b.maat + " m";
+    return a.vlagerig ? tekst + ", vlagerig: liever " + a.klein + " m" : tekst;
   }
   function vlMax(us) { return Math.max.apply(null, us.map(function (u) { return u.vl; })); }
 
@@ -178,7 +190,7 @@
     if (gm != null) { if (gm > 1.5) tel(-0.5, "flinke golven " + gm.toFixed(1) + " m"); else if (gm < 0.5) pl.push("vlak water"); }
     var mm = us.reduce(function (a,u) { return a + (u.mm||0); }, 0);
     if (mm >= 2) tel(-0.5, "regen, " + mm.toFixed(1) + " mm in het venster");
-    if (n >= 4) pl.push(n + " uur lang"); else if (n <= 1) tel(-1, "maar 1 uur");
+    if (n >= 4) pl.push(n + " uur lang"); else if (n <= 1) tel(-1, "slechts 1 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     return { score:score, plus:pl, min:mn, som: start + " voor " + WOORD[v.n] + " wind" + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
       een: (v.n === "perfect" ? "Perfecte wind" : "Goede wind") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
@@ -299,14 +311,15 @@
 
   // ── welke dag ────────────────────────────────────────
   function tekenWeek() {
-    $("weekstrip").innerHTML = dagen().map(function (d, i) {
+    var ds = dagen();
+    $("weekstrip").innerHTML = ds.map(function (d, i) {
       var o = dagOordeel(d);
       return '<button type="button" class="dagkaart' + (i === st.dag ? " aan" : "") + '" data-dag="' + i + '" aria-pressed="' + (i === st.dag) +
         '" style="--tint:' + tint(o.n) + ';--tint-v:' + tintV(o.n) + '"><span class="dk">' + (i === 0 ? "vandaag" : dagStr(d.uren[0].t)) + '</span>' +
         '<span class="dv">' + (o.v ? o.v.lo + "–" + o.v.hi : o.b.kn) + ' <em>kn</em></span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
-        (i >= 3 ? '<span class="ind">indicatie</span>' : '') + '</button>';
-    }).join("");
+        '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (i >= 3 ? ' · indicatie' : '') + '</span></button>';
+    }).join("") + (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
   }
 
   // ── uur voor uur: één dag, tabel zoals Windfinder ────
@@ -357,7 +370,7 @@
     $("sheet-b").innerHTML = '<p class="sheet-een">' + c.een + '</p><ul class="redenen">' +
       c.plus.map(function (p) { return '<li class="p">' + p + '</li>'; }).join("") + c.min.map(function (p) { return '<li class="m">' + p + '</li>'; }).join("") + '</ul>' +
       [["wind", w.lo + "–" + w.hi + " kn uit " + kompas(top(w.uren).dir)], ["vlagen tot", Math.max.apply(null, w.uren.map(function (u) { return u.vl; })) + " kn"],
-       ["duur", w.uren.length + " uur"], ["kite", kiteBereik(w.lo, w.hi, vlMax(w.uren)) + " bij " + st.kg + " kg, " + st.board + " · klein bij vlagen tot " + vlMax(w.uren) + " kn, groot bij " + w.lo + " kn"],
+       ["duur", w.uren.length + " uur"], ["kite", kiteBereik(w.lo, w.hi, vlMax(w.uren)) + " bij " + st.kg + " kg, " + st.board + ". Maat op de gemiddelde wind; vlagen tot " + vlMax(w.uren) + " kn" + (vlMax(w.uren) / w.hi >= 1.5 ? ", dat is 1,5× de wind: neem de kleine" : ", dat kan de kite hebben")],
        ["cijfer", c.som],
        ["modellen", st.modellen.length + " aangevinkt, gewogen middelste waarde per uur (Arthurs skill-gewichten, regionaal/globaal 50/50)"]
       ].map(function (r) { return '<div class="rij"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join("");
@@ -368,11 +381,16 @@
   // ── modellen-keuze ───────────────────────────────────
   function tekenModellen() {
     var alle = KWU.modellen.map(function (m) { return m.id; });
-    var isArthur = st.modellen.slice().sort().join() === ARTHUR.slice().sort().join();
-    $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>middelste waarde van wat je aanvinkt · golven, stroming en weer komen niet uit deze keuze</span>' +
-      '<span class="mknoppen"><button type="button" data-mset="arthur" class="' + (isArthur ? "on" : "") + '">mix van Arthur</button>' +
-      '<button type="button" data-mset="alle" class="' + (st.modellen.length === alle.length ? "on" : "") + '">alle</button>' +
-      '<button type="button" data-mset="geen" class="' + (!st.modellen.length ? "on" : "") + '">geen</button></span></div>' +
+    var zelfde = function (a, b) { return a.slice().sort().join() === b.slice().sort().join(); };
+    var FIJN = KWU.modellen.filter(function (m) { return m.klasse === "regionaal"; }).map(function (m) { return m.id; });
+    var GROF = KWU.modellen.filter(function (m) { return m.klasse === "globaal" && m.arthur; }).map(function (m) { return m.id; });
+    var knop = function (id, lbl, set, title) { return '<button type="button" data-mset="' + id + '" title="' + title + '" class="' + (zelfde(st.modellen, set) ? "on" : "") + '">' + lbl + '</button>'; };
+    var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
+    $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>De wind hierboven is de gewogen middelste waarde van deze modellen. Fijne modellen (2 km) reiken 2 dagen en vallen daarna vanzelf weg; verder kijkt alleen het grove. Voor de gekozen dag doen er <b>' + nd + '</b> mee.</span>' +
+      '<span class="mknoppen">' + knop("arthur", "Arthur (aanbevolen)", ARTHUR, "fijn + grof, gewogen op gemeten trefzekerheid; wordt vanzelf grof na 2 dagen") +
+      knop("fijn", "alleen fijn, 2 dagen", FIJN, "de vier 2 km-modellen, zoals Windfinder Superforecast") +
+      knop("grof", "alleen grof, 7 dagen", GROF, "ECMWF, GFS, ICON wereldwijd") +
+      knop("alle", "alle", alle, "") + knop("geen", "geen", [], "terug naar de basisreeks") + '</span></div>' +
       '<div class="mchips">' + KWU.modellen.map(function (m) {
         var aan = st.modellen.indexOf(m.id) >= 0;
         return '<button type="button" class="mchip' + (aan ? " aan" : "") + '" data-model="' + m.id + '" aria-pressed="' + aan + '">' + esc(m.naam) + '<small>' + m.dagen + ' dag</small></button>'; }).join("") + '</div>';
@@ -388,7 +406,12 @@
     var bd = e.target.closest("[data-board]");
     if (bd) { bd.parentNode.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); }); bd.classList.add("on"); st.board = bd.dataset.board; return teken(); }
     var ms = e.target.closest("[data-mset]");
-    if (ms) { st.modellen = ms.dataset.mset === "alle" ? KWU.modellen.map(function (m) { return m.id; }) : ms.dataset.mset === "geen" ? [] : ARTHUR.slice(); st.t = null; return teken(); }
+    if (ms) { var k = ms.dataset.mset;
+      st.modellen = k === "alle" ? KWU.modellen.map(function (m) { return m.id; }) : k === "geen" ? []
+        : k === "fijn" ? KWU.modellen.filter(function (m) { return m.klasse === "regionaal"; }).map(function (m) { return m.id; })
+        : k === "grof" ? KWU.modellen.filter(function (m) { return m.klasse === "globaal" && m.arthur; }).map(function (m) { return m.id; })
+        : ARTHUR.slice();
+      st.t = null; return teken(); }
     var mc = e.target.closest("[data-model]");
     if (mc) { var id = mc.dataset.model, ix = st.modellen.indexOf(id); if (ix >= 0) st.modellen.splice(ix,1); else st.modellen.push(id); st.t = null; return teken(); }
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);

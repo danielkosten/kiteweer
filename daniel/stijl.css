@@ -304,3 +304,6 @@ main{padding-bottom:64px}
 .voet a{color:var(--inkt)}
 .uurtabel .tm .kans{display:inline-block;background:var(--tint-v);color:var(--tint);font-weight:700;font-size:12.5px;border-radius:6px;padding:2px 7px}
 .uurtabel .tm small{display:block;font-size:10.5px;color:var(--flauw);margin-top:2px}
+.mkop>span:not(.mknoppen){line-height:1.4}
+.mkop>span:not(.mknoppen) b{font-size:inherit;letter-spacing:0;text-transform:none;color:var(--inkt)}
+.dagkaart.leeg{--tint:var(--lijn);--tint-v:var(--papier);color:var(--flauw);cursor:default}
