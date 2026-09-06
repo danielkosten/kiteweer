@@ -258,26 +258,29 @@ window.KWU_READY.then(function () {
     setTimeout(function () { kaart.invalidateSize(); }, 50);
 
     var W = 900, H = 480, naar = (u.dir + 180) % 360;
+    /* Pijl met donkere rand eronder, zodat hij op zand én op water leesbaar is. */
     function arrow(cx, cy, rot, len, kleur, dik, op) {
-      var kop = -len/2;
-      return '<g transform="translate(' + cx + ',' + cy + ') rotate(' + rot + ')" opacity="' + (op||1) + '">' +
-        '<line x1="0" y1="' + (len/2) + '" x2="0" y2="' + (kop + dik*2) + '" stroke="' + kleur + '" stroke-width="' + dik + '" stroke-linecap="round"/>' +
-        '<path d="M 0 ' + kop + ' L ' + (-dik*2.2) + ' ' + (kop + dik*2.6) + ' L ' + (dik*2.2) + ' ' + (kop + dik*2.6) + ' Z" fill="' + kleur + '"/></g>';
+      var kop = -len/2, halo = "rgba(23,19,15,.55)";
+      var vorm = function (kl, d) { return '<line x1="0" y1="' + (len/2) + '" x2="0" y2="' + (kop + dik*2) + '" stroke="' + kl + '" stroke-width="' + d + '" stroke-linecap="round"/>' +
+        '<path d="M 0 ' + kop + ' L ' + (-dik*2.2) + ' ' + (kop + dik*2.6) + ' L ' + (dik*2.2) + ' ' + (kop + dik*2.6) + ' Z" fill="' + kl + '" stroke="' + kl + '" stroke-width="' + (d - dik) + '" stroke-linejoin="round"/>'; };
+      return '<g transform="translate(' + cx + ',' + cy + ') rotate(' + rot + ')" opacity="' + (op||1) + '">' + vorm(halo, dik + 3) + vorm(kleur, dik) + '</g>';
     }
     var svg = "";
-    for (var y = 60; y < H; y += 105) for (var x = 60; x < W; x += 120) svg += arrow(x, y, naar, 34 + u.kn*1.2, "#FFFFFF", 3, .55);
+    for (var y = 60; y < H; y += 105) for (var x = 60; x < W; x += 120) svg += arrow(x, y, naar, 34 + u.kn*1.2, "#FFFFFF", 3.5, .9);
     svg += '<circle cx="' + W/2 + '" cy="' + H/2 + '" r="58" fill="rgba(23,19,15,.28)"/>' + arrow(W/2, H/2, naar, 96, kl, 9);
     var b = blokBij(u.t);
     if (b && b.stroom && b.stroom.kn >= 0.08) {
-      var c = stroomC(b, u.dir), skl = c > 0.15 ? "#8FE0B8" : c < -0.15 ? "#F5B27A" : "#8FC7F0";
-      svg += '<circle cx="130" cy="' + (H-90) + '" r="46" fill="rgba(23,19,15,.35)"/>' + arrow(130, H-90, b.stroom.naar, 50 + Math.min(70, b.stroom.kn*70), skl, 5);
-      svg += '<text x="130" y="' + (H-26) + '" text-anchor="middle" font-size="13" font-weight="700" fill="#FFF">stroming ' + b.stroom.kn.toFixed(1) + ' kn ' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</text>';
+      var c = stroomC(b, u.dir);
+      svg += '<circle cx="130" cy="' + (H-90) + '" r="46" fill="rgba(23,19,15,.35)"/>' + arrow(130, H-90, b.stroom.naar, 50 + Math.min(70, b.stroom.kn*70), "#4FC3F7", 6);
+      svg += '<text x="130" y="' + (H-26) + '" text-anchor="middle" font-size="14" font-weight="700" fill="#4FC3F7" stroke="rgba(23,19,15,.6)" stroke-width="3" paint-order="stroke">stroming ' + b.stroom.kn.toFixed(1) + ' kn ' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</text>';
     }
     if (u.golf) {
-      svg += '<circle cx="' + (W-130) + '" cy="' + (H-90) + '" r="46" fill="rgba(23,19,15,.35)"/>' + arrow(W-130, H-90, u.golf.dir + 180, 40 + Math.min(60, u.golf.m*40), "#DCE9F2", 4);
-      svg += '<text x="' + (W-130) + '" y="' + (H-26) + '" text-anchor="middle" font-size="13" font-weight="700" fill="#FFF">golven ' + u.golf.m.toFixed(1) + ' m</text>';
+      svg += '<circle cx="' + (W-130) + '" cy="' + (H-90) + '" r="46" fill="rgba(23,19,15,.35)"/>' + arrow(W-130, H-90, u.golf.dir + 180, 40 + Math.min(60, u.golf.m*40), "#F2D27A", 5);
+      svg += '<text x="' + (W-130) + '" y="' + (H-26) + '" text-anchor="middle" font-size="14" font-weight="700" fill="#F2D27A" stroke="rgba(23,19,15,.6)" stroke-width="3" paint-order="stroke">golven ' + u.golf.m.toFixed(1) + ' m</text>';
     }
     svg += '<g transform="translate(' + (W-40) + ',44)"><circle r="18" fill="rgba(23,19,15,.45)"/><path d="M0 -12 L6 6 L0 2 L-6 6 Z" fill="#FFF"/><text y="26" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF">N</text></g>';
+    svg += '<g transform="translate(16,24)" font-size="12" font-weight="700" stroke="rgba(23,19,15,.6)" stroke-width="3" paint-order="stroke">' +
+      '<text fill="#FFF">wit = wind</text><text x="90" fill="#4FC3F7">blauw = stroom</text><text x="205" fill="#F2D27A">geel = golven</text></g>';
     $("pijlen").innerHTML = svg;
 
     var hw = hoekWoord(hoekTussen(u.dir, s.onshore), s, u), so = stroomOordeel(b, u), go = golfOordeel(u.golf);
@@ -461,7 +464,7 @@ window.KWU_READY.then(function () {
   // ── modellen: knop in de kop, keuze in een paneel ────
   function tekenModelknop() {
     var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
-    $("modelknop").innerHTML = '<b>' + (st.mix === "dajk" ? "DAJK" : "AJK") + '</b><span>' + st.modellen.length + ' modellen · ' + nd + ' deze dag</span>';
+    $("modelknop").innerHTML = '<b>' + (st.mix === "dajk" ? "DAJK" : "AJK") + '-mix</b><span>' + nd + ' van ' + st.modellen.length + ' modellen</span>';
   }
   function tekenModellen() {
     var alle = KWU.modellen.map(function (m) { return m.id; });
@@ -483,7 +486,7 @@ window.KWU_READY.then(function () {
 
   function tekenSpotkeuze() {
     var s = spot();
-    $("spotknop").innerHTML = '<b>' + esc(s.naam) + '</b><span>' + esc(s.regio || "") + ' · ' + esc(s.vorm) + '</span>';
+    $("spotknop").innerHTML = '<b>' + esc(s.naam) + '</b><span>' + esc(s.regio || "") + '</span>';
   }
   var zoek = "";
   function tekenSpots() {

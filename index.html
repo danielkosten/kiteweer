@@ -16,8 +16,8 @@
   <header class="top">
     <div class="merk"><span class="mark" aria-hidden="true"></span><h1>Kiteweer</h1></div>
     <div class="filters">
-      <button type="button" class="filter" id="spotknop" data-open-spot="1" aria-haspopup="dialog"></button>
-      <button type="button" class="filter" id="modelknop" data-open-modellen="1" aria-haspopup="dialog"></button>
+      <button type="button" class="filter" id="spotknop" data-open-spot="1" aria-haspopup="dialog"><b>Spot</b><span>laden…</span></button>
+      <button type="button" class="filter" id="modelknop" data-open-modellen="1" aria-haspopup="dialog"><b>DAJK</b><span>laden…</span></button>
     </div>
     <div class="rider">
       <label class="invoer"><input id="kg" type="number" min="40" max="140" step="1" value="85" aria-label="Gewicht"><b>kg</b></label>
@@ -35,7 +35,7 @@
 
   <section>
     <h3 class="sec">Welke dag <i>— klik een dag, alles hieronder volgt</i></h3>
-    <div class="weekstrip" id="weekstrip"></div>
+    <div class="weekstrip" id="weekstrip"><p class="sv flauw laadtekst">Wind ophalen bij Open-Meteo, een paar seconden…</p></div>
   </section>
 
   <section class="hero" id="hero" aria-live="polite">
@@ -51,7 +51,7 @@
   <section>
     <h3 class="sec">Op het strand <i id="scenenote"></i></h3>
     <div class="scenekaart">
-      <div class="scene" id="scene"><div id="kaart"></div><svg id="pijlen" viewBox="0 0 900 480" aria-hidden="true"></svg><div class="scene-label" id="scenelabel"></div></div>
+      <div class="scene-label" id="scenelabel"></div><div class="scene" id="scene"><div id="kaart"></div><svg id="pijlen" viewBox="0 0 900 480" aria-hidden="true"></svg></div>
       <div class="schuifrij"><span class="schuifuur" id="schuifuur"></span><div class="schuifkolom"><div class="schuiflabels" id="schuiflabels" aria-hidden="true"></div><input type="range" id="schuif" min="0" max="14" step="1" value="0" aria-label="Uur van de dag"></div></div>
       <div class="scene-uitleg" id="sceneuitleg"></div>
     </div>

@@ -127,7 +127,7 @@ main{padding-bottom:64px}
 
 /* ── detail ──────────────────────────────────────── */
 .sheet{position:fixed;inset:0;background:rgba(23,19,15,.42);display:flex;
-  align-items:flex-end;justify-content:center;z-index:50;padding:14px}
+  align-items:flex-end;justify-content:center;z-index:5000;padding:14px}
 .sheet[hidden]{display:none}
 .sheet-in{background:var(--kaart);border-radius:var(--r);padding:24px;max-width:420px;
   width:100%;position:relative;box-shadow:0 20px 60px -20px rgba(23,19,15,.4)}
@@ -365,3 +365,20 @@ details.modellen>div{margin-top:12px}
 .spotkeus b{font-size:14px}
 .spotkeus span{font-size:11.5px;color:var(--zacht)}
 @media(max-width:600px){.filters{margin-left:0;width:100%}.filter{flex:1}}
+
+/* label boven de kaart, niet erover */
+.scene-label{position:static;background:var(--kaart);border-radius:0;padding:12px 18px 10px;flex-direction:row;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--lijn-2)}
+.scene-label b{font-size:24px}
+.sheet-in{max-height:88vh;overflow:auto}
+.laadtekst{padding:14px 0}
+.filter{max-width:48%}
+.filter b,.filter span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+@media(max-width:600px){
+  .filters{gap:6px}.filter{flex:1 1 0;max-width:none;padding:6px 10px}
+  .filter b{font-size:12.5px}.filter span{font-size:10.5px}
+  /* dagkaarten: één rij, swipen, geen weeskaart */
+  .weekstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+  .weekstrip .dagkaart{flex:0 0 44%;scroll-snap-align:start}
+  .dgroep .weekstrip{display:flex}
+  .scene-label b{font-size:20px}
+}
