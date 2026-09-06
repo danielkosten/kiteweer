@@ -156,8 +156,7 @@ main{padding-bottom:64px}
   input{font-size:16px}
   .invoer input{font-size:16px}
   html,body{overflow-x:hidden}
-  .voet{text-align:center;padding:20px 4px 40px}
-  .voet p{margin-left:auto;margin-right:auto}
+  .voet{padding:20px 24px 40px}
   .groot-rij{gap:18px}
   .meet .mv{font-size:27px}
   .blok{min-width:42px}
