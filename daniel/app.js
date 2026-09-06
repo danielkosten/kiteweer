@@ -11,7 +11,9 @@
   var DAGK = ["zo","ma","di","wo","do","vr","za"];
   var KOMPAS = ["N","NNO","NO","ONO","O","OZO","ZO","ZZO","Z","ZZW","ZW","WZW","W","WNW","NW","NNW"];
 
-  var st = { board:"twintip", kg:85, kites:KW.rider.kites.slice(), spot:KW.spots[0].id, dag:0, t:null };
+  var BOARDS = { twintip:1, directional:0.8 };
+  var ARTHUR = KWU.modellen.filter(function (m) { return m.arthur; }).map(function (m) { return m.id; });
+  var st = { board:"twintip", kg:85, spot:KW.spots[0].id, dag:0, t:null, modellen:ARTHUR.slice() };
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
@@ -35,10 +37,48 @@
   function tint(n) { return "var(--" + n + ")"; }
   function tintV(n) { return "var(--" + n + "-v)"; }
 
+  /* ── wind = mediaan over de aangevinkte modellen ──────
+     Elk model apart opgehaald; hier per uur de middelste waarde. Richting als cirkelgemiddelde.
+     Valt een model buiten zijn horizon (null), dan telt het niet mee. Niets aangevinkt = basisreeks. */
+  var cache = { key:null, uren:null };
+  var MODEL = {}; KWU.modellen.forEach(function (m) { MODEL[m.id] = m; });
+  /* Gewicht per model zoals Arthur het doet: eerst zijn skill-gewicht binnen de klasse, dan wegen de
+     klassen regionaal/globaal 50/50, zodat vier fijne modellen niet vanzelf de globale overstemmen. */
+  function gewichten(ids) {
+    var som = { regionaal:0, globaal:0 }; ids.forEach(function (id) { som[MODEL[id].klasse] += MODEL[id].w; });
+    var klassen = (som.regionaal ? 1 : 0) + (som.globaal ? 1 : 0);
+    return ids.map(function (id) { var m = MODEL[id]; return (m.w / som[m.klasse]) * (1 / klassen); });
+  }
+  function gewMediaan(vals, ws) {
+    var p = vals.map(function (v, i) { return [v, ws[i]]; }).sort(function (a,b) { return a[0]-b[0]; }), tot = 0, acc = 0;
+    p.forEach(function (x) { tot += x[1]; });
+    for (var i = 0; i < p.length; i++) { acc += p[i][1]; if (acc >= tot / 2) return p[i][0]; }
+    return p[p.length-1][0];
+  }
+  function uren() {
+    var key = st.spot + "|" + st.modellen.join(",");
+    if (cache.key === key) return cache.uren;
+    var sp = KWU.spots[st.spot], s = spot();
+    cache.uren = sp.uren.map(function (u, i) {
+      var ids = st.modellen.filter(function (m) { return sp.modellen[m] && sp.modellen[m][i]; });
+      if (!ids.length) return Object.assign({}, u, { nModellen:0 });
+      var rows = ids.map(function (m) { return sp.modellen[m][i]; }), ws = gewichten(ids);
+      var sx = 0, sy = 0, ja = 0; rows.forEach(function (r, j) {
+        sx += ws[j]*Math.cos(r[2]*Math.PI/180); sy += ws[j]*Math.sin(r[2]*Math.PI/180);
+        if (r[0] >= RIJDBAAR && veilig(s, r[2])) ja += ws[j];                       // Arthurs gate, per model één stem
+      });
+      var kns = rows.map(function (r) { return r[0]; });
+      return Object.assign({}, u, { kn:gewMediaan(kns, ws), vl:gewMediaan(rows.map(function (r) { return r[1]; }), ws),
+        dir:Math.round((Math.atan2(sy, sx)*180/Math.PI + 360) % 360), nModellen:rows.length, nJa:rows.filter(function (r) { return r[0] >= RIJDBAAR && veilig(s, r[2]); }).length,
+        kans:Math.round(ja*100), knLo:Math.min.apply(null,kns), knHi:Math.max.apply(null,kns) });
+    });
+    cache.key = key; return cache.uren;
+  }
+
   /* ── dagen: alleen de uren tussen zon op en zon onder ── */
   function dagen() {
     var sp = KWU.spots[st.spot], map = {}, volg = [];
-    sp.uren.forEach(function (u) {
+    uren().forEach(function (u) {
       var k = u.t.slice(0,10), z = sp.zon.filter(function (z) { return z.d === k; })[0];
       if (!z) return;
       var h = u.t.slice(11,16);
@@ -114,31 +154,34 @@
 
   /* ── kitemaat ──────────────────────────────────────
      ideaal = 2,2 x kg / knopen x boardfactor. Per kite uit JOUW quiver zeggen we hoe hij staat. */
-  function ideaal(kn) { return 2.2 * st.kg / kn * KW.rider.boards[st.board]; }
+  function ideaal(kn) { return 2.2 * st.kg / kn * BOARDS[st.board]; }
   function staat(maat, kn) {
     var r = maat / ideaal(kn);
     return r > 1.22 ? "over" : r > 1.08 ? "iets over" : r < 0.80 ? "te klein" : r < 0.93 ? "iets under" : "goed";
   }
   /* Welke maat past bij een windbereik: afgerond op hele meters, hoog naar laag. */
-  function kiteBereik(lo, hi) {
-    var a = Math.round(ideaal(hi)), b = Math.round(ideaal(lo));
+  function kiteBereik(lo, hi, vl) {
+    var a = Math.round(ideaal(vl ? (hi + vl) / 2 : hi)), b = Math.round(ideaal(lo));   // onderkant rekent de vlagen half mee
     return a === b ? a + " m" : a + "–" + b + " m";
   }
+  function vlMax(us) { return Math.max.apply(null, us.map(function (u) { return u.vl; })); }
 
   /* ── cijfer voor een venster: wind, stabiliteit, stroming, golven, lengte ── */
   function cijfer(v) {
-    var us = v.uren, n = us.length, pl = [], mn = [], score = v.n === "perfect" ? 8 : 7;
+    var us = v.uren, n = us.length, pl = [], mn = [], start = v.n === "perfect" ? 8 : 7, score = start, som = [];
+    var tel = function (d, tekst) { score += d; som.push((d > 0 ? "+ " : "− ") + Math.abs(d).toString().replace(".", ",") + " " + tekst); (d > 0 ? pl : mn).push(tekst); };
     var vl = us.reduce(function (a,u) { return a + (u.vl - u.kn); }, 0) / n;
-    if (vl >= 10) { score -= 1.5; mn.push("vlagerig"); } else if (vl < 6) { score += 0.5; pl.push("stabiele wind"); }
+    if (vl >= 10) tel(-1.5, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vl < 6) tel(0.5, "stabiele wind");
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
-    if (c > 0.3) { score += 0.5; pl.push("stroom tegen de wind, gratis hoogte"); } else if (c < -0.5) { score -= 0.5; mn.push("stroom mee, je zakt af"); }
+    if (c > 0.3) tel(0.5, "stroom tegen de wind, gratis hoogte"); else if (c < -0.5) tel(-0.5, "stroom mee, je zakt af");
     var g = us.filter(function (u) { return u.golf; }); var gm = g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null;
-    if (gm != null) { if (gm > 1.5) { score -= 0.5; mn.push("flinke golven " + gm.toFixed(1) + " m"); } else if (gm < 0.5) pl.push("vlak water"); }
+    if (gm != null) { if (gm > 1.5) tel(-0.5, "flinke golven " + gm.toFixed(1) + " m"); else if (gm < 0.5) pl.push("vlak water"); }
     var mm = us.reduce(function (a,u) { return a + (u.mm||0); }, 0);
-    if (mm >= 2) { score -= 0.5; mn.push("regen"); }
-    if (n >= 4) pl.push(n + " uur lang"); else if (n <= 1) { score -= 1; mn.push("maar 1 uur"); }
+    if (mm >= 2) tel(-0.5, "regen, " + mm.toFixed(1) + " mm in het venster");
+    if (n >= 4) pl.push(n + " uur lang"); else if (n <= 1) tel(-1, "maar 1 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
-    return { score:score, plus:pl, min:mn, een: (v.n === "perfect" ? "Perfecte wind" : "Goede wind") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0] : "") };
+    return { score:score, plus:pl, min:mn, som: start + " voor " + WOORD[v.n] + " wind" + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
+      een: (v.n === "perfect" ? "Perfecte wind" : "Goede wind") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
   }
 
   /* weercode -> icoon + woord */
@@ -208,7 +251,7 @@
     $("schuiflabels").innerHTML = d.uren.map(function (x) { return '<i style="background:' + KLEUR[niveau(x)] + '"></i>'; }).join("");
     $("schuifuur").textContent = uurStr(u.t);
     $("scenelabel").innerHTML = '<b style="color:' + kl + '">' + u.kn + ' kn</b><span>vlagen ' + u.vl + ' · uit ' + kompas(u.dir) + '</span>' +
-      '<span>' + WOORD[n] + ((n !== "weinig" && n !== "aflandig") ? " · kite " + kiteBereik(u.kn, u.kn) : "") + '</span>';
+      '<span>' + WOORD[n] + ((n !== "weinig" && n !== "aflandig") ? " · kite " + kiteBereik(u.kn, u.kn, u.vl) : "") + '</span>';
     $("sceneuitleg").innerHTML = [["Wind", n, hw], ["Stroming", so.niveau, so], ["Golven", go.niveau, go]].map(function (x) {
       return '<div class="oordeel" style="--tint:' + tint(x[1]) + ';--tint-v:' + tintV(x[1]) + '"><span class="okop">' + x[0] + '</span><b>' + x[2].kop + '</b><ul>' +
         x[2].punten.map(function (p) { return "<li>" + p + "</li>"; }).join("") + '</ul></div>'; }).join("");
@@ -241,14 +284,14 @@
       $("vensterlijst").innerHTML = o.ws.map(function (w, j) {
         var c = cijfer(w);
         return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' +
-          '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn</span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi) + '</span>' +
+          '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn</span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span>' +
           '<span class="vc">' + c.score.toString().replace(".", ",") + '</span><span class="veen">' + c.een + '</span><i class="info" aria-hidden="true">i</i></button>';
       }).join("");
       $("onderverdict").innerHTML = '<span class="flauw">' + zon + (i >= 3 ? " · indicatie, voorbij 2 dagen kijkt alleen het grove model" : "") + '</span>';
     } else {
-      $("verdict").textContent = o.n === "aflandig" ? "Aflandig, niet gaan" : "Geen kitewind";
+      $("verdict").textContent = o.n === "aflandig" ? "Aflandig, niet gaan" : o.n === "matig" ? "Matig, " + o.b.kn + " kn" : "Geen kitewind";
       $("vensterlijst").innerHTML = "";
-      $("onderverdict").innerHTML = "hoogste " + o.b.kn + " kn om " + uurStr(o.b.t) +
+      $("onderverdict").innerHTML = (o.n === "matig" ? "wel te doen met een grote kite (" + kiteBereik(o.b.kn, o.b.kn, o.b.vl) + "), rond " + uurStr(o.b.t) : "hoogste " + o.b.kn + " kn om " + uurStr(o.b.t)) +
         (beste && besteDag !== d ? ' · <b>beste moment deze week: ' + dagLang(besteDag.uren[0].t) + " " + beste.tekst + ", " + beste.lo + "–" + beste.hi + " kn</b>" : "") +
         '<br><span class="flauw">' + zon + '</span>';
     }
@@ -280,7 +323,8 @@
       var cells = "", k = 0;
       while (k < d.uren.length) {
         var w = o.ws.filter(function (w) { return w.uren[0].t === d.uren[k].t; })[0];
-        if (w) { cells += '<td colspan="' + w.uren.length + '"><span class="vpil" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' + w.tekst + " · " + WOORD[w.n] + '</span></td>'; k += w.uren.length; }
+        if (w) { var lbl = w.uren.length >= 4 ? w.tekst + " · " + WOORD[w.n] : w.uren.length >= 2 ? w.tekst.replace(/:00/g, "") : "";
+          cells += '<td colspan="' + w.uren.length + '"><span class="vpil" title="' + w.tekst + " · " + WOORD[w.n] + '" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' + lbl + '</span></td>'; k += w.uren.length; }
         else { cells += '<td></td>'; k++; }
       }
       return '<tr class="vrij"><th scope="row">venster</th>' + cells + '</tr>';
@@ -291,6 +335,9 @@
       rij("wind kn", function (u) { return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + KLEUR[niveau(u)] + '"></span><b>' + u.kn + '</b>'); }) +
       rij("vlagen", function (u) { var n = niveau(u), g = n === "aflandig" ? "aflandig" : band(u.vl); return td(u, "tv", u.vl, "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
       rij("", function (u) { return td(u, "tn", '<i style="background:' + KLEUR[niveau(u)] + '"></i>'); }) +
+      rij("modellen eens", function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
+        var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
+        return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + u.nJa + "/" + u.nModellen + '</span><small>' + u.knLo + "–" + u.knHi + ' kn</small>'); }) +
       rij("stroming", function (u) { var b = blokBij(u.t), c = stroomC(b, u.dir);
         return td(u, "ts", b && b.stroom ? pijl(b.stroom.naar + 180, c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '<small>' + b.stroom.kn.toFixed(1) + ' kn</small><small style="color:' + (c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '">' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</small>' : '<small>—</small>'); }) +
       rij("golven", function (u) { return td(u, "tg", u.golf ? '<span>' + u.golf.m.toFixed(1) + ' m</span><small>' + u.golf.s + ' s</small>' : '<small>—</small>'); }) +
@@ -300,7 +347,7 @@
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i>' + WOORD[k] + (k === "perfect" ? " 20–30" : k === "goed" ? " 15–20" : k === "matig" ? " 12–15" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span>';
+      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">modellen eens = hoeveel van de aangevinkte modellen zeggen: genoeg wind uit een veilige hoek, eronder laagste–hoogste</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span>';
   }
 
   function openVenster(j) {
@@ -310,22 +357,40 @@
     $("sheet-b").innerHTML = '<p class="sheet-een">' + c.een + '</p><ul class="redenen">' +
       c.plus.map(function (p) { return '<li class="p">' + p + '</li>'; }).join("") + c.min.map(function (p) { return '<li class="m">' + p + '</li>'; }).join("") + '</ul>' +
       [["wind", w.lo + "–" + w.hi + " kn uit " + kompas(top(w.uren).dir)], ["vlagen tot", Math.max.apply(null, w.uren.map(function (u) { return u.vl; })) + " kn"],
-       ["duur", w.uren.length + " uur"], ["kite", kiteBereik(w.lo, w.hi) + " bij " + st.kg + " kg, " + st.board],
-       ["cijfer", "start " + (w.n === "perfect" ? 8 : 7) + " voor " + WOORD[w.n] + " wind, dan plus/min voor vlagen, stroming, golven, regen en lengte"]
+       ["duur", w.uren.length + " uur"], ["kite", kiteBereik(w.lo, w.hi, vlMax(w.uren)) + " bij " + st.kg + " kg, " + st.board + " · klein bij vlagen tot " + vlMax(w.uren) + " kn, groot bij " + w.lo + " kn"],
+       ["cijfer", c.som],
+       ["modellen", st.modellen.length + " aangevinkt, gewogen middelste waarde per uur (Arthurs skill-gewichten, regionaal/globaal 50/50)"]
       ].map(function (r) { return '<div class="rij"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join("");
     $("sheet").hidden = false; $("sheet-x").focus();
   }
   function sluit() { $("sheet").hidden = true; }
 
+  // ── modellen-keuze ───────────────────────────────────
+  function tekenModellen() {
+    var alle = KWU.modellen.map(function (m) { return m.id; });
+    var isArthur = st.modellen.slice().sort().join() === ARTHUR.slice().sort().join();
+    $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>middelste waarde van wat je aanvinkt · golven, stroming en weer komen niet uit deze keuze</span>' +
+      '<span class="mknoppen"><button type="button" data-mset="arthur" class="' + (isArthur ? "on" : "") + '">mix van Arthur</button>' +
+      '<button type="button" data-mset="alle" class="' + (st.modellen.length === alle.length ? "on" : "") + '">alle</button>' +
+      '<button type="button" data-mset="geen" class="' + (!st.modellen.length ? "on" : "") + '">geen</button></span></div>' +
+      '<div class="mchips">' + KWU.modellen.map(function (m) {
+        var aan = st.modellen.indexOf(m.id) >= 0;
+        return '<button type="button" class="mchip' + (aan ? " aan" : "") + '" data-model="' + m.id + '" aria-pressed="' + aan + '">' + esc(m.naam) + '<small>' + m.dagen + ' dag</small></button>'; }).join("") + '</div>';
+  }
+
   function tekenSpotkeuze() {
     $("spotkeuze").innerHTML = KW.spots.map(function (s) { return '<button type="button" class="' + (s.id === st.spot ? "on" : "") + '" data-spot="' + s.id + '">' + esc(s.naam) + '</button>'; }).join("");
   }
-  function teken() { tekenSpotkeuze(); tekenNu(); tekenHero(); tekenWeek(); tekenDag(); tekenScene(); }
+  function teken() { tekenSpotkeuze(); tekenHero(); tekenNu(); tekenModellen(); tekenWeek(); tekenDag(); tekenScene(); }
 
   document.addEventListener("click", function (e) {
     var sp = e.target.closest("[data-spot]"); if (sp) { st.spot = sp.dataset.spot; st.t = null; return teken(); }
     var bd = e.target.closest("[data-board]");
     if (bd) { bd.parentNode.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); }); bd.classList.add("on"); st.board = bd.dataset.board; return teken(); }
+    var ms = e.target.closest("[data-mset]");
+    if (ms) { st.modellen = ms.dataset.mset === "alle" ? KWU.modellen.map(function (m) { return m.id; }) : ms.dataset.mset === "geen" ? [] : ARTHUR.slice(); st.t = null; return teken(); }
+    var mc = e.target.closest("[data-model]");
+    if (mc) { var id = mc.dataset.model, ix = st.modellen.indexOf(id); if (ix >= 0) st.modellen.splice(ix,1); else st.modellen.push(id); st.t = null; return teken(); }
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
     var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; return teken(); }
@@ -335,6 +400,6 @@
   $("schuif").addEventListener("input", function (e) { st.t = huidigeDag().uren[+e.target.value].t; teken(); });
   $("kg").addEventListener("input", function (e) { var v = parseInt(e.target.value,10); if (v >= 40 && v <= 140) { st.kg = v; teken(); } });
 
-  $("ververst").textContent = "ververst " + new Date(KWU.gegenereerd).toLocaleString("nl-NL") + " · " + KWU.bron;
+  $("ververst").textContent = "ververst " + new Date(KWU.gegenereerd).toLocaleString("nl-NL");
   teken();
 })();

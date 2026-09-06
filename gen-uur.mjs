@@ -7,7 +7,20 @@ const SPOTS = [
   { id: "noordpier", lat: 52.493, lon: 4.593 },
   { id: "kijkduin", lat: 52.0581, lon: 4.1983 },
 ];
-const out = { gegenereerd: new Date().toISOString(), bron: "KNMI Harmonie (2,5 dag), daarna ECMWF", spots: {} };
+// Windmodellen, elk apart, zodat de pagina zelf kan mixen. Horizon in dagen erbij.
+const MODELLEN = [
+  // klasse + gewicht = Arthurs gemeten skill (windcalendar SPEC.md §13): regionaal AROME 1,16 · ICON-D2 1,03 ·
+  // UKMO 0,93 · KNMI 0,88, globaal 1,0; de twee klassen wegen 50/50.
+  { id: "knmi_harmonie_arome_netherlands", naam: "KNMI Harmonie 2 km", dagen: 2.5, arthur: true, klasse: "regionaal", w: 0.88 },
+  { id: "meteofrance_arome_france_hd", naam: "AROME-HD 1,3 km", dagen: 2, arthur: true, klasse: "regionaal", w: 1.16 },
+  { id: "icon_d2", naam: "ICON-D2 2 km", dagen: 2, arthur: true, klasse: "regionaal", w: 1.03 },
+  { id: "ukmo_uk_deterministic_2km", naam: "UKV 2 km", dagen: 2, arthur: true, klasse: "regionaal", w: 0.93 },
+  { id: "ecmwf_ifs025", naam: "ECMWF 25 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },
+  { id: "gfs_seamless", naam: "GFS 13 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },
+  { id: "icon_seamless", naam: "ICON 7 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },
+  { id: "meteofrance_seamless", naam: "ARPEGE 10 km", dagen: 4, arthur: false, klasse: "globaal", w: 1 },
+];
+const out = { gegenereerd: new Date().toISOString(), bron: "Open-Meteo, per model", modellen: MODELLEN, spots: {} };
 for (const s of SPOTS) {
   const u = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}` +
     `&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code,temperature_2m,precipitation` +
@@ -16,8 +29,19 @@ for (const s of SPOTS) {
   // golven: aparte gratis marine-api (hoogte, periode, richting)
   const m = (await (await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${s.lat}&longitude=${s.lon}` +
     `&hourly=wave_height,wave_period,wave_direction,wind_wave_height,wind_wave_period,swell_wave_height,swell_wave_period,swell_wave_direction&forecast_days=7&timezone=Europe/Amsterdam`)).json()).hourly;
+  // per model wind/vlagen/richting; ontbrekende uren (voorbij de horizon) worden null
+  const mw = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}` +
+    `&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m&wind_speed_unit=kn&forecast_days=7&timezone=Europe/Amsterdam` +
+    `&models=${MODELLEN.map(m => m.id).join(",")}`)).json();
+  const per = {};
+  for (const mo of MODELLEN) {
+    const k = mo.id, h = mw.hourly;
+    const ws = h["wind_speed_10m_" + k] || h.wind_speed_10m, gs = h["wind_gusts_10m_" + k] || h.wind_gusts_10m, ds = h["wind_direction_10m_" + k] || h.wind_direction_10m;
+    per[k] = j.time.map((t, i) => { const ii = mw.hourly.time.indexOf(t);
+      return ii < 0 || ws[ii] == null ? null : [Math.round(ws[ii]), Math.round(gs[ii]), Math.round(ds[ii])]; });
+  }
   out.spots[s.id] = {
-    lat: s.lat, lon: s.lon,
+    lat: s.lat, lon: s.lon, modellen: per,
     uren: j.time.map((t, i) => ({
       t, kn: Math.round(j.wind_speed_10m[i]), vl: Math.round(j.wind_gusts_10m[i]),
       dir: Math.round(j.wind_direction_10m[i]), wx: j.weather_code[i], temp: Math.round(j.temperature_2m[i]), mm: j.precipitation[i],
