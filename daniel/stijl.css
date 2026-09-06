@@ -312,3 +312,4 @@ main{padding-bottom:64px}
 .mkop>span:not(.mknoppen){min-width:0}
 .dagkaart .dvl{display:block;font-size:11px;color:var(--zacht);margin:-1px 0 4px}
 .venster .vk small{font-size:11.5px;color:var(--zacht);font-family:var(--tekst);font-weight:700;margin-left:4px}
+.redenen li{margin-bottom:5px}

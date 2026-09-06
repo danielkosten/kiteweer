@@ -29,3 +29,14 @@ stats("Harmonie",r=>r.per[M[0][0]]); stats("fijn",r=>mix(r,{r:1,g:0},FIJN)); sta
 console.log("--- Daniels sessies");
 for(const t of ["2026-08-30T15:00","2026-08-30T16:00","2026-08-30T17:00","2026-08-31T09:00","2026-08-31T10:00"]){const r=rows.find(x=>x.t==t); if(!r){console.log(t,"geen data");continue;}
   console.log(t,"gemeten HvH",r.meet.toFixed(0),"| Harm",r.per[M[0][0]],"AROME",r.per[M[1][0]],"ICON-D2",r.per[M[2][0]],"UKV",r.per[M[3][0]],"ECMWF",r.per[M[4][0]],"GFS",r.per[M[5][0]],"| AJK",mix(r,{r:.5,g:.5},AJK),"DJK",mix(r,{r:.75,g:.25},AJK));}
+
+// ── kitedagen: dagen met ≥2 aaneengesloten daglichturen ≥12 kn, voorspeld vs gemeten ──
+const dagen={}; for(const r of rows){const d=r.t.slice(0,10);(dagen[d]??=[]).push(r);}
+const heeftVenster=(rs,fn)=>{let run=0;for(const r of rs){const v=fn(r);if(v!=null&&v>=12){run++;if(run>=2)return true;}else run=0;}return false;};
+const kd=(name,fn)=>{let echt=0,voorsp=0,beide=0;for(const d in dagen){const e=heeftVenster(dagen[d],r=>r.meet),v=heeftVenster(dagen[d],fn);if(e)echt++;if(v)voorsp++;if(e&&v)beide++;}
+  console.log(name.padEnd(12),"kitedagen echt",echt,"voorspeld",voorsp,"goed geraden",beide);};
+console.log("--- kitedagen (≥2 uur ≥12 kn)");
+kd("Harmonie",r=>r.per[M[0][0]]);kd("fijn",r=>mix(r,{r:1,g:0},FIJN));kd("AJK 50/50",r=>mix(r,{r:.5,g:.5},AJK));kd("DAJK",r=>mix(r,{r:1,g:0},AJK));kd("grof",r=>mix(r,{r:0,g:1},GROF));
+// per dag, uren ≥12 kn
+console.log("--- uren ≥12 kn per dag: echt / DAJK / AJK / grof");
+for(const d in dagen){const c=fn=>dagen[d].filter(r=>{const v=fn(r);return v!=null&&v>=12;}).length;console.log(d,c(r=>r.meet),c(r=>mix(r,{r:1,g:0},AJK)),c(r=>mix(r,{r:.5,g:.5},AJK)),c(r=>mix(r,{r:0,g:1},GROF)));}
