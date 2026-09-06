@@ -5,8 +5,8 @@
   // spots komen uit data.js (window.KW.spots, met lat/lon); laden gebeurt per spot, pas als je hem kiest
   // klasse + gewicht = Arthurs gemeten skill (windcalendar SPEC.md §13); klassen wegen 50/50 in de AJK-mix
   // klasse + gewicht = Arthurs gemeten skill (windcalendar SPEC.md §13); klassen wegen 50/50 in de AJK-mix.
-  // tijd = doet mee in de DAJK-tijd-mix; off = krijgt daar de spot-optelling (grof leest 3–4 kn te laag aan het water,
-  // ARPEGE niet). Gemeten: toets-horizon.mjs, docs/dajk-tijd.md.
+  // tijd = doet mee in de DAJK-mix; off = krijgt daar de spot-optelling (grof leest 3–4 kn te laag aan het water,
+  // ARPEGE niet). Gemeten: toets-horizon.mjs, docs/dajk-mix.md.
   var MODELLEN = [
     { id: "knmi_harmonie_arome_netherlands", naam: "KNMI Harmonie 2 km", dagen: 2.5, arthur: true, tijd: true, klasse: "regionaal", w: 0.88 },
     { id: "meteofrance_arome_france_hd", naam: "AROME-HD 1,3 km", dagen: 2, arthur: true, tijd: true, klasse: "regionaal", w: 1.16 },

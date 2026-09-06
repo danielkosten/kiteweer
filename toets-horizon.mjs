@@ -10,10 +10,15 @@ const FIJN = ["knmi_harmonie_arome_netherlands", "icon_d2", "ukmo_uk_determinist
 const GROF = ["ecmwf_ifs", "gfs_seamless", "icon_seamless", "gem_global", "jma_seamless"], ARPEGE = "meteofrance_seamless";
 const ALLE = FIJN.concat(GROF, [ARPEGE, "ecmwf_ifs025", "ukmo_global_deterministic_10km"]);
 const med = v => { v = v.filter(x => x != null).sort((a, b) => a - b); return v.length ? v[Math.floor((v.length - 1) / 2)] : null; };
+// gewogen middelste waarde, zoals de pagina: klasse fijn/grof elk 50%, binnen de klasse gelijk (AJK-mix)
+const ajk = q => { const f = FIJN.map(m => q[m]).filter(x => x != null), g = ["ecmwf_ifs", "gfs_seamless", "icon_seamless"].map(m => q[m]).filter(x => x != null);
+  if (!f.length) return med(g); if (!g.length) return med(f);
+  const p = f.map(v => [v, 0.5 / f.length]).concat(g.map(v => [v, 0.5 / g.length])).sort((a, b) => a[0] - b[0]); let acc = 0; for (const x of p) { acc += x[1]; if (acc >= 0.5) return x[0]; } };
 // de mixen van de pagina (gewichten 1, want in het archief zit per klasse maar één run per model)
 const MIX = off => ({
-  "huidig DAJK (fijn, dan ECMWF9/GFS/ICON)": q => { const f = med(FIJN.map(m => q[m])); return f ?? med(["ecmwf_ifs", "gfs_seamless", "icon_seamless"].map(m => q[m])); },
-  "DAJK-tijd (fijn, dan grof+off, ARPEGE, JMA, GEM)": q => { const f = med(FIJN.map(m => q[m])); if (f != null) return f;
+  "AJK (fijn en grof 50/50)": ajk,
+  "DAJK-oud (fijn, dan ECMWF9/GFS/ICON)": q => { const f = med(FIJN.map(m => q[m])); return f ?? med(["ecmwf_ifs", "gfs_seamless", "icon_seamless"].map(m => q[m])); },
+  "DAJK-mix (fijn, dan grof+off, ARPEGE, JMA, GEM)": q => { const f = med(FIJN.map(m => q[m])); if (f != null) return f;
     return med(GROF.map(m => q[m] == null ? null : q[m] + off).concat([q[ARPEGE]])); },
   "ARPEGE alleen": q => q[ARPEGE], "ECMWF 9 km": q => q["ecmwf_ifs"], "ECMWF 25 km": q => q["ecmwf_ifs025"], "GFS": q => q["gfs_seamless"], "ICON": q => q["icon_seamless"], "JMA": q => q["jma_seamless"], "GEM": q => q["gem_global"]
 });
