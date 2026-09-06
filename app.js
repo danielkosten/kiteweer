@@ -369,7 +369,9 @@ window.KWU_READY.then(function () {
 
   function tekenSamenvatting() {
     var d = huidigeDag(), o = dagOordeel(d), el = $("samenvatting");
-    if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Geen kitewind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>'; return; }
+    if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Geen kitewind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' +
+      '<p class="sv flauw">zon op ' + d.zon.op + ', onder ' + d.zon.onder +
+      (st.dag === 0 ? ' · <a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a>' : '') + '</p>'; return; }
     var alle = [].concat.apply([], o.ws.map(function (w) { return w.uren; })).filter(function (u) { return uurScore(u) != null; });
     var max = Math.max.apply(null, alle.map(uurScore));
     var beste = alle.filter(function (u) { return uurScore(u) >= max - 0.25; }), rest = alle.filter(function (u) { return uurScore(u) < max - 0.25; });
@@ -380,7 +382,8 @@ window.KWU_READY.then(function () {
     var niet = d.uren.filter(function (u) { return uurScore(u) == null; });
     if (niet.length) html += '<p class="sv flauw">Niet: ' + runs(niet).map(runTekst).join(", ") + ' · ' + (niet.some(function (u) { return niveau(u) === "aflandig"; }) ? "aflandig of " : "") + 'te weinig wind</p>';
     var kt = kenteringTekst(d.uren); if (kt) html += '<p class="sv"><b>Stroming:</b> ' + kt + ' (bron per 3 uur, dus ongeveer)</p>';
-    html += '<p class="sv flauw">zon op ' + d.zon.op + ', onder ' + d.zon.onder + ' · <button type="button" class="link" data-venster="0">hoe het cijfer ontstaat</button></p>';
+    html += '<p class="sv flauw">zon op ' + d.zon.op + ', onder ' + d.zon.onder + ' · <button type="button" class="link" data-venster="0">hoe het cijfer ontstaat</button>' +
+      (st.dag === 0 ? ' · <a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a>' : '') + '</p>';
     el.innerHTML = html;
   }
 

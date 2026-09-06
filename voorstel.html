@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kiteweer · voorstel DAJK-tijd</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Albert+Sans:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="stijl.css">
+<style>
+  .vs{max-width:1100px;margin:0 auto;padding:16px}
+  .vs h1{font-family:"Bricolage Grotesque",sans-serif;font-size:28px;margin:0 0 4px}
+  .vs p.uit{color:var(--zacht);margin:0 0 18px;max-width:70ch}
+  .vs h2{font-size:18px;margin:26px 0 8px}
+  table.vg{width:100%;border-collapse:collapse;font-size:14px;background:var(--kaart);border:1px solid var(--lijn);border-radius:12px;overflow:hidden}
+  .vg th,.vg td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--lijn-2);vertical-align:top}
+  .vg th{font-size:12px;color:var(--zacht);text-transform:uppercase;letter-spacing:.04em}
+  .vg td.nu{color:var(--zacht)}
+  .vg td b{font-size:16px}
+  .vg .bron{font-size:12px;color:var(--flauw)}
+  .kans{display:inline-block;padding:2px 8px;border-radius:999px;font-size:12px;font-weight:700;color:#fff}
+  .staaf{display:flex;gap:1px;height:22px;align-items:flex-end}
+  .staaf i{display:block;width:6px;border-radius:2px 2px 0 0;background:var(--weinig)}
+  .staaf i.g{background:var(--goed)} .staaf i.p{background:var(--perfect)} .staaf i.m{background:var(--matig)}
+  .wo{background:#FFF7E6}
+  .legenda{font-size:12px;color:var(--zacht);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="vs">
+  <h1>Voorstel: DAJK-tijd</h1>
+  <p class="uit">Zelfde pagina-logica als nu (gewogen middelste waarde, elk model één stem), maar de grove modellen krijgen per spot een vaste optelling omdat ze aan het water 3–4 kn te laag lezen, ARPEGE doet mee tot dag 4, en vanaf dag 3 staat de kans uit de ensembles (51 ECMWF-leden, 31 GFS-leden) ernaast. Links wat de pagina nu zegt, rechts het voorstel. Balkjes: uur voor uur 09–19, groen ≥14 kn.</p>
+  <div id="uit">laden…</div>
+  <p class="legenda">Kans = deel van de ensemble-leden dat overdag gemiddeld ≥14 kn geeft, na dezelfde optelling. Twee getallen ver uit elkaar = de modellen zijn het niet eens.</p>
+</div>
+<script>
+(function () {
+  var SPOTS = [
+    { naam: "Zandmotor", lat: 52.052, lon: 4.185, off: 3 },
+    { naam: "Kijkduin", lat: 52.0581, lon: 4.1983, off: 3 },
+    { naam: "Wassenaar", lat: 52.1648, lon: 4.3491, off: 3 },
+    { naam: "Noordpier", lat: 52.493, lon: 4.593, off: 4 }
+  ];
+  var FIJN = [["knmi_harmonie_arome_netherlands",0.88],["meteofrance_arome_france_hd",1.16],["icon_d2",1.03],["ukmo_uk_deterministic_2km",0.93]];
+  var GROF_NU = [["ecmwf_ifs",1],["gfs_seamless",1],["icon_seamless",1]];
+  var GROF_VOORSTEL = [["ecmwf_ifs",1],["gfs_seamless",1],["icon_seamless",1],["gem_global",1],["jma_seamless",1],["meteofrance_seamless",1]];
+  var ALLE = FIJN.concat(GROF_VOORSTEL).map(function (m) { return m[0]; });
+  var DAG = ["zo","ma","di","wo","do","vr","za"];
+  function haal(u) { return fetch(u).then(function (r) { return r.json(); }); }
+  function gewMed(vals, ws) {
+    var p = vals.map(function (v, i) { return [v, ws[i]]; }).filter(function (x) { return x[0] != null; }).sort(function (a, b) { return a[0] - b[0]; });
+    if (!p.length) return null; var tot = 0, acc = 0; p.forEach(function (x) { tot += x[1]; });
+    for (var i = 0; i < p.length; i++) { acc += p[i][1]; if (acc >= tot / 2) return p[i][0]; }
+  }
+  function nu(q) { var f = gewMed(FIJN.map(function (m) { return q[m[0]]; }), FIJN.map(function (m) { return m[1]; }));
+    return f != null ? { v: f, bron: "fijn" } : { v: gewMed(GROF_NU.map(function (m) { return q[m[0]]; }), GROF_NU.map(function (m) { return m[1]; })), bron: "grof" }; }
+  function voorstel(q, off) { var f = gewMed(FIJN.map(function (m) { return q[m[0]]; }), FIJN.map(function (m) { return m[1]; }));
+    if (f != null) return { v: f, bron: "fijn" };
+    // ARPEGE leest waar, de rest krijgt de spot-optelling; allemaal gewicht 1
+    var vals = GROF_VOORSTEL.map(function (m) { var x = q[m[0]]; return x == null ? null : m[0] === "meteofrance_seamless" ? x : x + off; });
+    return { v: gewMed(vals, GROF_VOORSTEL.map(function (m) { return m[1]; })), bron: q.meteofrance_seamless != null ? "grof+ARPEGE, +" + off : "grof, +" + off }; }
+  function kans(e, dag, off) { var t = e.time, keys = Object.keys(e).filter(function (k) { return k.indexOf("wind_speed") === 0; });
+    var idx = t.map(function (x, i) { return x.slice(0, 10) === dag && +x.slice(11, 13) >= 9 && +x.slice(11, 13) <= 19 ? i : -1; }).filter(function (i) { return i >= 0; });
+    var mm = keys.map(function (k) { var s = 0; for (var j = 0; j < idx.length; j++) { if (e[k][idx[j]] == null) return null; s += e[k][idx[j]]; } return s / idx.length; }).filter(function (x) { return x != null; });
+    return mm.length ? Math.round(mm.filter(function (x) { return x + off >= 14; }).length / mm.length * 100) : null; }
+  function pil(p) { if (p == null) return '<span class="bron">–</span>'; var c = p >= 60 ? "var(--perfect)" : p >= 30 ? "var(--matig)" : "var(--weinig)"; return '<span class="kans" style="background:' + c + '">' + p + '%</span>'; }
+  function staaf(vs) { return '<div class="staaf">' + vs.map(function (v) { var h = Math.max(2, Math.min(22, v)); return '<i class="' + (v >= 18 ? "p" : v >= 14 ? "g" : v >= 11 ? "m" : "") + '" style="height:' + h + 'px" title="' + Math.round(v) + ' kn"></i>'; }).join("") + '</div>'; }
+  function spot(s) {
+    var basis = "latitude=" + s.lat + "&longitude=" + s.lon + "&hourly=wind_speed_10m&wind_speed_unit=kn&timezone=Europe/Amsterdam&forecast_days=7";
+    return Promise.all([
+      haal("https://api.open-meteo.com/v1/forecast?" + basis + "&models=" + ALLE.join(",")),
+      haal("https://ensemble-api.open-meteo.com/v1/ensemble?" + basis + "&models=gfs025"),
+      haal("https://ensemble-api.open-meteo.com/v1/ensemble?" + basis + "&models=ecmwf_ifs025")
+    ]).then(function (r) {
+      var h = r[0].hourly, dagen = {};
+      h.time.forEach(function (t, i) { var u = +t.slice(11, 13); if (u < 9 || u > 19) return; var q = {}; ALLE.forEach(function (m) { q[m] = h["wind_speed_10m_" + m][i]; });
+        var d = dagen[t.slice(0, 10)] = dagen[t.slice(0, 10)] || { nu: [], vs: [], bron: {} }; var a = nu(q), b = voorstel(q, s.off); d.nu.push(a.v); d.vs.push(b.v); d.bron[b.bron] = 1; });
+      var rows = Object.keys(dagen).sort().map(function (dag, i) { var d = dagen[dag], dt = new Date(dag), mean = function (a) { return a.reduce(function (x, y) { return x + y; }, 0) / a.length; };
+        var uren = function (a) { return a.filter(function (v) { return v >= 14; }).length; };
+        return '<tr' + (i >= 3 ? ' class="wo"' : '') + '><td><b>' + DAG[dt.getDay()] + ' ' + dt.getDate() + '/' + (dt.getMonth() + 1) + '</b></td>' +
+          '<td class="nu">' + mean(d.nu).toFixed(1) + ' kn, max ' + Math.round(Math.max.apply(null, d.nu)) + '<br>' + uren(d.nu) + ' uur ≥14' + staaf(d.nu) + '</td>' +
+          '<td><b>' + mean(d.vs).toFixed(1) + ' kn</b>, max ' + Math.round(Math.max.apply(null, d.vs)) + '<br>' + uren(d.vs) + ' uur ≥14' + staaf(d.vs) + '</td>' +
+          '<td>' + (i >= 2 ? pil(kans(r[1].hourly, dag, s.off)) + ' ' + pil(kans(r[2].hourly, dag, s.off)) : '<span class="bron">fijn reikt, niet nodig</span>') + '</td>' +
+          '<td class="bron">' + Object.keys(d.bron).join(", ") + '</td></tr>'; });
+      return '<h2>' + s.naam + ' <span class="bron">grof +' + s.off + ' kn</span></h2><table class="vg"><tr><th>dag</th><th>nu op de pagina</th><th>voorstel</th><th>kans ≥14 · GFS · ECMWF</th><th>bron</th></tr>' + rows.join("") + '</table>';
+    });
+  }
+  Promise.all(SPOTS.map(spot)).then(function (html) { document.getElementById("uit").innerHTML = html.join(""); })
+    .catch(function (e) { document.getElementById("uit").textContent = "laden mislukt: " + e; });
+})();
+</script>
+</body>
+</html>

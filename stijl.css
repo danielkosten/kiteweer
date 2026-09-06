@@ -388,3 +388,7 @@ body.modal-open{overflow:hidden}
 .pk{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle;border:1.5px solid rgba(23,19,15,.4)}
 .pk.wit{background:#fff}.pk.blauw{background:#4FC3F7}.pk.geel{background:#F2D27A}
 .scene-label span{font-weight:600}
+
+.filter.meet{text-decoration:none;color:var(--inkt)}
+.filter.meet b{color:var(--perfect)}
+.sv a{color:var(--zacht)}
