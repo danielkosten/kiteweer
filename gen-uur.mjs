@@ -11,17 +11,17 @@ const SPOTS = [
 const MODELLEN = [
   // klasse + gewicht = Arthurs gemeten skill (windcalendar SPEC.md §13): regionaal AROME 1,16 · ICON-D2 1,03 ·
   // UKMO 0,93 · KNMI 0,88, globaal 1,0; de twee klassen wegen 50/50.
-  { id: "knmi_harmonie_arome_netherlands", naam: "KNMI Harmonie 2 km", dagen: 2.5, arthur: true, klasse: "regionaal", w: 0.88 },
-  { id: "meteofrance_arome_france_hd", naam: "AROME-HD 1,3 km", dagen: 2, arthur: true, klasse: "regionaal", w: 1.16 },
-  { id: "icon_d2", naam: "ICON-D2 2 km", dagen: 2, arthur: true, klasse: "regionaal", w: 1.03 },
-  { id: "ukmo_uk_deterministic_2km", naam: "UKV 2 km", dagen: 2, arthur: true, klasse: "regionaal", w: 0.93 },
-  { id: "ecmwf_ifs", naam: "ECMWF 9 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },   // volle 9 km HRES, gratis sinds okt 2025; de 25 km-versie zat 5,5 kn te laag (toets-horizon.mjs)
-  { id: "gfs_seamless", naam: "GFS 13 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },
-  { id: "icon_seamless", naam: "ICON 7 km", dagen: 7, arthur: true, klasse: "globaal", w: 1 },
-  { id: "meteofrance_seamless", naam: "ARPEGE 10 km", dagen: 4, arthur: false, klasse: "globaal", w: 1 },
+  { id: "knmi_harmonie_arome_netherlands", naam: "KNMI Harmonie 2 km", dagen: 2.5, arthur: true, klasse: "regionaal", w: 0.88, tijd: true },
+  { id: "meteofrance_arome_france_hd", naam: "AROME-HD 1,3 km", dagen: 2, arthur: true, klasse: "regionaal", w: 1.16, tijd: true },
+  { id: "icon_d2", naam: "ICON-D2 2 km", dagen: 2, arthur: true, klasse: "regionaal", w: 1.03, tijd: true },
+  { id: "ukmo_uk_deterministic_2km", naam: "UKV 2 km", dagen: 2, arthur: true, klasse: "regionaal", w: 0.93, tijd: true },
+  { id: "ecmwf_ifs", naam: "ECMWF 9 km", dagen: 7, arthur: true, klasse: "globaal", w: 1, tijd: true, off: true },   // volle 9 km HRES, gratis sinds okt 2025; de 25 km-versie zat 5,5 kn te laag (toets-horizon.mjs)
+  { id: "gfs_seamless", naam: "GFS 13 km", dagen: 7, arthur: true, klasse: "globaal", w: 1, tijd: true, off: true },
+  { id: "icon_seamless", naam: "ICON 7 km", dagen: 7, arthur: true, klasse: "globaal", w: 1, tijd: true, off: true },
+  { id: "meteofrance_seamless", naam: "ARPEGE 5 km", dagen: 4, arthur: false, tijd: true, klasse: "globaal", w: 1 },
     // opt-in: op 60 dagen HvH de trefzekerste 7-daagse modellen op dag 3–7 (JMA fout 3,4–4,7 kn, GEM 4,0–4,8; GFS 4,2–5,3, ECMWF 9 km 4,7–5,5)
-    { id: "jma_seamless", naam: "JMA 10 km", dagen: 7, arthur: false, klasse: "globaal", w: 1 },
-    { id: "gem_global", naam: "GEM 15 km", dagen: 7, arthur: false, klasse: "globaal", w: 1 },
+    { id: "jma_seamless", naam: "JMA 10 km", dagen: 7, arthur: false, klasse: "globaal", w: 1, tijd: true, off: true },
+    { id: "gem_global", naam: "GEM 15 km", dagen: 7, arthur: false, klasse: "globaal", w: 1, tijd: true, off: true },
 ];
 const out = { gegenereerd: new Date().toISOString(), bron: "Open-Meteo, per model", modellen: MODELLEN, spots: {} };
 for (const s of SPOTS) {

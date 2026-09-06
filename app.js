@@ -13,14 +13,20 @@ window.KWU_READY.then(function () {
 
   var BOARDS = { twintip:1, directional:0.8 };
   var ARTHUR = KWU.modellen.filter(function (m) { return m.arthur; }).map(function (m) { return m.id; });
-  var st = { board:"twintip", kg:85, spot:"kijkduin", dag:0, t:null, modellen:ARTHUR.slice(), mix:"dajk" };
+  var TIJD = KWU.modellen.filter(function (m) { return m.tijd; }).map(function (m) { return m.id; });
+  /* Spot-optelling voor de grove modellen in de DAJK-tijd-mix: aan het water lezen ze 3–4 kn te laag,
+     op een landmast niet (De Kooy). Gemeten 60 dagen op Hoek van Holland (+3) en IJmuiden (+4), docs/dajk-tijd.md. */
+  var OPTELLING = { standaard: 3, noordpier: 4, zuidpier: 4, wijkaanzee: 4 };
+  function optelling() { return OPTELLING[st.spot] != null ? OPTELLING[st.spot] : OPTELLING.standaard; }
+  var st = { board:"twintip", kg:85, spot:"kijkduin", dag:0, t:null, modellen:TIJD.slice(), mix:"tijd" };
   try { var bewaard = JSON.parse(localStorage.getItem("kiteweer") || "{}");
     ["board","kg","spot","modellen","mix"].forEach(function (k) { if (bewaard[k] != null) st[k] = bewaard[k]; });
+    if (bewaard.v !== 2) { st.mix = "tijd"; st.modellen = TIJD.slice(); }   // eenmalig: iedereen naar de DAJK-tijd-mix
     if (!KW.spots.some(function (s) { return s.id === st.spot; })) st.spot = KW.spots[0].id;
     st.modellen = st.modellen.map(function (m) { return m === "ecmwf_ifs025" ? "ecmwf_ifs" : m; });   // oude opgeslagen keuze: 25 km → 9 km
     st.modellen = st.modellen.filter(function (m) { return KWU.modellen.some(function (x) { return x.id === m; }); }); if (!st.modellen.length) st.modellen = ARTHUR.slice();
   } catch (e) {}
-  function bewaar() { try { localStorage.setItem("kiteweer", JSON.stringify({ board:st.board, kg:st.kg, spot:st.spot, modellen:st.modellen, mix:st.mix })); } catch (e) {} }
+  function bewaar() { try { localStorage.setItem("kiteweer", JSON.stringify({ v:2, board:st.board, kg:st.kg, spot:st.spot, modellen:st.modellen, mix:st.mix })); } catch (e) {} }
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
@@ -65,7 +71,7 @@ window.KWU_READY.then(function () {
   function gewichten(ids) {
     var som = { regionaal:0, globaal:0 }; ids.forEach(function (id) { som[MODEL[id].klasse] += MODEL[id].w; });
     var cw = { regionaal:0.5, globaal:0.5 };
-    if (st.mix === "dajk") cw = { regionaal:1, globaal:0 };
+    if (st.mix === "dajk" || st.mix === "tijd") cw = { regionaal:1, globaal:0 };
     if (!som.regionaal) cw = { regionaal:0, globaal:1 }; else if (!som.globaal) cw = { regionaal:1, globaal:0 };
     return ids.map(function (id) { var m = MODEL[id]; return (m.w / som[m.klasse]) * cw[m.klasse]; });
   }
@@ -82,7 +88,12 @@ window.KWU_READY.then(function () {
     cache.uren = sp.uren.map(function (u, i) {
       var ids = st.modellen.filter(function (m) { return sp.modellen[m] && sp.modellen[m][i]; });
       if (!ids.length) return st.modellen.length ? null : Object.assign({}, u, { nModellen:0 });   // buiten horizon van alles wat aanstaat: geen uur
-      var rows = ids.map(function (m) { return sp.modellen[m][i]; }), ws = gewichten(ids);
+      var off = st.mix === "tijd" ? optelling() : 0;
+      var rows = ids.map(function (m) { var r = sp.modellen[m][i]; return off && MODEL[m].off ? [r[0] + off, r[1] + off, r[2]] : r; }), ws = gewichten(ids);
+      /* kans uit de ensembles: deel van de leden (na de optelling) dat rijdbaar geeft; alleen in de tijd-mix, alleen wind */
+      var ens = null;
+      if (st.mix === "tijd" && sp.ens) { ens = {}; Object.keys(sp.ens).forEach(function (e) { var v = sp.ens[e][i]; if (!v) return;
+        ens[e] = Math.round(v.filter(function (x) { return x + off >= RIJDBAAR; }).length / v.length * 100); }); if (!Object.keys(ens).length) ens = null; }
       var sx = 0, sy = 0, ja = 0; rows.forEach(function (r, j) {
         sx += ws[j]*Math.cos(r[2]*Math.PI/180); sy += ws[j]*Math.sin(r[2]*Math.PI/180);
         if (r[0] >= RIJDBAAR && veilig(s, r[2])) ja += ws[j];                       // Arthurs gate, per model één stem
@@ -90,7 +101,7 @@ window.KWU_READY.then(function () {
       var kns = rows.map(function (r) { return r[0]; });
       return Object.assign({}, u, { kn:gewMediaan(kns, ws), vl:gewMediaan(rows.map(function (r) { return r[1]; }), ws),
         dir:Math.round((Math.atan2(sy, sx)*180/Math.PI + 360) % 360), nModellen:rows.length, nJa:rows.filter(function (r) { return r[0] >= RIJDBAAR && veilig(s, r[2]); }).length,
-        kans:Math.round(ja*100), knLo:Math.min.apply(null,kns), knHi:Math.max.apply(null,kns) });
+        kans:Math.round(ja*100), knLo:Math.min.apply(null,kns), knHi:Math.max.apply(null,kns), ens:ens, off:off });
     });
     cache.key = key; return cache.uren;
   }
@@ -133,6 +144,20 @@ window.KWU_READY.then(function () {
     var ws = vensters(d.uren, d.zon), b = ws.length ? top(ws[0].uren) : top(d.uren);
     return { ws:ws, v:ws[0] || null, b:b, n:ws.length ? ws[0].n : niveau(b) };
   }
+  /* Hoeveel fijne modellen nog reiken midden op de dag (0 = alles grof). */
+  function fijnBij(d) { var sp = KWU.spots[st.spot], u = d.uren[Math.floor(d.uren.length/2)], i = sp.uren.findIndex(function (x) { return x.t === u.t; });
+    return st.modellen.filter(function (m) { return MODEL[m].klasse === "regionaal" && sp.modellen[m] && sp.modellen[m][i]; }).length; }
+  /* Kans op kitewind per dag uit de ensembles: gemiddelde over de daglichturen, per ensemble. Alleen tijd-mix. */
+  function dagKans(d) {
+    var som = {}, n = {};
+    d.uren.forEach(function (u) { if (!u.ens) return; Object.keys(u.ens).forEach(function (e) { som[e] = (som[e] || 0) + u.ens[e]; n[e] = (n[e] || 0) + 1; }); });
+    var ks = Object.keys(som); if (!ks.length) return null;
+    var out = {}; ks.forEach(function (e) { out[e] = Math.round(som[e] / n[e]); }); return out;
+  }
+  function kansTekst(k) { if (!k) return ""; var f = function (e) { return k[e] != null ? (e === "gfs" ? "GFS " : "ECMWF ") + k[e] + "%" : ""; };
+    return [f("gfs"), f("ecmwf")].filter(Boolean).join(" · "); }
+  function indicatieTekst(i, d) { if (i < 3 && (st.mix !== "tijd" || fijnBij(d))) return ""; if (st.mix !== "tijd") return " · indicatie, voorbij 2 dagen kijkt alleen het grove model";
+    var k = kansTekst(dagKans(d)); return " · grof +" + optelling() + " kn" + (k ? " · kans op kitewind " + k : ""); }
   /* Gekozen uur; standaard het eerste kitebare uur van de dag, anders het hardste. */
   function gekozen() {
     var d = huidigeDag(), u = d.uren.filter(function (x) { return x.t === st.t; })[0];
@@ -328,7 +353,7 @@ window.KWU_READY.then(function () {
           '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn <small>vlagen ' + w.vlLo + "–" + w.vlHi + '</small></span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span>' +
           '<span class="vc">' + c.score.toString().replace(".", ",") + '</span><span class="veen">' + c.een + '</span><i class="info" aria-hidden="true">i</i></button>';
       }).join("");
-      $("onderverdict").innerHTML = '<span class="flauw">' + zon + (i >= 3 ? " · indicatie, voorbij 2 dagen kijkt alleen het grove model" : "") + '</span>';
+      $("onderverdict").innerHTML = '<span class="flauw">' + zon + indicatieTekst(i, d) + '</span>';
     } else {
       $("verdict").textContent = o.n === "aflandig" ? "Aflandig, niet gaan" : o.n === "matig" ? "Matig, " + o.b.kn + " kn" : "Geen kitewind";
       $("vensterlijst").innerHTML = "";
@@ -389,9 +414,7 @@ window.KWU_READY.then(function () {
 
   // ── welke dag ────────────────────────────────────────
   function tekenWeek() {
-    var ds = dagen(), sp = KWU.spots[st.spot], tijden = sp.uren.map(function (x) { return x.t; });
-    var fijnBij = function (d) { var u = d.uren[Math.floor(d.uren.length/2)];
-      return st.modellen.filter(function (m) { return MODEL[m].klasse === "regionaal" && sp.modellen[m][tijden.indexOf(u.t)]; }).length; };
+    var ds = dagen();
     var kaarten = ds.map(function (d, i) {
       var o = dagOordeel(d);
       return '<button type="button" class="dagkaart' + (i === st.dag ? " aan" : "") + '" data-dag="' + i + '" aria-pressed="' + (i === st.dag) +
@@ -399,13 +422,14 @@ window.KWU_READY.then(function () {
         '<span class="dv">' + (o.v ? o.v.lo + "–" + o.v.hi : o.b.kn) + ' <em>kn</em></span>' +
         '<span class="dvl">vlagen ' + (o.v ? o.v.vlLo + "–" + o.v.vlHi : o.b.vl) + '</span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
-        '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : (o.b.knLo != null ? " · " + o.b.knLo + "–" + o.b.knHi + " kn uiteen" : "")) + '</span></button>';
+        '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : (o.b.knLo != null ? " · " + o.b.knLo + "–" + o.b.knHi + " kn uiteen" : "")) + '</span>' +
+        (!fijnBij(d) && kansTekst(dagKans(d)) ? '<span class="ind kans-ens">kans ' + kansTekst(dagKans(d)) + '</span>' : '') + '</button>';
     });
     var nauw = ds.map(fijnBij), split = nauw.findIndex(function (n) { return n === 0; });
     if (split < 0) split = ds.length;
     var groep = function (kop, sub, items) { return items.length ? '<div class="dgroep"><h4>' + kop + ' <i>' + sub + '</i></h4><div class="weekstrip">' + items.join("") + '</div></div>' : ""; };
     $("weekstrip").innerHTML = groep("Nauwkeurig", "fijne modellen, 2 km", kaarten.slice(0, split)) +
-      groep("Indicatie", "alleen grove modellen, 7–15 km", kaarten.slice(split)) +
+      groep("Indicatie", st.mix === "tijd" ? "grove modellen +" + optelling() + " kn, kans uit 82 ensemble-runs" : "alleen grove modellen, 7–15 km", kaarten.slice(split)) +
       (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
   }
 
@@ -415,7 +439,7 @@ window.KWU_READY.then(function () {
 
     var kop = '<div class="dagkop" style="--tint:' + tint(o.n) + '"><b>' + (i === 0 ? "vandaag, " : "") + dagLang(d.uren[0].t) + '</b>' +
       '<span class="dagv">' + (o.v ? o.ws.length + (o.ws.length === 1 ? " venster" : " vensters") + " · " + WOORD[o.n] : WOORD[o.n]) + '</span>' +
-      '<span class="ind">zon op ' + d.zon.op + ', onder ' + d.zon.onder + (i >= 3 ? ' · indicatie, verder dan 2 dagen kijkt alleen het grove model' : '') + '</span></div>';
+      '<span class="ind">zon op ' + d.zon.op + ', onder ' + d.zon.onder + indicatieTekst(i, d) + '</span></div>';
     var td = function (u, cls, inhoud, style) { return '<td class="' + cls + (u.t === st.t ? " aan" : "") + '" data-t="' + u.t + '"' + (style ? ' style="' + style + '"' : '') + '>' + inhoud + '</td>'; };
     var rij = function (lbl, cel) { return '<tr><th scope="row">' + lbl + '</th>' + d.uren.map(cel).join("") + '</tr>'; };
     var max = Math.max(30, top(d.uren).kn);
@@ -459,7 +483,7 @@ window.KWU_READY.then(function () {
       [["wind", w.lo + "–" + w.hi + " kn uit " + kompas(top(w.uren).dir)], ["vlagen tot", Math.max.apply(null, w.uren.map(function (u) { return u.vl; })) + " kn"],
        ["duur", w.uren.length + " uur"], ["kite", kiteBereik(w.lo, w.hi, vlMax(w.uren)) + " bij " + st.kg + " kg, " + st.board + ". Maat op de gemiddelde wind; vlagen tot " + vlMax(w.uren) + " kn" + (vlMax(w.uren) / w.hi >= 1.5 ? ", dat is 1,5× de wind: neem de kleine" : ", dat kan de kite hebben")],
        ["cijfer", c.som],
-       ["modellen", st.modellen.length + " aangevinkt, " + (st.mix === "dajk" ? "DAJK" : "AJK") + "-mix"]
+       ["modellen", st.modellen.length + " aangevinkt, " + mixNaam() + (w.uren[0].off ? ", grof +" + w.uren[0].off + " kn" : "")]
       ].map(function (r) { return '<div class="rij"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join("");
     $("sheet").hidden = false; $("sheet-x").focus();
   }
@@ -471,7 +495,8 @@ window.KWU_READY.then(function () {
       '<li class="p"><b>Fijn</b> (2 km) ziet de kust, reikt 2 dagen. <b>Grof</b> (7–15 km) reikt 7 dagen; na dag 3 lopen ze uiteen, kijk naar laagste–hoogste.</li>' +
       '<li class="p"><b>AJK-mix</b>: fijn en grof tellen altijd 50/50. <a href="https://ajk68.com/kiteweer/" target="_blank" rel="noopener">Uitleg en gewichten op ajk68.com</a>.</li>' +
       '<li class="p"><b>DAJK-mix</b>: alleen fijn zolang het reikt, daarna grof. Afgelopen week 1 kn dichter bij de meting dan AJK; bij jouw 3 sessies zat grof 8–10 kn te laag.</li>' +
-      '<li class="m">Na 2 dagen is alles grof: indicatie, geen plan.</li>' +
+      '<li class="p"><b>DAJK-tijd-mix</b>: als DAJK, plus drie dingen die 60 dagen meten opleverde. (1) Grove modellen krijgen +' + optelling() + ' kn: aan het water lezen ze zoveel te laag, op een landmast niet. (2) ARPEGE doet mee tot dag 4: 5 km boven onze kust, leest waar, trefzekerste model tot dag 3. (3) Vanaf dag 3 staat de kans uit 31 GFS- en 51 ECMWF-runs erbij; liggen die ver uiteen, dan is het een gok. Trefkans dag 2–6 ging van 0,2 naar 0,4–0,6 (Hoek van Holland, HSS). <a href="docs/dajk-tijd.md" target="_blank" rel="noopener">Meting en uitleg</a>.</li>' +
+      '<li class="m">Na 2,5 dag is alles grof: indicatie, geen plan. Kijk naar de kans en laagste–hoogste.</li>' +
       '<li class="m">Meting = Hoek van Holland, 12 km verderop. Het strand kan wat lager lezen.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
@@ -481,18 +506,20 @@ window.KWU_READY.then(function () {
   // ── modellen: knop in de kop, keuze in een paneel ────
   function tekenModelknop() {
     var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
-    $("modelknop").innerHTML = '<b>' + (st.mix === "dajk" ? "DAJK" : "AJK") + '-mix</b><span>' + nd + ' van ' + st.modellen.length + ' modellen</span>';
+    $("modelknop").innerHTML = '<b>' + mixNaam() + '</b><span>' + nd + ' van ' + st.modellen.length + ' modellen</span>';
   }
+  function mixNaam() { return st.mix === "tijd" ? "DAJK-tijd" : st.mix === "dajk" ? "DAJK-mix" : "AJK-mix"; }
   function tekenModellen() {
     var alle = KWU.modellen.map(function (m) { return m.id; });
     var mixKnop = function (id, lbl, sub) { return '<button type="button" class="mixknop' + (st.mix === id ? " aan" : "") + '" data-mset="' + id + '" aria-pressed="' + (st.mix === id) + '"><b>' + lbl + '</b><span>' + sub + '</span></button>'; };
     return '<div class="mixen">' +
-      mixKnop("dajk", "DAJK-mix", "fijn zolang het reikt (2 dagen), daarna grof · afgelopen week 1 kn dichter bij de meting") +
+      mixKnop("tijd", "DAJK-tijd", "fijn tot 2,5 dag, dan grof +" + optelling() + " kn en ARPEGE tot dag 4, kans uit ensembles · trefkans dag 2–6 twee keer zo hoog") +
+      mixKnop("dajk", "DAJK-mix", "fijn zolang het reikt (2 dagen), daarna grof, zonder optelling") +
       mixKnop("ajk", "AJK-mix", "fijn en grof altijd 50/50, zoals op ajk68.com") + '</div>' +
       '<div class="mkop"><span>Los aan- of uitzetten</span><button type="button" class="link" data-mset="' + (st.modellen.length === alle.length ? "een" : "alle") + '">' + (st.modellen.length === alle.length ? "alleen fijn" : "alles aan") + '</button></div>' +
       '<div class="mchips">' + KWU.modellen.map(function (m) {
         var aan = st.modellen.indexOf(m.id) >= 0;
-        return '<button type="button" class="mchip' + (aan ? " aan" : "") + '" data-model="' + m.id + '" aria-pressed="' + aan + '">' + esc(m.naam) + '<small>' + m.dagen + ' dag · ' + (m.klasse === "regionaal" ? "fijn" : "grof") + '</small></button>'; }).join("") + '</div>' +
+        return '<button type="button" class="mchip' + (aan ? " aan" : "") + '" data-model="' + m.id + '" aria-pressed="' + aan + '">' + esc(m.naam) + '<small>' + m.dagen + ' dag · ' + (m.klasse === "regionaal" ? "fijn" : "grof") +  (st.mix === "tijd" && m.off ? ' · +' + optelling() : '') + '</small></button>'; }).join("") + '</div>' +
       '<p class="sv flauw">Wind = gewogen middelste waarde van wat aanstaat, trefzekerste model weegt het zwaarst. <button type="button" class="link" data-info="modellen">hoe dat werkt</button></p>';
   }
   function openModelPaneel() {
@@ -536,7 +563,8 @@ window.KWU_READY.then(function () {
     if (bd) { bd.parentNode.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); }); bd.classList.add("on"); st.board = bd.dataset.board; return teken(); }
     var ms = e.target.closest("[data-mset]");
     if (ms) { var k = ms.dataset.mset;
-      if (k === "dajk" || k === "ajk") { st.mix = k; st.modellen = ARTHUR.slice(); }
+      if (k === "tijd") { st.mix = k; st.modellen = TIJD.slice(); }
+      else if (k === "dajk" || k === "ajk") { st.mix = k; st.modellen = ARTHUR.slice(); }
       else st.modellen = k === "alle" ? KWU.modellen.map(function (m) { return m.id; }) : KWU.modellen.filter(function (m) { return m.klasse === "regionaal"; }).map(function (m) { return m.id; });
       st.t = null; return teken(); }
     var mc = e.target.closest("[data-model]");
