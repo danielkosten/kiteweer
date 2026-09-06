@@ -460,6 +460,11 @@ window.KWU_READY.then(function () {
       rij("wind kn", function (u) { return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>'); }) +
       rij("vlagen", function (u) { var n = niveau(u), g = n === "aflandig" ? "aflandig" : band(u.vl); return td(u, "tv", u.vl, "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
       rij("", function (u) { return td(u, "tn", '<i style="background:' + knKleur(u.kn, niveau(u)) + '"></i>'); }) +
+      rij("kite m<br><small>" + st.kg + " kg, " + st.board + "</small>", function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
+        var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", k.maat + (k.vlagerig ? '<small>' + k.klein + ' kan, vlagerig</small>' : ''), "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
+      rij("verloop", function (u, j) { var v = d.uren[j + 1]; if (!v) return td(u, "tverloop", "");
+        var dk = v.kn - u.kn, dd = ((v.dir - u.dir + 540) % 360) - 180, s = dk >= 2 ? "↗ <b>+" + dk + "</b>" : dk <= -2 ? "↘ <b>" + dk + "</b>" : "→";
+        return td(u, "tverloop", s + (Math.abs(dd) >= 20 ? '<br><small>draait ' + (dd > 0 ? "rechtsom" : "linksom") + '</small>' : '')); }) +
       rij("modellen eens", function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
         return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span><small>' + u.knLo + "–" + u.knHi + ' kn</small>'); }) +
@@ -472,7 +477,7 @@ window.KWU_READY.then(function () {
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i>' + WOORD[k] + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">modellen eens = gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span>';
+      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">modellen eens = gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg">kite = maat op de gemiddelde wind bij jouw gewicht en board; bij vlagen ≥ 1,5× de wind kan een maat kleiner</span><span class="lg">verloop = wat de wind het volgende uur doet, in kn</span><span class="lg disclaimer">⚠️ schatting uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
   }
 
   function openVenster(j) {

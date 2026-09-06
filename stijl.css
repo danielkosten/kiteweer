@@ -143,6 +143,11 @@ main{padding-bottom:64px}
 .voet{border-top:1px solid var(--lijn);padding:20px 0 40px;font-size:13px;color:var(--zacht)}
 .voet p{margin:0 0 8px;max-width:70ch;line-height:1.5}
 .voet .dank{font-size:14px;color:var(--inkt)}
+.voet .disclaimer{color:var(--inkt)}
+.uurtabel .tkite{font-weight:800;color:var(--tint);background:var(--tint-v);border-radius:4px;padding:5px 0}
+.uurtabel .tkite small{display:block;font-size:10.5px;font-weight:700;color:var(--zacht)}
+.uurtabel .tverloop{font-size:12px;font-weight:700;color:var(--zacht)}
+.uurtabel .tverloop b{color:var(--inkt)}
 .voet a{color:var(--zacht);text-decoration:underline;text-underline-offset:3px}
 .voet .dot{margin:0 8px;opacity:.5}
 

@@ -57,9 +57,11 @@
   }
 
   /* Cache 30 minuten per spot in de browser: Open-Meteo is gratis maar telt aanvragen. */
-  var VERS = 30 * 60e3, MODEL_INFO = { gegenereerd: new Date().toISOString(), bron: "Open-Meteo, live", live: true, modellen: MODELLEN, spots: {} };
-  function uitCache(id) { try { var c = JSON.parse(localStorage.getItem("kiteweer-uur:" + id) || "null"); return c && Date.now() - c.op < VERS ? c.data : null; } catch (e) { return null; } }
-  function naarCache(id, data) { try { localStorage.setItem("kiteweer-uur:" + id, JSON.stringify({ op: Date.now(), data: data })); } catch (e) {} }
+  /* DATAVERSIE ophogen als de vorm van de spotdata verandert: oude browsercache wordt dan genegeerd en opgeruimd. */
+  var VERS = 30 * 60e3, DATAVERSIE = "v2", MODEL_INFO = { gegenereerd: new Date().toISOString(), bron: "Open-Meteo, live", live: true, modellen: MODELLEN, spots: {} };
+  function uitCache(id) { try { var c = JSON.parse(localStorage.getItem("kiteweer-uur:" + DATAVERSIE + ":" + id) || "null"); return c && Date.now() - c.op < VERS ? c.data : null; } catch (e) { return null; } }
+  function naarCache(id, data) { try { localStorage.setItem("kiteweer-uur:" + DATAVERSIE + ":" + id, JSON.stringify({ op: Date.now(), data: data })); } catch (e) {} }
+  try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf("kiteweer-uur:") === 0 && k.indexOf("kiteweer-uur:" + DATAVERSIE + ":") !== 0) localStorage.removeItem(k); }); } catch (e) {}
 
   window.KWU = MODEL_INFO;
   var bezig = {};
