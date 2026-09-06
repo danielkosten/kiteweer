@@ -207,7 +207,9 @@ main{padding-bottom:64px}
 .legenda-box[open] summary::before{transform:rotate(45deg)}
 .legenda-box summary i{font-style:normal;letter-spacing:0;text-transform:none;font-weight:500;opacity:.8}
 .legenda{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--zacht)}
-.lg{display:inline-flex;align-items:center;gap:6px}
+.lg{display:inline-flex;align-items:baseline;gap:6px}
+.lg b{color:var(--inkt);white-space:nowrap}
+.oordeel li b{display:inline;font-size:inherit;margin:0;color:var(--inkt)}
 .lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
 
 /* ── het strand, echte luchtfoto, noorden boven ──── */
@@ -402,7 +404,7 @@ details.modellen>div{margin-top:12px}
   .filters{gap:6px}.filter{flex:1 1 0;max-width:none;padding:6px 10px}
   .filter b{font-size:12.5px}.filter span{font-size:10.5px}
   /* dagkaarten: één rij, swipen, geen weeskaart */
-  .weekstrip{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
+  .weekstrip{display:flex;flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x mandatory;gap:8px;padding-bottom:6px;-webkit-overflow-scrolling:touch}
   .weekstrip .dagkaart{flex:0 0 44%;scroll-snap-align:start}
   .weekstrip .dsep{flex:0 0 auto;writing-mode:vertical-rl;padding:8px 0;border-bottom:0;border-left:1.5px dashed var(--lijn);font-size:10.5px;text-align:center}
   .weekstrip .dsep.eerste{display:none}

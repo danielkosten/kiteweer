@@ -321,7 +321,7 @@ window.KWU_READY.then(function () {
       '<span>' + WOORD[n] + ((n !== "weinig" && n !== "aflandig") ? " · kite " + kiteBereik(u.kn, u.kn, u.vl) : "") + '</span>';
     $("sceneuitleg").innerHTML = [["Wind", n, hw], ["Stroming", so.niveau, so], ["Golven", go.niveau, go]].map(function (x) {
       return '<div class="oordeel" style="--tint:' + tint(x[1]) + ';--tint-v:' + tintV(x[1]) + '"><span class="okop">' + x[0] + '</span><b>' + x[2].kop + '</b><ul>' +
-        x[2].punten.map(function (p) { return "<li>" + p + "</li>"; }).join("") + '</ul></div>'; }).join("");
+        x[2].punten.map(function (p) { return "<li>" + vet(p) + "</li>"; }).join("") + '</ul></div>'; }).join("");
   }
 
   // ── nu gemeten ───────────────────────────────────────
@@ -391,6 +391,8 @@ window.KWU_READY.then(function () {
       if (vorige && z !== vorige && z !== "dwars" && vorige !== "dwars") out.push({ t:u.t, van:vorige, naar:z }); if (z !== "dwars") vorige = z; });
     return out;
   }
+  /* Eerste zinsdeel vet (tot de eerste komma of dubbele punt), zodat een lijstje in één blik te scannen is. */
+  function vet(p) { var m = /^([^,:]{3,48})([,:])(.+)$/.exec(p); return m ? "<b>" + m[1] + "</b>" + m[2] + m[3] : p; }
   function kenteringTekst(us) { var k = kenteringen(us); return k.length ? "stroom draait " + k.map(function (x) { return "rond " + uurStr(x.t) + " van " + x.van + " naar " + x.naar; }).join(", ") : ""; }
 
   function tekenSamenvatting() {
@@ -483,8 +485,8 @@ window.KWU_READY.then(function () {
       '</tbody></table>';
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
-      return '<span class="lg"><i style="background:' + tint(k) + '"></i>' + WOORD[k] + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">modellen eens = gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg">kite = maat bij jouw gewicht en board, groot getal = lekker powered, eronder de veilige en de gepowerde kant</span><span class="lg disclaimer">⚠️ schatting uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
+      return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
+      '<span class="lg"><b>pijl</b> waar wind of stroom heen gaat</span><span class="lg"><b>modellen eens</b> gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg"><b>stroming</b> sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg"><b>regen</b> 💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg"><b>kite</b> maat bij jouw gewicht en board, groot getal = lekker powered, eronder de veilige en de gepowerde kant</span><span class="lg disclaimer"><b>⚠️ schatting</b> uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
   }
 
   function openVenster(j) {
