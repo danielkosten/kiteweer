@@ -13,7 +13,7 @@
 
   var BOARDS = { twintip:1, directional:0.8 };
   var ARTHUR = KWU.modellen.filter(function (m) { return m.arthur; }).map(function (m) { return m.id; });
-  var st = { board:"twintip", kg:85, spot:KW.spots[0].id, dag:0, t:null, modellen:ARTHUR.slice() };
+  var st = { board:"twintip", kg:85, spot:KW.spots[0].id, dag:0, t:null, modellen:ARTHUR.slice(), mix:"ajk" };
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
@@ -44,10 +44,14 @@
   var MODEL = {}; KWU.modellen.forEach(function (m) { MODEL[m.id] = m; });
   /* Gewicht per model zoals Arthur het doet: eerst zijn skill-gewicht binnen de klasse, dan wegen de
      klassen regionaal/globaal 50/50, zodat vier fijne modellen niet vanzelf de globale overstemmen. */
+  /* Klassegewicht: AJK = 50/50 (zijn besluit, geen meting). DJK = fijn 75 / grof 25 zolang er een fijn
+     model is: de 2 km-modellen bestaan juist om de kust te zien. Ongemeten, dus een keuze, geen bewijs. */
   function gewichten(ids) {
     var som = { regionaal:0, globaal:0 }; ids.forEach(function (id) { som[MODEL[id].klasse] += MODEL[id].w; });
-    var klassen = (som.regionaal ? 1 : 0) + (som.globaal ? 1 : 0);
-    return ids.map(function (id) { var m = MODEL[id]; return (m.w / som[m.klasse]) * (1 / klassen); });
+    var cw = { regionaal:0.5, globaal:0.5 };
+    if (st.mix === "djk") cw = { regionaal:0.75, globaal:0.25 };
+    if (!som.regionaal) cw = { regionaal:0, globaal:1 }; else if (!som.globaal) cw = { regionaal:1, globaal:0 };
+    return ids.map(function (id) { var m = MODEL[id]; return (m.w / som[m.klasse]) * cw[m.klasse]; });
   }
   function gewMediaan(vals, ws) {
     var p = vals.map(function (v, i) { return [v, ws[i]]; }).sort(function (a,b) { return a[0]-b[0]; }), tot = 0, acc = 0;
@@ -56,7 +60,7 @@
     return p[p.length-1][0];
   }
   function uren() {
-    var key = st.spot + "|" + st.modellen.join(",");
+    var key = st.spot + "|" + st.mix + "|" + st.modellen.join(",");
     if (cache.key === key) return cache.uren;
     var sp = KWU.spots[st.spot], s = spot();
     cache.uren = sp.uren.map(function (u, i) {
@@ -351,7 +355,7 @@
       rij("", function (u) { return td(u, "tn", '<i style="background:' + KLEUR[niveau(u)] + '"></i>'); }) +
       rij("modellen eens", function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
-        return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + u.nJa + "/" + u.nModellen + '</span><small>' + u.knLo + "–" + u.knHi + ' kn</small>'); }) +
+        return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span><small>' + u.knLo + "–" + u.knHi + ' kn</small>'); }) +
       rij("stroming", function (u) { var b = blokBij(u.t), c = stroomC(b, u.dir);
         return td(u, "ts", b && b.stroom ? pijl(b.stroom.naar + 180, c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '<small>' + b.stroom.kn.toFixed(1) + ' kn</small><small style="color:' + (c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '">' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</small>' : '<small>—</small>'); }) +
       rij("golven", function (u) { return td(u, "tg", u.golf ? '<span>' + u.golf.m.toFixed(1) + ' m</span><small>' + u.golf.s + ' s</small>' : '<small>—</small>'); }) +
@@ -361,7 +365,7 @@
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i>' + WOORD[k] + (k === "perfect" ? " 20–30" : k === "goed" ? " 15–20" : k === "matig" ? " 12–15" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">modellen eens = hoeveel van de aangevinkte modellen zeggen: genoeg wind uit een veilige hoek, eronder laagste–hoogste</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span>';
+      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">modellen eens = gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span>';
   }
 
   function openVenster(j) {
@@ -377,6 +381,22 @@
       ].map(function (r) { return '<div class="rij"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join("");
     $("sheet").hidden = false; $("sheet-x").focus();
   }
+  function openModellen() {
+    var fijn = KWU.modellen.filter(function (m) { return m.klasse === "regionaal"; }), grof = KWU.modellen.filter(function (m) { return m.klasse === "globaal"; });
+    $("sheet-t").textContent = "Hoe de wind wordt berekend";
+    $("sheet-b").innerHTML =
+      '<p class="sheet-een">Elk model doet zijn eigen voorspelling per uur. De pagina neemt daarvan de <b>gewogen middelste waarde</b>: het model dat vaker goed zat weegt zwaarder.</p>' +
+      '<ul class="redenen">' +
+      '<li class="p"><b>Fijn</b> (2 km, ziet de kust): ' + fijn.map(function (m) { return m.naam.split(" ")[0] + " ×" + m.w.toString().replace(".", ","); }).join(", ") + '. Reiken 2 dagen, daarna vallen ze vanzelf weg.</li>' +
+      '<li class="p"><b>Grof</b> (7–25 km, hele wereld): ' + grof.map(function (m) { return m.naam.split(" ")[0]; }).join(", ") + '. Reiken 7 dagen.</li>' +
+      '<li class="p"><b>AJK-mix</b>: fijn en grof tellen samen 50/50 (Arthurs besluit, zodat vier fijne modellen niet vanzelf de meerderheid zijn). De gewichten ×1,16 … ×0,88 zijn gemeten: een jaar lang, 9 KNMI-stations, 78.000 vergelijkingen.</li>' +
+      '<li class="p"><b>DJK-mix</b>: zelfde modellen, fijn weegt 75% zolang het reikt. Niet gemeten, een keuze.</li>' +
+      '<li class="m">Voorbij 2 dagen is alles grof: een indicatie, geen plan.</li>' +
+      '<li class="m">Het model is niet de grootste fout. Zelfde model, andere plek: tot 5 kn verschil. Zandmotor heeft geen eigen meetstation; "nu gemeten" is Hoek van Holland, 12 km verderop.</li></ul>' +
+      '<div class="rij"><span>modellen eens</span><span>gewogen deel dat zegt: genoeg wind uit een veilige hoek</span></div>' +
+      '<div class="rij"><span>bron</span><span>ajk68.com/kiteweer, SPEC §6 en §13</span></div>';
+    $("sheet").hidden = false; $("sheet-x").focus();
+  }
   function sluit() { $("sheet").hidden = true; }
 
   // ── modellen-keuze ───────────────────────────────────
@@ -385,10 +405,11 @@
     var zelfde = function (a, b) { return a.slice().sort().join() === b.slice().sort().join(); };
     var FIJN = KWU.modellen.filter(function (m) { return m.klasse === "regionaal"; }).map(function (m) { return m.id; });
     var GROF = KWU.modellen.filter(function (m) { return m.klasse === "globaal" && m.arthur; }).map(function (m) { return m.id; });
-    var knop = function (id, lbl, set, title) { return '<button type="button" data-mset="' + id + '" title="' + title + '" class="' + (zelfde(st.modellen, set) ? "on" : "") + '">' + lbl + '</button>'; };
+    var knop = function (id, lbl, set, title, mix) { return '<button type="button" data-mset="' + id + '" title="' + title + '" class="' + (zelfde(st.modellen, set) && (!mix || st.mix === mix) ? "on" : "") + '">' + lbl + '</button>'; };
     var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
-    $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>De wind hierboven is de gewogen middelste waarde van de aangevinkte modellen (minstens één). Fijne modellen (2 km) reiken 2 dagen en vallen daarna vanzelf weg; verder kijkt alleen het grove. Voor de gekozen dag doen er <b>' + nd + '</b> mee.</span>' +
-      '<span class="mknoppen">' + knop("arthur", "AJK-mix (aanbevolen)", ARTHUR, "fijn + grof, gewogen op gemeten trefzekerheid; wordt vanzelf grof na 2 dagen") +
+    $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>voor deze dag doen er <b>' + nd + '</b> mee <button type="button" class="info" data-info="modellen" aria-label="uitleg modellen">i</button></span>' +
+      '<span class="mknoppen">' + knop("arthur", "AJK-mix", ARTHUR, "fijn en grof 50/50, gewogen op gemeten trefzekerheid; wordt vanzelf grof na 2 dagen", "ajk") +
+      knop("djk", "DJK-mix", ARTHUR, "zelfde modellen, maar fijn weegt 75% zolang het reikt; ongemeten keuze", "djk") +
       knop("fijn", "alleen fijn, 2 dagen", FIJN, "de vier 2 km-modellen, zoals Windfinder Superforecast") +
       knop("grof", "alleen grof, 7 dagen", GROF, "ECMWF, GFS, ICON wereldwijd") +
       knop("alle", "alle 8", alle, "ook ARPEGE, dat AJK niet gebruikt") + '</span></div>' +
@@ -408,6 +429,7 @@
     if (bd) { bd.parentNode.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); }); bd.classList.add("on"); st.board = bd.dataset.board; return teken(); }
     var ms = e.target.closest("[data-mset]");
     if (ms) { var k = ms.dataset.mset;
+      st.mix = k === "djk" ? "djk" : "ajk";
       st.modellen = k === "alle" ? KWU.modellen.map(function (m) { return m.id; }) : k === "geen" ? []
         : k === "fijn" ? KWU.modellen.filter(function (m) { return m.klasse === "regionaal"; }).map(function (m) { return m.id; })
         : k === "grof" ? KWU.modellen.filter(function (m) { return m.klasse === "globaal" && m.arthur; }).map(function (m) { return m.id; })
@@ -415,6 +437,7 @@
       st.t = null; return teken(); }
     var mc = e.target.closest("[data-model]");
     if (mc) { var id = mc.dataset.model, ix = st.modellen.indexOf(id); if (ix >= 0) { if (st.modellen.length > 1) st.modellen.splice(ix,1); } else st.modellen.push(id); st.t = null; return teken(); }
+    if (e.target.closest("[data-info=\"modellen\"]")) return openModellen();
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
     var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; return teken(); }

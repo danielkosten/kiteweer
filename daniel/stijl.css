@@ -308,3 +308,5 @@ main{padding-bottom:64px}
 .mkop>span:not(.mknoppen) b{font-size:inherit;letter-spacing:0;text-transform:none;color:var(--inkt)}
 .dagkaart.leeg{--tint:var(--lijn);--tint-v:var(--papier);color:var(--flauw);cursor:default}
 .dagkaart[data-grof]{border-style:dashed}
+.mkop .info{font-style:normal;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-left:4px}
+.mkop>span:not(.mknoppen){min-width:0}
