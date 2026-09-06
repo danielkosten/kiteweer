@@ -44,12 +44,13 @@
   var MODEL = {}; KWU.modellen.forEach(function (m) { MODEL[m.id] = m; });
   /* Gewicht per model zoals Arthur het doet: eerst zijn skill-gewicht binnen de klasse, dan wegen de
      klassen regionaal/globaal 50/50, zodat vier fijne modellen niet vanzelf de globale overstemmen. */
-  /* Klassegewicht: AJK = 50/50 (zijn besluit, geen meting). DJK = fijn 75 / grof 25 zolang er een fijn
-     model is: de 2 km-modellen bestaan juist om de kust te zien. Ongemeten, dus een keuze, geen bewijs. */
+  /* Klassegewicht: AJK = 50/50 (zijn besluit, geen meting). DJK = alleen fijn zolang een fijn model reikt,
+     daarna grof. Getoetst op 30-08 t/m 05-09 tegen KNMI Hoek van Holland (verifieer.mjs): fijn-mix zat
+     1,3 kn te laag, AJK 3,0, grof 3,8. Eén week, één station op een pier: aanwijzing, geen bewijs. */
   function gewichten(ids) {
     var som = { regionaal:0, globaal:0 }; ids.forEach(function (id) { som[MODEL[id].klasse] += MODEL[id].w; });
     var cw = { regionaal:0.5, globaal:0.5 };
-    if (st.mix === "djk") cw = { regionaal:0.75, globaal:0.25 };
+    if (st.mix === "djk") cw = { regionaal:1, globaal:0 };
     if (!som.regionaal) cw = { regionaal:0, globaal:1 }; else if (!som.globaal) cw = { regionaal:1, globaal:0 };
     return ids.map(function (id) { var m = MODEL[id]; return (m.w / som[m.klasse]) * cw[m.klasse]; });
   }
@@ -390,7 +391,8 @@
       '<li class="p"><b>Fijn</b> (2 km, ziet de kust): ' + fijn.map(function (m) { return m.naam.split(" ")[0] + " ×" + m.w.toString().replace(".", ","); }).join(", ") + '. Reiken 2 dagen, daarna vallen ze vanzelf weg.</li>' +
       '<li class="p"><b>Grof</b> (7–25 km, hele wereld): ' + grof.map(function (m) { return m.naam.split(" ")[0]; }).join(", ") + '. Reiken 7 dagen.</li>' +
       '<li class="p"><b>AJK-mix</b>: fijn en grof tellen samen 50/50 (Arthurs besluit, zodat vier fijne modellen niet vanzelf de meerderheid zijn). De gewichten ×1,16 … ×0,88 zijn gemeten: een jaar lang, 9 KNMI-stations, 78.000 vergelijkingen.</li>' +
-      '<li class="p"><b>DJK-mix</b>: zelfde modellen, fijn weegt 75% zolang het reikt. Niet gemeten, een keuze.</li>' +
+      '<li class="p"><b>DJK-mix</b>: alleen fijn zolang het reikt (2 dagen), daarna grof.</li>' +
+      '<li class="p"><b>Toets 30-08 t/m 05-09</b> tegen KNMI Hoek van Holland, 84 daglichturen: fijn-mix 1,3 kn te laag · AJK 3,0 te laag · grof 3,8 te laag · AROME-HD +0,8 (beste) · ECMWF 6,0 te laag. Maandag 31-08 09:00 mat het station 23 kn, geen model zat boven 20.</li>' +
       '<li class="m">Voorbij 2 dagen is alles grof: een indicatie, geen plan.</li>' +
       '<li class="m">Het model is niet de grootste fout. Zelfde model, andere plek: tot 5 kn verschil. Zandmotor heeft geen eigen meetstation; "nu gemeten" is Hoek van Holland, 12 km verderop.</li></ul>' +
       '<div class="rij"><span>modellen eens</span><span>gewogen deel dat zegt: genoeg wind uit een veilige hoek</span></div>' +
@@ -409,7 +411,7 @@
     var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
     $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>voor deze dag doen er <b>' + nd + '</b> mee <button type="button" class="info" data-info="modellen" aria-label="uitleg modellen">i</button></span>' +
       '<span class="mknoppen">' + knop("arthur", "AJK-mix", ARTHUR, "fijn en grof 50/50, gewogen op gemeten trefzekerheid; wordt vanzelf grof na 2 dagen", "ajk") +
-      knop("djk", "DJK-mix", ARTHUR, "zelfde modellen, maar fijn weegt 75% zolang het reikt; ongemeten keuze", "djk") +
+      knop("djk", "DJK-mix", ARTHUR, "fijn zolang het reikt (2 dagen), daarna grof; zat afgelopen week het dichtst bij de meting", "djk") +
       knop("fijn", "alleen fijn, 2 dagen", FIJN, "de vier 2 km-modellen, zoals Windfinder Superforecast") +
       knop("grof", "alleen grof, 7 dagen", GROF, "ECMWF, GFS, ICON wereldwijd") +
       knop("alle", "alle 8", alle, "ook ARPEGE, dat AJK niet gebruikt") + '</span></div>' +
