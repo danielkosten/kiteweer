@@ -145,13 +145,19 @@ main{padding-bottom:64px}
 .voet .dank{font-size:14px;color:var(--inkt)}
 .voet .disclaimer{color:var(--inkt)}
 .uurtabel .tkite{font-weight:800;color:var(--tint);background:var(--tint-v);border-radius:4px;padding:5px 0}
+.uurtabel .tkite b{font-size:15px;display:block}
 .uurtabel .tkite small{display:block;font-size:10.5px;font-weight:700;color:var(--zacht)}
-.uurtabel .tverloop{font-size:12px;font-weight:700;color:var(--zacht)}
-.uurtabel .tverloop b{color:var(--inkt)}
+.uurtabel th .info{font-style:normal;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-left:3px;background:none;cursor:pointer}
 .voet a{color:var(--zacht);text-decoration:underline;text-underline-offset:3px}
 .voet .dot{margin:0 8px;opacity:.5}
 
 @media(max-width:600px){
+  /* Safari zoomt de pagina in bij een invoerveld onder 16px en zoomt niet terug: alle velden minimaal 16px */
+  input{font-size:16px}
+  .invoer input{font-size:16px}
+  html,body{overflow-x:hidden}
+  .voet{text-align:center;padding:20px 4px 40px}
+  .voet p{margin-left:auto;margin-right:auto}
   .groot-rij{gap:18px}
   .meet .mv{font-size:27px}
   .blok{min-width:42px}
@@ -243,7 +249,7 @@ main{padding-bottom:64px}
 .rider{display:flex;align-items:center;gap:8px}
 .seg.klein button{padding:5px 11px;font-size:13px}
 .rider .invoer{padding:5px 12px}
-.rider .invoer input{width:42px;font-size:15px}
+.rider .invoer input{width:46px;font-size:16px}
 /* vensters onder elkaar */
 .vensters{display:flex;flex-direction:column;gap:8px;margin:14px 0 10px}
 .venster{border:1px solid var(--lijn);border-left:5px solid var(--tint);border-radius:var(--r-s);background:var(--tint-v)}

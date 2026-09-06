@@ -460,11 +460,8 @@ window.KWU_READY.then(function () {
       rij("wind kn", function (u) { return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>'); }) +
       rij("vlagen", function (u) { var n = niveau(u), g = n === "aflandig" ? "aflandig" : band(u.vl); return td(u, "tv", u.vl, "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
       rij("", function (u) { return td(u, "tn", '<i style="background:' + knKleur(u.kn, niveau(u)) + '"></i>'); }) +
-      rij("kite m<br><small>" + st.kg + " kg, " + st.board + "</small>", function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
-        var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", k.maat + (k.vlagerig ? '<small>' + k.klein + ' kan, vlagerig</small>' : ''), "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
-      rij("verloop", function (u, j) { var v = d.uren[j + 1]; if (!v) return td(u, "tverloop", "");
-        var dk = v.kn - u.kn, dd = ((v.dir - u.dir + 540) % 360) - 180, s = dk >= 2 ? "↗ <b>+" + dk + "</b>" : dk <= -2 ? "↘ <b>" + dk + "</b>" : "→";
-        return td(u, "tverloop", s + (Math.abs(dd) >= 20 ? '<br><small>draait ' + (dd > 0 ? "rechtsom" : "linksom") + '</small>' : '')); }) +
+      rij('kite m <button type="button" class="info" data-info="kite" aria-label="Hoe de kitemaat wordt berekend">i</button><br><small>' + st.kg + ' kg, ' + st.board + '</small>', function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
+        var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : k.maat - 1) + '–' + (k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       rij("modellen eens", function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
         return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span><small>' + u.knLo + "–" + u.knHi + ' kn</small>'); }) +
@@ -477,7 +474,7 @@ window.KWU_READY.then(function () {
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i>' + WOORD[k] + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">modellen eens = gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg">kite = maat op de gemiddelde wind bij jouw gewicht en board; bij vlagen ≥ 1,5× de wind kan een maat kleiner</span><span class="lg">verloop = wat de wind het volgende uur doet, in kn</span><span class="lg disclaimer">⚠️ schatting uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
+      '<span class="lg">pijl = waar wind of stroom heen gaat</span><span class="lg">modellen eens = gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg">stroming: sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg">💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg">kite = maat bij jouw gewicht en board, groot getal = lekker powered, eronder de veilige en de gepowerde kant</span><span class="lg disclaimer">⚠️ schatting uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
   }
 
   function openVenster(j) {
@@ -493,6 +490,17 @@ window.KWU_READY.then(function () {
       ].map(function (r) { return '<div class="rij"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join("");
     $("sheet").hidden = false; $("sheet-x").focus();
   }
+  function openKite() {
+    $("sheet-t").textContent = "Hoe de kitemaat wordt berekend";
+    $("sheet-b").innerHTML =
+      '<ul class="redenen">' +
+      '<li class="p"><b>Grote getal</b> = de maat waarmee je bij die wind lekker powered staat: 2,2 × je gewicht ÷ knopen, × 1 voor twintip en iets kleiner voor directional. Bij ' + st.kg + ' kg en 19 kn is dat ' + Math.round(ideaal(19)) + ' m.</li>' +
+      '<li class="p"><b>Bereik eronder</b>: één maat kleiner (vlagen, jij wilt rustig) tot één maat groter (ondergrens van het venster, je wilt zeker de hoogte halen).</li>' +
+      '<li class="p"><b>Vlagerig</b> (vlagen ≥ 1,5× de wind): de onderkant van het bereik zakt twee maten, de vlagen dragen je.</li>' +
+      '<li class="p">Geijkt op je eigen sessies: 10 m bij 19–23 kn en 8 m bij 23–25 kn voelden lekker powered. Meer sessies = betere ijking.</li>' +
+      '<li class="m">Schatting uit modellen die er geregeld 3–5 kn naast zitten. Kijk naar het water en naar wat de anderen optuigen, en beslis zelf.</li></ul>';
+    $("sheet").hidden = false; $("sheet-x").focus();
+  }
   function openModellen() {
     $("sheet-t").textContent = "Hoe de wind wordt berekend";
     $("sheet-b").innerHTML =
@@ -500,7 +508,7 @@ window.KWU_READY.then(function () {
       '<li class="p"><b>Middelste waarde</b> van de aangevinkte modellen, het trefzekerste model weegt het zwaarst.</li>' +
       '<li class="p"><b>Fijn</b> (2 km) ziet de kust, reikt 2 dagen. <b>Grof</b> (7–15 km) reikt 7 dagen; na dag 3 lopen ze uiteen, kijk naar laagste–hoogste.</li>' +
       '<li class="p"><b>AJK-mix</b>: fijn en grof tellen altijd 50/50. <a href="https://ajk68.com/kiteweer/" target="_blank" rel="noopener">Uitleg en gewichten op ajk68.com</a>.</li>' +
-      '<li class="p"><b>DAJK-mix</b>: fijn zolang het reikt (2,5 dag), daarna grof, met drie dingen die 60 dagen meten opleverde. (1) Grove modellen krijgen +' + optelling() + ' kn: aan het water lezen ze zoveel te laag, op een landmast niet. (2) ARPEGE doet mee tot dag 4: 5 km boven onze kust, leest waar, trefzekerste model tot dag 3. (3) Vanaf dag 3 staat de kans uit 31 GFS- en 51 ECMWF-runs erbij; liggen die ver uiteen, dan is het een gok. Trefkans dag 2–6 ging van 0,2 naar 0,4–0,6 (Hoek van Holland, HSS). <a href="docs/dajk-mix.md" target="_blank" rel="noopener">Meting en uitleg</a>.</li>' +
+      '<li class="p"><b>DAJK-mix</b>: fijn zolang het reikt (2,5 dag), daarna grof, geijkt op 60 dagen meting: grof +' + optelling() + ' kn aan het water, ARPEGE tot dag 4, kans uit 82 ensemble-runs. Trefkans dag 2–6 van 0,2 naar 0,5. <a href="docs/?p=dajk-mix.md" target="_blank" rel="noopener">Hoe en waarom</a>.</li>' +
       '<li class="m">Na 2,5 dag is alles grof: indicatie, geen plan. Kijk naar de kans en laagste–hoogste.</li>' +
       '<li class="m">Meting = Hoek van Holland, 12 km verderop. Het strand kan wat lager lezen.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
@@ -575,6 +583,7 @@ window.KWU_READY.then(function () {
     if (mc) { var id = mc.dataset.model, ix = st.modellen.indexOf(id); if (ix >= 0) { if (st.modellen.length > 1) st.modellen.splice(ix,1); } else st.modellen.push(id); st.t = null; return teken(); }
     if (e.target.closest("[data-open-modellen]")) return openModelPaneel();
     if (e.target.closest("[data-info=\"modellen\"]")) return openModellen();
+    if (e.target.closest("[data-info=\"kite\"]")) return openKite();
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
     var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; return teken(); }
