@@ -50,9 +50,15 @@
     }).then(function () { if (window.KWU) window.KWU.live = false; });
   }
 
-  window.KWU_READY = Promise.all(SPOTS.map(spot)).then(function (alle) {
+  /* Cache 30 minuten in de browser: Open-Meteo is gratis maar telt aanvragen, en 12 per bezoek is genoeg. */
+  var CACHE = "kiteweer-uur", VERS = 30 * 60e3;
+  function uitCache() { try { var c = JSON.parse(localStorage.getItem(CACHE) || "null"); return c && Date.now() - new Date(c.gegenereerd).getTime() < VERS ? c : null; } catch (e) { return null; } }
+  function naarCache(out) { try { localStorage.setItem(CACHE, JSON.stringify(out)); } catch (e) {} }
+
+  var cached = uitCache();
+  window.KWU_READY = cached ? Promise.resolve(window.KWU = cached) : Promise.all(SPOTS.map(spot)).then(function (alle) {
     var out = { gegenereerd: new Date().toISOString(), bron: "Open-Meteo, live", live: true, modellen: MODELLEN, spots: {} };
     SPOTS.forEach(function (s, i) { out.spots[s.id] = alle[i]; });
-    window.KWU = out;
+    naarCache(out); window.KWU = out;
   }).catch(function (e) { console.warn("live data mislukt, terugval op uur.js", e); return terugval(); });
 })();

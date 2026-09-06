@@ -312,7 +312,7 @@ window.KWU_READY.then(function () {
     ds.forEach(function (x) { var ox = dagOordeel(x);
       if (ox.v && (!beste || RANG[ox.n] < RANG[beste.n] || (RANG[ox.n] === RANG[beste.n] && ox.v.uren.length > beste.uren.length))) { beste = ox.v; besteDag = x; } });
     $("hero").style.setProperty("--tint", tint(o.n));
-    $("kicker").textContent = (i === 0 ? "vandaag, " : "") + dagLang(d.uren[0].t) + " · " + s.naam;
+    $("kicker").textContent = s.naam + " · klik een kolom, de strandkaart volgt";
     var zon = "zon op " + d.zon.op + ", onder " + d.zon.onder;
     if (o.v) {
       $("verdict").textContent = o.ws.length + (o.ws.length === 1 ? " venster" : " vensters") + " · " + WOORD[o.n];
@@ -330,6 +330,41 @@ window.KWU_READY.then(function () {
         (beste && besteDag !== d ? ' · <b>beste moment deze week: ' + dagLang(besteDag.uren[0].t) + " " + beste.tekst + ", " + beste.lo + "–" + beste.hi + " kn</b>" : "") +
         '<br><span class="flauw">' + zon + '</span>';
     }
+  }
+
+  /* ── samenvatting: welke uren het beste zijn en waarom ──
+     Per uur een score: niveau (6/7/8) + stroom tegen (+0,5) of mee (−0,5) − vlagerig (1).
+     Beste uren = de uren met de hoogste score in het beste venster; de rest van het venster is "ook prima". */
+  function uurScore(u) {
+    var n = niveau(u); if (n === "weinig" || n === "aflandig") return null;
+    var sc = n === "perfect" ? 8 : n === "goed" ? 7 : 6, c = stroomC(blokBij(u.t), u.dir);
+    if (c > 0.3) sc += 0.5; else if (c < -0.5) sc -= 0.5;
+    if (u.vl / u.kn >= 1.8) sc -= 1;                     // alleen echt vlagerig; 1,6 hakte een venster in losse uren
+    return sc;
+  }
+  function runs(us) { var out = [], nu = null; us.forEach(function (u) { if (!nu || +u.t.slice(11,13) !== +nu[nu.length-1].t.slice(11,13) + 1) { nu = [u]; out.push(nu); } else nu.push(u); }); return out; }
+  function runTekst(r) { return r[0].t.slice(11,13) + "–" + (+r[r.length-1].t.slice(11,13)+1) + " u"; }
+  function waarom(us) {
+    var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / us.length, vl = us.reduce(function (a,u) { return a + u.vl/u.kn; }, 0) / us.length;
+    var p = [];
+    p.push(c > 0.3 ? "stroom tegen de wind, gratis hoogte" : c < -0.5 ? "stroom mee, je zakt af" : "stroom dwars");
+    if (vl >= 1.8) p.push("vlagerig");
+    return p.join(", ");
+  }
+  function tekenSamenvatting() {
+    var d = huidigeDag(), o = dagOordeel(d), el = $("samenvatting");
+    if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Geen kitewind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>'; return; }
+    var alle = [].concat.apply([], o.ws.map(function (w) { return w.uren; })).filter(function (u) { return uurScore(u) != null; });
+    var max = Math.max.apply(null, alle.map(uurScore));
+    var beste = alle.filter(function (u) { return uurScore(u) >= max - 0.25; }), rest = alle.filter(function (u) { return uurScore(u) < max - 0.25; });
+    var rb = runs(beste), rr = runs(rest), lo = Math.min.apply(null, beste.map(function (u) { return u.kn; })), hi = Math.max.apply(null, beste.map(function (u) { return u.kn; }));
+    var html = '<p class="sv beste" style="--tint:' + tint(niveau(top(beste))) + '"><span class="vc">' + max.toString().replace(".", ",") + '</span><b>Beste uren ' + rb.map(runTekst).join(", ") + '</b> · ' + (lo === hi ? lo : lo + "–" + hi) + ' kn, vlagen tot ' + vlMax(beste) + ' · ' + waarom(beste) + ' · kite ' + kiteBereik(lo, hi, vlMax(beste)) + '</p>';
+    if (rest.length) { var lo2 = Math.min.apply(null, rest.map(function (u) { return u.kn; })), hi2 = Math.max.apply(null, rest.map(function (u) { return u.kn; }));
+      html += '<p class="sv"><b>Ook prima ' + rr.map(runTekst).join(", ") + '</b> · ' + (lo2 === hi2 ? lo2 : lo2 + "–" + hi2) + ' kn · ' + waarom(rest) + '</p>'; }
+    var niet = d.uren.filter(function (u) { return uurScore(u) == null; });
+    if (niet.length) html += '<p class="sv flauw">Niet: ' + runs(niet).map(runTekst).join(", ") + ' · ' + (niet.some(function (u) { return niveau(u) === "aflandig"; }) ? "aflandig of " : "") + 'te weinig wind</p>';
+    html += '<p class="sv flauw">zon op ' + d.zon.op + ', onder ' + d.zon.onder + ' · <button type="button" class="link" data-venster="0">hoe het cijfer ontstaat</button></p>';
+    el.innerHTML = html;
   }
 
   // ── welke dag ────────────────────────────────────────
@@ -357,7 +392,7 @@ window.KWU_READY.then(function () {
   // ── uur voor uur: één dag, tabel zoals Windfinder ────
   function tekenDag() {
     var ds = dagen(), d = huidigeDag(), i = ds.indexOf(d), o = dagOordeel(d);
-    $("uurnote").textContent = "— klik een kolom, de strandkaart en het kite-advies volgen";
+
     var kop = '<div class="dagkop" style="--tint:' + tint(o.n) + '"><b>' + (i === 0 ? "vandaag, " : "") + dagLang(d.uren[0].t) + '</b>' +
       '<span class="dagv">' + (o.v ? o.ws.length + (o.ws.length === 1 ? " venster" : " vensters") + " · " + WOORD[o.n] : WOORD[o.n]) + '</span>' +
       '<span class="ind">zon op ' + d.zon.op + ', onder ' + d.zon.onder + (i >= 3 ? ' · indicatie, verder dan 2 dagen kijkt alleen het grove model' : '') + '</span></div>';
@@ -430,7 +465,8 @@ window.KWU_READY.then(function () {
     var GROF = KWU.modellen.filter(function (m) { return m.klasse === "globaal" && m.arthur; }).map(function (m) { return m.id; });
     var knop = function (id, lbl, set, title, mix) { return '<button type="button" data-mset="' + id + '" title="' + title + '" class="' + (zelfde(st.modellen, set) && (!mix || st.mix === mix) ? "on" : "") + '">' + lbl + '</button>'; };
     var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
-    $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>voor deze dag doen er <b>' + nd + '</b> mee <button type="button" class="info" data-info="modellen" aria-label="uitleg modellen">i</button></span>' +
+    $("modelsum").innerHTML = '<b>Windmodellen</b> <span>' + (st.mix === "dajk" ? "DAJK-mix" : "AJK-mix") + ' · ' + st.modellen.length + ' aan, ' + nd + ' reiken deze dag</span>';
+    $("modellen").innerHTML = '<div class="mkop"><span><button type="button" class="info" data-info="modellen" aria-label="uitleg modellen">i</button> uitleg</span>' +
       '<span class="mknoppen">' + knop("dajk", "DAJK-mix", ARTHUR, "fijn zolang het reikt (2 dagen), daarna grof", "dajk") +
       knop("arthur", "AJK-mix", ARTHUR, "fijn en grof 50/50, zoals op ajk68.com", "ajk") +
       '<button type="button" data-mset="' + (st.modellen.length === alle.length ? "een" : "alle") + '">' + (st.modellen.length === alle.length ? "alleen fijn" : "alles aan") + '</button></span></div>' +
@@ -442,7 +478,7 @@ window.KWU_READY.then(function () {
   function tekenSpotkeuze() {
     $("spotkeuze").innerHTML = KW.spots.map(function (s) { return '<button type="button" class="' + (s.id === st.spot ? "on" : "") + '" data-spot="' + s.id + '">' + esc(s.naam) + '</button>'; }).join("");
   }
-  function teken() { bewaar(); tekenSpotkeuze(); tekenHero(); tekenNu(); tekenModellen(); tekenWeek(); tekenDag(); tekenScene(); }
+  function teken() { bewaar(); tekenSpotkeuze(); tekenHero(); tekenNu(); tekenModellen(); tekenWeek(); tekenDag(); tekenSamenvatting(); tekenScene(); }
 
   document.addEventListener("click", function (e) {
     var sp = e.target.closest("[data-spot]"); if (sp) { st.spot = sp.dataset.spot; st.t = null; return teken(); }
