@@ -379,7 +379,7 @@ window.KWU_READY.then(function () {
         '<span class="dv">' + (o.v ? o.v.lo + "–" + o.v.hi : o.b.kn) + ' <em>kn</em></span>' +
         '<span class="dvl">vlagen ' + (o.v ? o.v.vlLo + "–" + o.v.vlHi : o.b.vl) + '</span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
-        '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : "") + '</span></button>';
+        '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : (o.b.knLo != null ? " · " + o.b.knLo + "–" + o.b.knHi + " kn uiteen" : "")) + '</span></button>';
     });
     var nauw = ds.map(fijnBij), split = nauw.findIndex(function (n) { return n === 0; });
     if (split < 0) split = ds.length;
@@ -457,28 +457,34 @@ window.KWU_READY.then(function () {
   }
   function sluit() { $("sheet").hidden = true; }
 
-  // ── modellen-keuze ───────────────────────────────────
+  // ── modellen: knop in de kop, keuze in een paneel ────
+  function tekenModelknop() {
+    var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
+    $("modelknop").innerHTML = '<b>' + (st.mix === "dajk" ? "DAJK" : "AJK") + '</b><span>' + st.modellen.length + ' modellen · ' + nd + ' deze dag</span>';
+  }
   function tekenModellen() {
     var alle = KWU.modellen.map(function (m) { return m.id; });
-    var zelfde = function (a, b) { return a.slice().sort().join() === b.slice().sort().join(); };
-    var FIJN = KWU.modellen.filter(function (m) { return m.klasse === "regionaal"; }).map(function (m) { return m.id; });
-    var GROF = KWU.modellen.filter(function (m) { return m.klasse === "globaal" && m.arthur; }).map(function (m) { return m.id; });
-    var knop = function (id, lbl, set, title, mix) { return '<button type="button" data-mset="' + id + '" title="' + title + '" class="' + (zelfde(st.modellen, set) && (!mix || st.mix === mix) ? "on" : "") + '">' + lbl + '</button>'; };
-    var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
-    $("modelsum").innerHTML = '<b>Windmodellen</b> <span>' + (st.mix === "dajk" ? "DAJK-mix" : "AJK-mix") + ' · ' + st.modellen.length + ' aan, ' + nd + ' reiken deze dag</span>';
-    $("modellen").innerHTML = '<div class="mkop"><span><button type="button" class="info" data-info="modellen" aria-label="uitleg modellen">i</button> uitleg</span>' +
-      '<span class="mknoppen">' + knop("dajk", "DAJK-mix", ARTHUR, "fijn zolang het reikt (2 dagen), daarna grof", "dajk") +
-      knop("arthur", "AJK-mix", ARTHUR, "fijn en grof 50/50, zoals op ajk68.com", "ajk") +
-      '<button type="button" data-mset="' + (st.modellen.length === alle.length ? "een" : "alle") + '">' + (st.modellen.length === alle.length ? "alleen fijn" : "alles aan") + '</button></span></div>' +
+    var mixKnop = function (id, lbl, sub) { return '<button type="button" class="mixknop' + (st.mix === id ? " aan" : "") + '" data-mset="' + id + '" aria-pressed="' + (st.mix === id) + '"><b>' + lbl + '</b><span>' + sub + '</span></button>'; };
+    return '<div class="mixen">' +
+      mixKnop("dajk", "DAJK-mix", "fijn zolang het reikt (2 dagen), daarna grof · afgelopen week 1 kn dichter bij de meting") +
+      mixKnop("arthur", "AJK-mix", "fijn en grof altijd 50/50, zoals op ajk68.com") + '</div>' +
+      '<div class="mkop"><span>Los aan- of uitzetten</span><button type="button" class="link" data-mset="' + (st.modellen.length === alle.length ? "een" : "alle") + '">' + (st.modellen.length === alle.length ? "alleen fijn" : "alles aan") + '</button></div>' +
       '<div class="mchips">' + KWU.modellen.map(function (m) {
         var aan = st.modellen.indexOf(m.id) >= 0;
-        return '<button type="button" class="mchip' + (aan ? " aan" : "") + '" data-model="' + m.id + '" aria-pressed="' + aan + '">' + esc(m.naam) + '<small>' + m.dagen + ' dag</small></button>'; }).join("") + '</div>';
+        return '<button type="button" class="mchip' + (aan ? " aan" : "") + '" data-model="' + m.id + '" aria-pressed="' + aan + '">' + esc(m.naam) + '<small>' + m.dagen + ' dag · ' + (m.klasse === "regionaal" ? "fijn" : "grof") + '</small></button>'; }).join("") + '</div>' +
+      '<p class="sv flauw">Wind = gewogen middelste waarde van wat aanstaat, trefzekerste model weegt het zwaarst. <button type="button" class="link" data-info="modellen">hoe dat werkt</button></p>';
+  }
+  function openModelPaneel() {
+    $("sheet-t").textContent = "Windmodellen";
+    $("sheet-b").innerHTML = tekenModellen();
+    $("sheet").hidden = false; $("sheet-x").focus();
   }
 
   function tekenSpotkeuze() {
     $("spotkeuze").innerHTML = KW.spots.map(function (s) { return '<button type="button" class="' + (s.id === st.spot ? "on" : "") + '" data-spot="' + s.id + '">' + esc(s.naam) + '</button>'; }).join("");
   }
-  function teken() { bewaar(); tekenSpotkeuze(); tekenHero(); tekenNu(); tekenModellen(); tekenWeek(); tekenDag(); tekenSamenvatting(); tekenScene(); }
+  function teken() { bewaar(); tekenSpotkeuze(); tekenHero(); tekenNu(); tekenModelknop(); tekenWeek(); tekenDag(); tekenSamenvatting(); tekenScene();
+    if (!$("sheet").hidden && $("sheet-t").textContent === "Windmodellen") $("sheet-b").innerHTML = tekenModellen(); }
 
   document.addEventListener("click", function (e) {
     var sp = e.target.closest("[data-spot]"); if (sp) { st.spot = sp.dataset.spot; st.t = null; return teken(); }
@@ -491,6 +497,7 @@ window.KWU_READY.then(function () {
       st.t = null; return teken(); }
     var mc = e.target.closest("[data-model]");
     if (mc) { var id = mc.dataset.model, ix = st.modellen.indexOf(id); if (ix >= 0) { if (st.modellen.length > 1) st.modellen.splice(ix,1); } else st.modellen.push(id); st.t = null; return teken(); }
+    if (e.target.closest("[data-open-modellen]")) return openModelPaneel();
     if (e.target.closest("[data-info=\"modellen\"]")) return openModellen();
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();

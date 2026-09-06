@@ -342,3 +342,14 @@ details.modellen>div{margin-top:12px}
 .dagen .scroll{padding:0 0 6px}
 [hidden]{display:none!important}
 .seg{flex-wrap:wrap}
+
+.filter{display:inline-flex;flex-direction:column;align-items:flex-start;border:1px solid var(--lijn);border-radius:var(--r-pil);padding:4px 14px;background:var(--kaart);line-height:1.15}
+.filter b{font-size:13px}
+.filter span{font-size:11px;color:var(--zacht)}
+.filter:hover{border-color:var(--inkt)}
+.mixen{display:grid;gap:8px;margin-bottom:14px}
+.mixknop{text-align:left;border:1.5px solid var(--lijn);border-radius:var(--r-s);padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.mixknop.aan{border-color:var(--perfect);background:var(--perfect-v)}
+.mixknop b{font-size:15px}
+.mixknop span{font-size:12.5px;color:var(--zacht)}
+.sheet-in{max-width:520px}

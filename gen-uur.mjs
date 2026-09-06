@@ -52,4 +52,4 @@ for (const s of SPOTS) {
   };
   console.log(s.id, out.spots[s.id].uren.length, "uren");
 }
-await (await import("node:fs/promises")).writeFile("daniel/uur.js", "window.KWU = " + JSON.stringify(out) + ";\n");
+await (await import("node:fs/promises")).writeFile("uur.js", "window.KWU = " + JSON.stringify(out) + ";\n");
