@@ -382,3 +382,9 @@ details.modellen>div{margin-top:12px}
   .dgroep .weekstrip{display:flex}
   .scene-label b{font-size:20px}
 }
+
+body.modal-open{overflow:hidden}
+.scene{isolation:isolate;z-index:0}
+.pk{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:middle;border:1.5px solid rgba(23,19,15,.4)}
+.pk.wit{background:#fff}.pk.blauw{background:#4FC3F7}.pk.geel{background:#F2D27A}
+.scene-label span{font-weight:600}

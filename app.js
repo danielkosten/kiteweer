@@ -271,25 +271,27 @@ window.KWU_READY.then(function () {
     var b = blokBij(u.t);
     if (b && b.stroom && b.stroom.kn >= 0.08) {
       var c = stroomC(b, u.dir);
-      svg += '<circle cx="130" cy="' + (H-90) + '" r="46" fill="rgba(23,19,15,.35)"/>' + arrow(130, H-90, b.stroom.naar, 50 + Math.min(70, b.stroom.kn*70), "#4FC3F7", 6);
-      svg += '<text x="130" y="' + (H-26) + '" text-anchor="middle" font-size="14" font-weight="700" fill="#4FC3F7" stroke="rgba(23,19,15,.6)" stroke-width="3" paint-order="stroke">stroming ' + b.stroom.kn.toFixed(1) + ' kn ' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</text>';
+      svg += '<circle cx="130" cy="' + (H-90) + '" r="46" fill="rgba(23,19,15,.35)"/>' + arrow(130, H-90, b.stroom.naar, 60 + Math.min(70, b.stroom.kn*70), "#4FC3F7", 8);
+
     }
     if (u.golf) {
-      svg += '<circle cx="' + (W-130) + '" cy="' + (H-90) + '" r="46" fill="rgba(23,19,15,.35)"/>' + arrow(W-130, H-90, u.golf.dir + 180, 40 + Math.min(60, u.golf.m*40), "#F2D27A", 5);
-      svg += '<text x="' + (W-130) + '" y="' + (H-26) + '" text-anchor="middle" font-size="14" font-weight="700" fill="#F2D27A" stroke="rgba(23,19,15,.6)" stroke-width="3" paint-order="stroke">golven ' + u.golf.m.toFixed(1) + ' m</text>';
+      svg += '<circle cx="' + (W-130) + '" cy="' + (H-90) + '" r="46" fill="rgba(23,19,15,.35)"/>' + arrow(W-130, H-90, u.golf.dir + 180, 50 + Math.min(60, u.golf.m*40), "#F2D27A", 7);
+
     }
     svg += '<g transform="translate(' + (W-40) + ',44)"><circle r="18" fill="rgba(23,19,15,.45)"/><path d="M0 -12 L6 6 L0 2 L-6 6 Z" fill="#FFF"/><text y="26" text-anchor="middle" font-size="11" font-weight="700" fill="#FFF">N</text></g>';
-    svg += '<g transform="translate(16,24)" font-size="12" font-weight="700" stroke="rgba(23,19,15,.6)" stroke-width="3" paint-order="stroke">' +
-      '<text fill="#FFF">wit = wind</text><text x="90" fill="#4FC3F7">blauw = stroom</text><text x="205" fill="#F2D27A">geel = golven</text></g>';
     $("pijlen").innerHTML = svg;
 
     var hw = hoekWoord(hoekTussen(u.dir, s.onshore), s, u), so = stroomOordeel(b, u), go = golfOordeel(u.golf);
+    var kt = kenteringTekst(d.uren); if (kt && so.punten) so.punten.push(kt);
     $("scenenote").textContent = "— " + dagStr(u.t) + " " + uurStr(u.t) + ", " + s.naam;
     var idx = d.uren.map(function (x) { return x.t; }).indexOf(u.t);
     $("schuif").max = d.uren.length - 1; $("schuif").value = Math.max(0, idx);
     $("schuiflabels").innerHTML = d.uren.map(function (x) { return '<i style="background:' + knKleur(x.kn, niveau(x)) + '"></i>'; }).join("");
     $("schuifuur").textContent = uurStr(u.t);
-    $("scenelabel").innerHTML = '<b style="color:' + kl + '">' + u.kn + ' kn</b><span>vlagen ' + u.vl + ' · uit ' + kompas(u.dir) + '</span>' +
+    var c0 = stroomC(b, u.dir);
+    $("scenelabel").innerHTML = '<b style="color:' + kl + '">' + u.kn + ' kn</b><span><i class="pk wit"></i>wind uit ' + kompas(u.dir) + ', vlagen ' + u.vl + '</span>' +
+      (b && b.stroom ? '<span><i class="pk blauw"></i>stroming ' + b.stroom.kn.toFixed(1) + ' kn ' + (c0 > 0.15 ? "tegen" : c0 < -0.15 ? "mee" : "dwars") + '</span>' : '') +
+      (u.golf ? '<span><i class="pk geel"></i>golven ' + u.golf.m.toFixed(1) + ' m</span>' : '') +
       '<span>' + WOORD[n] + ((n !== "weinig" && n !== "aflandig") ? " · kite " + kiteBereik(u.kn, u.kn, u.vl) : "") + '</span>';
     $("sceneuitleg").innerHTML = [["Wind", n, hw], ["Stroming", so.niveau, so], ["Golven", go.niveau, go]].map(function (x) {
       return '<div class="oordeel" style="--tint:' + tint(x[1]) + ';--tint-v:' + tintV(x[1]) + '"><span class="okop">' + x[0] + '</span><b>' + x[2].kop + '</b><ul>' +
@@ -355,6 +357,16 @@ window.KWU_READY.then(function () {
     if (vl >= 1.8) p.push("vlagerig");
     return p.join(", ");
   }
+  /* Kentering: het uur waarop de stroom van mee naar tegen draait (of andersom). Bron is per 3 uur,
+     dus "rond" en niet "om". */
+  function kenteringen(us) {
+    var out = [], vorige = null;
+    us.forEach(function (u) { var c = stroomC(blokBij(u.t), u.dir), z = c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars";
+      if (vorige && z !== vorige && z !== "dwars" && vorige !== "dwars") out.push({ t:u.t, van:vorige, naar:z }); if (z !== "dwars") vorige = z; });
+    return out;
+  }
+  function kenteringTekst(us) { var k = kenteringen(us); return k.length ? "stroom draait " + k.map(function (x) { return "rond " + uurStr(x.t) + " van " + x.van + " naar " + x.naar; }).join(", ") : ""; }
+
   function tekenSamenvatting() {
     var d = huidigeDag(), o = dagOordeel(d), el = $("samenvatting");
     if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Geen kitewind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>'; return; }
@@ -367,6 +379,7 @@ window.KWU_READY.then(function () {
       html += '<p class="sv"><b>Ook prima ' + rr.map(runTekst).join(", ") + '</b> · ' + (lo2 === hi2 ? lo2 : lo2 + "–" + hi2) + ' kn · ' + waarom(rest) + '</p>'; }
     var niet = d.uren.filter(function (u) { return uurScore(u) == null; });
     if (niet.length) html += '<p class="sv flauw">Niet: ' + runs(niet).map(runTekst).join(", ") + ' · ' + (niet.some(function (u) { return niveau(u) === "aflandig"; }) ? "aflandig of " : "") + 'te weinig wind</p>';
+    var kt = kenteringTekst(d.uren); if (kt) html += '<p class="sv"><b>Stroming:</b> ' + kt + ' (bron per 3 uur, dus ongeveer)</p>';
     html += '<p class="sv flauw">zon op ' + d.zon.op + ', onder ' + d.zon.onder + ' · <button type="button" class="link" data-venster="0">hoe het cijfer ontstaat</button></p>';
     el.innerHTML = html;
   }
@@ -459,7 +472,8 @@ window.KWU_READY.then(function () {
       '<li class="m">Meting = Hoek van Holland, 12 km verderop. Het strand kan wat lager lezen.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
-  function sluit() { $("sheet").hidden = true; }
+  function sluit() { $("sheet").hidden = true; document.body.classList.remove("modal-open"); }
+  new MutationObserver(function () { document.body.classList.toggle("modal-open", !$("sheet").hidden); }).observe($("sheet"), { attributes:true, attributeFilter:["hidden"] });
 
   // ── modellen: knop in de kop, keuze in een paneel ────
   function tekenModelknop() {
