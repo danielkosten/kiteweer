@@ -13,7 +13,7 @@
 
   var BOARDS = { twintip:1, directional:0.8 };
   var ARTHUR = KWU.modellen.filter(function (m) { return m.arthur; }).map(function (m) { return m.id; });
-  var st = { board:"twintip", kg:85, spot:KW.spots[0].id, dag:0, t:null, modellen:ARTHUR.slice(), mix:"ajk" };
+  var st = { board:"twintip", kg:85, spot:KW.spots[0].id, dag:0, t:null, modellen:ARTHUR.slice(), mix:"djk" };
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
@@ -96,23 +96,26 @@
   }
   function huidigeDag() { var ds = dagen(); return ds[Math.min(st.dag, ds.length-1)]; }
 
-  /* Alle aaneengesloten vensters goed/perfect, beste eerst (niveau, dan lengte). */
-  function vensters(us) {
+  /* Alle aaneengesloten rijdbare vensters (vanaf 12 kn, veilige hoek), beste eerst (niveau, dan lengte).
+     Label = het niveau dat het vaakst voorkomt; een venster van 14-14-14-15-14 heet dus "matig", maar
+     staat er wél: 14 kn met een grote kite is een sessie (Daniel, 2026-09-06). */
+  function vensters(us, zon) {
     var alle = [], nu = null;
     us.forEach(function (u) {
       var n = niveau(u);
-      if (n === "perfect" || n === "goed") { if (!nu) { nu = []; alle.push(nu); } nu.push(u); } else nu = null;
+      if (n === "perfect" || n === "goed" || n === "matig") { if (!nu) { nu = []; alle.push(nu); } nu.push(u); } else nu = null;
     });
     return alle.map(function (v) {
-      var kns = v.map(function (u) { return u.kn; });
-      var n = v.some(function (u) { return niveau(u) === "perfect"; }) ? "perfect" : "goed";
-      return { uren:v, n:n, lo:Math.min.apply(null,kns), hi:Math.max.apply(null,kns),
-        tekst: uurStr(v[0].t) + "–" + (+v[v.length-1].t.slice(11,13)+1) + ":00" };
+      var kns = v.map(function (u) { return u.kn; }), vls = v.map(function (u) { return u.vl; });
+      var tel = { perfect:0, goed:0, matig:0 }; v.forEach(function (u) { tel[niveau(u)]++; });
+      var n = ["perfect","goed","matig"].sort(function (a,b) { return tel[b] - tel[a] || RANG[a] - RANG[b]; })[0];
+      return { uren:v, n:n, lo:Math.min.apply(null,kns), hi:Math.max.apply(null,kns), vlLo:Math.min.apply(null,vls), vlHi:Math.max.apply(null,vls),
+        tekst: uurStr(v[0].t) + "–" + (zon && (+v[v.length-1].t.slice(11,13)+1) + ":00" > zon.onder ? zon.onder : (+v[v.length-1].t.slice(11,13)+1) + ":00") };
     }).sort(function (a,b) { return RANG[a.n] - RANG[b.n] || b.uren.length - a.uren.length; });
   }
   function top(us) { return us.reduce(function (a,u) { return u.kn > a.kn ? u : a; }); }
   function dagOordeel(d) {
-    var ws = vensters(d.uren), b = ws.length ? top(ws[0].uren) : top(d.uren);
+    var ws = vensters(d.uren, d.zon), b = ws.length ? top(ws[0].uren) : top(d.uren);
     return { ws:ws, v:ws[0] || null, b:b, n:ws.length ? ws[0].n : niveau(b) };
   }
   /* Gekozen uur; standaard het eerste kitebare uur van de dag, anders het hardste. */
@@ -185,7 +188,7 @@
 
   /* ── cijfer voor een venster: wind, stabiliteit, stroming, golven, lengte ── */
   function cijfer(v) {
-    var us = v.uren, n = us.length, pl = [], mn = [], start = v.n === "perfect" ? 8 : 7, score = start, som = [];
+    var us = v.uren, n = us.length, pl = [], mn = [], start = v.n === "perfect" ? 8 : v.n === "goed" ? 7 : 6, score = start, som = [];
     var tel = function (d, tekst) { score += d; som.push((d > 0 ? "+ " : "− ") + Math.abs(d).toString().replace(".", ",") + " " + tekst); (d > 0 ? pl : mn).push(tekst); };
     var vl = us.reduce(function (a,u) { return a + (u.vl - u.kn); }, 0) / n;
     if (vl >= 10) tel(-1.5, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vl < 6) tel(0.5, "stabiele wind");
@@ -198,7 +201,7 @@
     if (n >= 4) pl.push(n + " uur lang"); else if (n <= 1) tel(-1, "slechts 1 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     return { score:score, plus:pl, min:mn, som: start + " voor " + WOORD[v.n] + " wind" + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
-      een: (v.n === "perfect" ? "Perfecte wind" : "Goede wind") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
+      een: (v.n === "perfect" ? "Perfecte wind" : v.n === "goed" ? "Goede wind" : "Matige wind, grote kite") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
   }
 
   /* weercode -> icoon + woord */
@@ -301,7 +304,7 @@
       $("vensterlijst").innerHTML = o.ws.map(function (w, j) {
         var c = cijfer(w);
         return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' +
-          '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn</span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span>' +
+          '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn <small>vlagen ' + w.vlLo + "–" + w.vlHi + '</small></span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span>' +
           '<span class="vc">' + c.score.toString().replace(".", ",") + '</span><span class="veen">' + c.een + '</span><i class="info" aria-hidden="true">i</i></button>';
       }).join("");
       $("onderverdict").innerHTML = '<span class="flauw">' + zon + (i >= 3 ? " · indicatie, voorbij 2 dagen kijkt alleen het grove model" : "") + '</span>';
@@ -322,6 +325,7 @@
       return '<button type="button" class="dagkaart' + (i === st.dag ? " aan" : "") + '" data-dag="' + i + '" aria-pressed="' + (i === st.dag) +
         '" style="--tint:' + tint(o.n) + ';--tint-v:' + tintV(o.n) + '"><span class="dk">' + (i === 0 ? "vandaag" : dagStr(d.uren[0].t)) + '</span>' +
         '<span class="dv">' + (o.v ? o.v.lo + "–" + o.v.hi : o.b.kn) + ' <em>kn</em></span>' +
+        '<span class="dvl">vlagen ' + (o.v ? o.v.vlLo + "–" + o.v.vlHi : o.b.vl) + '</span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
         '<span class="ind">' + (function () { var u = d.uren[Math.floor(d.uren.length/2)], fijn = st.modellen.filter(function (m) { return MODEL[m].klasse === "regionaal" && KWU.spots[st.spot].modellen[m][KWU.spots[st.spot].uren.map(function (x) { return x.t; }).indexOf(u.t)]; }).length;
           return u.nModellen + " modellen" + (fijn ? ", " + fijn + " fijn" : " · alleen grof") + (i >= 3 ? " · indicatie" : ""); })() + '</span></button>';
@@ -393,6 +397,7 @@
       '<li class="p"><b>AJK-mix</b>: fijn en grof tellen samen 50/50 (Arthurs besluit, zodat vier fijne modellen niet vanzelf de meerderheid zijn). De gewichten ×1,16 … ×0,88 zijn gemeten: een jaar lang, 9 KNMI-stations, 78.000 vergelijkingen.</li>' +
       '<li class="p"><b>DJK-mix</b>: alleen fijn zolang het reikt (2 dagen), daarna grof.</li>' +
       '<li class="p"><b>Toets 30-08 t/m 05-09</b> tegen KNMI Hoek van Holland, 84 daglichturen: fijn-mix 1,3 kn te laag · AJK 3,0 te laag · grof 3,8 te laag · AROME-HD +0,8 (beste) · ECMWF 6,0 te laag. Maandag 31-08 09:00 mat het station 23 kn, geen model zat boven 20.</li>' +
+      '<li class="p"><b>Jouw sessies (Garmin)</b> tegen het station: zo 30-08 09:50–11:20 gemeten 19 kn (AROME 22–24, Harmonie 20–22, ECMWF 10–11) · ma 31-08 13:05–15:15 gemeten 23 (AROME 21–23, Harmonie 19–21, ECMWF 13) · vr 04-09 18:38–19:38 Wassenaar, gemeten 23–25 (AROME 22–24, Harmonie 19–20, ECMWF 13). Elke keer: fijn dichtbij, grof 8–10 kn te laag.</li>' +
       '<li class="m">Voorbij 2 dagen is alles grof: een indicatie, geen plan.</li>' +
       '<li class="m">Het model is niet de grootste fout. Zelfde model, andere plek: tot 5 kn verschil. Zandmotor heeft geen eigen meetstation; "nu gemeten" is Hoek van Holland, 12 km verderop.</li></ul>' +
       '<div class="rij"><span>modellen eens</span><span>gewogen deel dat zegt: genoeg wind uit een veilige hoek</span></div>' +
@@ -410,8 +415,8 @@
     var knop = function (id, lbl, set, title, mix) { return '<button type="button" data-mset="' + id + '" title="' + title + '" class="' + (zelfde(st.modellen, set) && (!mix || st.mix === mix) ? "on" : "") + '">' + lbl + '</button>'; };
     var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
     $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>voor deze dag doen er <b>' + nd + '</b> mee <button type="button" class="info" data-info="modellen" aria-label="uitleg modellen">i</button></span>' +
-      '<span class="mknoppen">' + knop("arthur", "AJK-mix", ARTHUR, "fijn en grof 50/50, gewogen op gemeten trefzekerheid; wordt vanzelf grof na 2 dagen", "ajk") +
-      knop("djk", "DJK-mix", ARTHUR, "fijn zolang het reikt (2 dagen), daarna grof; zat afgelopen week het dichtst bij de meting", "djk") +
+      '<span class="mknoppen">' + knop("djk", "DJK-mix (standaard)", ARTHUR, "fijn zolang het reikt (2 dagen), daarna grof; zat afgelopen week het dichtst bij de meting", "djk") +
+      knop("arthur", "AJK-mix", ARTHUR, "fijn en grof 50/50, gewogen op gemeten trefzekerheid", "ajk") +
       knop("fijn", "alleen fijn, 2 dagen", FIJN, "de vier 2 km-modellen, zoals Windfinder Superforecast") +
       knop("grof", "alleen grof, 7 dagen", GROF, "ECMWF, GFS, ICON wereldwijd") +
       knop("alle", "alle 8", alle, "ook ARPEGE, dat AJK niet gebruikt") + '</span></div>' +
