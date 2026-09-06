@@ -1,4 +1,4 @@
-# DAJK-tijd: de mix per dag vooruit, gemeten
+# DAJK-mix: de mix per dag vooruit, gemeten
 
 Voor Arthur. Wat de pagina sinds 2026-09-06 standaard doet, waarom, en hoe het gemeten is.
 Meetscript: `toets-horizon.mjs` in de root, `node toets-horizon.mjs`, geen sleutel nodig.
@@ -8,7 +8,7 @@ Meetscript: `toets-horizon.mjs` in de root, `node toets-horizon.mjs`, geen sleut
 Zelfde rekenkern als de site (gewogen middelste waarde, elk model één stem, jouw skill-gewichten
 binnen de fijne klasse). Drie toevoegingen, alle drie uit meting:
 
-| dag vooruit | wind = | verschil met DAJK |
+| dag vooruit | wind = | verschil met DAJK-oud |
 |---|---|---|
 | 0 – 2,5 | middelste van de 4 fijne modellen | geen |
 | 2,5 – 4 | middelste van ARPEGE + de 5 grove modellen, grof eerst **+3 kn** (Noordpier +4) | ARPEGE erbij, optelling |
@@ -54,23 +54,32 @@ Bias op de piers -0,2 tot -0,8: hij leest waar, krijgt dus geen optelling. HSS o
 Op De Kooy overschat hij vanaf dag 2 (+2,8). Aan het water is hij het beste model tot dag 3, ook
 beter dan de fijne mix op dag 1. In de mix telt hij één stem, gewicht 1, niets bijzonders.
 
-## Resultaat: huidig DAJK tegen DAJK-tijd
+## Resultaat: DAJK-oud tegen DAJK-mix (en AJK)
 
 HSS op "≥14 kn", daglicht, 60 dagen. 0 = gokken, 1 = perfect.
 
 | | d1 | d2 | d3 | d4 | d5 | d6 | d7 |
 |---|---|---|---|---|---|---|---|
-| Hoek van Holland, DAJK | 0,69 | 0,22 | 0,23 | 0,27 | 0,21 | 0,18 | 0,11 |
-| Hoek van Holland, DAJK-tijd | 0,69 | **0,61** | **0,58** | **0,48** | **0,51** | **0,43** | **0,29** |
-| IJmuiden, DAJK | 0,27 | 0,16 | 0,14 | 0,19 | 0,09 | 0,06 | 0,07 |
-| IJmuiden, DAJK-tijd | 0,27 | **0,62** | **0,60** | **0,56** | **0,50** | **0,34** | **0,31** |
-| De Kooy, DAJK | 0,57 | 0,62 | 0,51 | 0,42 | 0,35 | 0,20 | 0,08 |
-| De Kooy, DAJK-tijd (optelling 0) | 0,57 | 0,58 | 0,48 | 0,43 | 0,33 | 0,23 | 0,02 |
+| Hoek van Holland, AJK | 0,50 | 0,22 | 0,23 | 0,27 | 0,21 | 0,18 | 0,11 |
+| Hoek van Holland, DAJK-oud | 0,69 | 0,22 | 0,23 | 0,27 | 0,21 | 0,18 | 0,11 |
+| Hoek van Holland, DAJK-mix | 0,69 | **0,61** | **0,58** | **0,48** | **0,51** | **0,43** | **0,29** |
+| IJmuiden, AJK | 0,20 | 0,16 | 0,14 | 0,19 | 0,09 | 0,06 | 0,07 |
+| IJmuiden, DAJK-oud | 0,27 | 0,16 | 0,14 | 0,19 | 0,09 | 0,06 | 0,07 |
+| IJmuiden, DAJK-mix | 0,27 | **0,62** | **0,60** | **0,56** | **0,50** | **0,34** | **0,31** |
+| De Kooy, DAJK-oud | 0,57 | 0,62 | 0,51 | 0,42 | 0,35 | 0,20 | 0,08 |
+| De Kooy, DAJK-mix (optelling 0) | 0,57 | 0,58 | 0,48 | 0,43 | 0,33 | 0,23 | 0,02 |
+
+AJK en DAJK-oud zijn vanaf dag 2,5 hetzelfde getal: zodra de fijne modellen wegvallen blijft in
+beide alleen de grove middelste waarde over. Op dag 1 trekt AJK de fijne mix 1,2 kn omlaag door de
+grove helft. Wat de AJK-mix van de site bij Arthur écht doet (ensembles, kans-%) is hier niet
+gemeten: die leden zitten niet in het archief.
 
 Gemiddelde fout Hoek van Holland dag 2–6: 4,2–4,7 kn naar 2,6–3,5 kn. Bias van -3,8 naar -0,3.
 
 Eerlijk: op De Kooy wint het niets, iets meer vals alarm zelfs. De winst zit aan het water, waar
 wij kiten. Dag 1 is ongewijzigd, want daar reiken de fijne modellen. Dag 7 blijft slecht in alles.
+
+Besluiten met grond en status: `docs/adr/`.
 
 ## Wat je niet uit deze meting mag halen
 

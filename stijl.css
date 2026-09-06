@@ -141,6 +141,8 @@ main{padding-bottom:64px}
 @media(min-width:600px){.sheet{align-items:center}}
 
 .voet{border-top:1px solid var(--lijn);padding:20px 0 40px;font-size:13px;color:var(--zacht)}
+.voet p{margin:0 0 8px;max-width:70ch;line-height:1.5}
+.voet .dank{font-size:14px;color:var(--inkt)}
 .voet a{color:var(--zacht);text-decoration:underline;text-underline-offset:3px}
 .voet .dot{margin:0 8px;opacity:.5}
 
@@ -370,7 +372,12 @@ details.modellen>div{margin-top:12px}
 /* label boven de kaart, niet erover */
 .scene-label{position:static;background:var(--kaart);border-radius:0;padding:12px 18px 10px;flex-direction:row;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--lijn-2)}
 .scene-label b{font-size:24px}
-.sheet-in{max-height:88vh;overflow:auto}
+/* paneel: kop blijft staan, alleen de inhoud scrolt; op mobiel bovenaan zodat het toetsenbord niets wegschuift */
+.sheet-in{max-height:85dvh;display:flex;flex-direction:column;overflow:hidden}
+#sheet-b{overflow:auto;min-height:0;-webkit-overflow-scrolling:touch}
+@media(max-width:600px){.sheet{align-items:flex-start;padding:10px}.sheet-in{padding:18px 16px}}
+#spotzoek{font-size:16px}
+.spotlijst{max-height:none}
 .laadtekst{padding:14px 0}
 .filter{max-width:48%}
 .filter b,.filter span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
