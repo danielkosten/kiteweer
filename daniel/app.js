@@ -3,7 +3,7 @@
    Uur-voor-uur, zon, golven uit uur.js (Open-Meteo, KNMI Harmonie eerst).
    Stroming, spreiding en metingen uit data.js (3-uursblokken). */
 
-(function () {
+window.KWU_READY.then(function () {
   "use strict";
 
   var RIJDBAAR = KW.rijdbaar || 12;
@@ -295,7 +295,7 @@
   // ── nu gemeten ───────────────────────────────────────
   function tekenNu() {
     var s = spot();
-    if (!s.metingen || !s.metingen.length || st.dag !== 0) { $("nu").hidden = true; return; }
+    if (!s.metingen || !s.metingen.length || st.dag !== 0 || Date.now() - new Date(s.metingen[0].ts).getTime() > 3*3600e3) { $("nu").hidden = true; return; }
     $("nu").hidden = false;
     $("nu").innerHTML = '<div class="nu-kop"><span class="nu-dot" aria-hidden="true"></span><b id="nu-h">Nu gemeten</b>' +
       '<span>' + new Date(s.metingen[0].ts).toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"}) + (s.verwachtNu != null ? " · model zei " + s.verwachtNu + " kn" : "") + ' · <a href="https://windmeting.nl" target="_blank" rel="noopener">live op windmeting.nl</a></span></div>' +
@@ -334,17 +334,24 @@
 
   // ── welke dag ────────────────────────────────────────
   function tekenWeek() {
-    var ds = dagen();
-    $("weekstrip").innerHTML = ds.map(function (d, i) {
+    var ds = dagen(), sp = KWU.spots[st.spot], tijden = sp.uren.map(function (x) { return x.t; });
+    var fijnBij = function (d) { var u = d.uren[Math.floor(d.uren.length/2)];
+      return st.modellen.filter(function (m) { return MODEL[m].klasse === "regionaal" && sp.modellen[m][tijden.indexOf(u.t)]; }).length; };
+    var kaarten = ds.map(function (d, i) {
       var o = dagOordeel(d);
       return '<button type="button" class="dagkaart' + (i === st.dag ? " aan" : "") + '" data-dag="' + i + '" aria-pressed="' + (i === st.dag) +
         '" style="--tint:' + tint(o.n) + ';--tint-v:' + tintV(o.n) + '"><span class="dk">' + (i === 0 ? "vandaag" : dagStr(d.uren[0].t)) + '</span>' +
         '<span class="dv">' + (o.v ? o.v.lo + "–" + o.v.hi : o.b.kn) + ' <em>kn</em></span>' +
         '<span class="dvl">vlagen ' + (o.v ? o.v.vlLo + "–" + o.v.vlHi : o.b.vl) + '</span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
-        '<span class="ind">' + (function () { var u = d.uren[Math.floor(d.uren.length/2)], fijn = st.modellen.filter(function (m) { return MODEL[m].klasse === "regionaal" && KWU.spots[st.spot].modellen[m][KWU.spots[st.spot].uren.map(function (x) { return x.t; }).indexOf(u.t)]; }).length;
-          return u.nModellen + " modellen" + (fijn ? ", " + fijn + " fijn" : " · alleen grof") + (i >= 3 ? " · indicatie" : ""); })() + '</span></button>';
-    }).join("") + (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
+        '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : "") + '</span></button>';
+    });
+    var nauw = ds.map(fijnBij), split = nauw.findIndex(function (n) { return n === 0; });
+    if (split < 0) split = ds.length;
+    var groep = function (kop, sub, items) { return items.length ? '<div class="dgroep"><h4>' + kop + ' <i>' + sub + '</i></h4><div class="weekstrip">' + items.join("") + '</div></div>' : ""; };
+    $("weekstrip").innerHTML = groep("Nauwkeurig", "fijne modellen, 2 km", kaarten.slice(0, split)) +
+      groep("Indicatie", "alleen grove modellen, 7–25 km", kaarten.slice(split)) +
+      (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
   }
 
   // ── uur voor uur: één dag, tabel zoals Windfinder ────
@@ -460,6 +467,6 @@
 
   $("kg").value = st.kg;
   document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
-  $("ververst").textContent = "ververst " + new Date(KWU.gegenereerd).toLocaleString("nl-NL");
+  $("ververst").textContent = (KWU.live ? "live opgehaald " : "gebundeld, niet live: ") + new Date(KWU.gegenereerd).toLocaleString("nl-NL");
   teken();
-})();
+});
