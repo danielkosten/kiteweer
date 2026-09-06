@@ -307,3 +307,4 @@ main{padding-bottom:64px}
 .mkop>span:not(.mknoppen){line-height:1.4}
 .mkop>span:not(.mknoppen) b{font-size:inherit;letter-spacing:0;text-transform:none;color:var(--inkt)}
 .dagkaart.leeg{--tint:var(--lijn);--tint-v:var(--papier);color:var(--flauw);cursor:default}
+.dagkaart[data-grof]{border-style:dashed}

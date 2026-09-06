@@ -318,7 +318,8 @@
         '" style="--tint:' + tint(o.n) + ';--tint-v:' + tintV(o.n) + '"><span class="dk">' + (i === 0 ? "vandaag" : dagStr(d.uren[0].t)) + '</span>' +
         '<span class="dv">' + (o.v ? o.v.lo + "–" + o.v.hi : o.b.kn) + ' <em>kn</em></span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
-        '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (i >= 3 ? ' · indicatie' : '') + '</span></button>';
+        '<span class="ind">' + (function () { var u = d.uren[Math.floor(d.uren.length/2)], fijn = st.modellen.filter(function (m) { return MODEL[m].klasse === "regionaal" && KWU.spots[st.spot].modellen[m][KWU.spots[st.spot].uren.map(function (x) { return x.t; }).indexOf(u.t)]; }).length;
+          return u.nModellen + " modellen" + (fijn ? ", " + fijn + " fijn" : " · alleen grof") + (i >= 3 ? " · indicatie" : ""); })() + '</span></button>';
     }).join("") + (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
   }
 
@@ -386,11 +387,11 @@
     var GROF = KWU.modellen.filter(function (m) { return m.klasse === "globaal" && m.arthur; }).map(function (m) { return m.id; });
     var knop = function (id, lbl, set, title) { return '<button type="button" data-mset="' + id + '" title="' + title + '" class="' + (zelfde(st.modellen, set) ? "on" : "") + '">' + lbl + '</button>'; };
     var d = huidigeDag(), nd = d.uren[Math.floor(d.uren.length/2)].nModellen;
-    $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>De wind hierboven is de gewogen middelste waarde van deze modellen. Fijne modellen (2 km) reiken 2 dagen en vallen daarna vanzelf weg; verder kijkt alleen het grove. Voor de gekozen dag doen er <b>' + nd + '</b> mee.</span>' +
-      '<span class="mknoppen">' + knop("arthur", "Arthur (aanbevolen)", ARTHUR, "fijn + grof, gewogen op gemeten trefzekerheid; wordt vanzelf grof na 2 dagen") +
+    $("modellen").innerHTML = '<div class="mkop"><b>Windmodellen</b><span>De wind hierboven is de gewogen middelste waarde van de aangevinkte modellen (minstens één). Fijne modellen (2 km) reiken 2 dagen en vallen daarna vanzelf weg; verder kijkt alleen het grove. Voor de gekozen dag doen er <b>' + nd + '</b> mee.</span>' +
+      '<span class="mknoppen">' + knop("arthur", "AJK-mix (aanbevolen)", ARTHUR, "fijn + grof, gewogen op gemeten trefzekerheid; wordt vanzelf grof na 2 dagen") +
       knop("fijn", "alleen fijn, 2 dagen", FIJN, "de vier 2 km-modellen, zoals Windfinder Superforecast") +
       knop("grof", "alleen grof, 7 dagen", GROF, "ECMWF, GFS, ICON wereldwijd") +
-      knop("alle", "alle", alle, "") + knop("geen", "geen", [], "terug naar de basisreeks") + '</span></div>' +
+      knop("alle", "alle 8", alle, "ook ARPEGE, dat AJK niet gebruikt") + '</span></div>' +
       '<div class="mchips">' + KWU.modellen.map(function (m) {
         var aan = st.modellen.indexOf(m.id) >= 0;
         return '<button type="button" class="mchip' + (aan ? " aan" : "") + '" data-model="' + m.id + '" aria-pressed="' + aan + '">' + esc(m.naam) + '<small>' + m.dagen + ' dag</small></button>'; }).join("") + '</div>';
@@ -413,7 +414,7 @@
         : ARTHUR.slice();
       st.t = null; return teken(); }
     var mc = e.target.closest("[data-model]");
-    if (mc) { var id = mc.dataset.model, ix = st.modellen.indexOf(id); if (ix >= 0) st.modellen.splice(ix,1); else st.modellen.push(id); st.t = null; return teken(); }
+    if (mc) { var id = mc.dataset.model, ix = st.modellen.indexOf(id); if (ix >= 0) { if (st.modellen.length > 1) st.modellen.splice(ix,1); } else st.modellen.push(id); st.t = null; return teken(); }
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
     var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; return teken(); }
