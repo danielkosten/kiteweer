@@ -7,3 +7,4 @@ Statische pagina, Nederlands, geen build. Lees `README.md` voor de relatie met `
 - Pages serveert vanaf de root van `main`. Geen mappen verplaatsen zonder de live URL te checken.
 - Wijzigingen ook naar `../windcalendar` tak `daniel-view`, map `static/daniel/`, dan PR naar Arthur.
 - Code en commentaar in het Nederlands, geen em-dash.
+- De look van deze pagina is Daniels huisstijl: vastgelegd in `/Users/danielunravel/Code/daniel-unleashed/plugins/core-design/skills/house-style/SKILL.md`. Nieuwe stijl hier = ook daar bijwerken.

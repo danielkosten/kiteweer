@@ -494,7 +494,7 @@ window.KWU_READY.then(function () {
     var c = cijfer(w);
     $("sheet-t").textContent = dagStr(w.uren[0].t) + " " + w.tekst + " · " + c.score.toString().replace(".", ",");
     $("sheet-b").innerHTML = '<p class="sheet-een">' + c.een + '</p><ul class="redenen">' +
-      c.plus.map(function (p) { return '<li class="p">' + p + '</li>'; }).join("") + c.min.map(function (p) { return '<li class="m">' + p + '</li>'; }).join("") + '</ul>' +
+      c.plus.map(function (p) { return '<li class="p">' + vet(p) + '</li>'; }).join("") + c.min.map(function (p) { return '<li class="m">' + vet(p) + '</li>'; }).join("") + '</ul>' +
       [["wind", w.lo + "–" + w.hi + " kn uit " + kompas(top(w.uren).dir)], ["vlagen tot", Math.max.apply(null, w.uren.map(function (u) { return u.vl; })) + " kn"],
        ["duur", w.uren.length + " uur"], ["kite", kiteBereik(w.lo, w.hi, vlMax(w.uren)) + " bij " + st.kg + " kg, " + st.board + ". Maat op de gemiddelde wind; vlagen tot " + vlMax(w.uren) + " kn" + (vlMax(w.uren) / w.hi >= 1.5 ? ", dat is 1,5× de wind: neem de kleine" : ", dat kan de kite hebben")],
        ["cijfer", c.som],
