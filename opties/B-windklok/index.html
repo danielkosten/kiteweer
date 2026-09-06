@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<!-- PROTOTYPE — throwaway, niet productieklaar. Richting B: "De Windklok". -->
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Windklok — kiteweer</title>
+<link rel="stylesheet" href="../../tokens.css">
+<style>
+  body{min-height:100vh;padding:0}
+  header{padding:var(--pad) var(--pad) 0;display:flex;flex-wrap:wrap;gap:var(--gap);align-items:center;justify-content:space-between}
+  h1{font-size:1.05rem;font-weight:600;margin:0;letter-spacing:.01em}
+  .toggle{display:flex;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px}
+  .toggle button{padding:7px 14px;border-radius:999px;font-size:.82rem;color:var(--fg-2)}
+  .toggle button[aria-pressed="true"]{background:var(--surface-2);color:var(--fg)}
+  main{display:flex;flex-wrap:wrap;gap:24px;padding:var(--pad);align-items:flex-start;justify-content:center;max-width:960px;margin:0 auto}
+  .dial-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;flex:1 1 380px;max-width:420px}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .spot-arc{cursor:pointer;transition:filter var(--t)}
+  .spot-arc:focus-visible{outline:none}
+  .spot-arc:focus-visible .arc-line{filter:drop-shadow(0 0 4px var(--fg))}
+  .needle-line{stroke:var(--fg);stroke-width:3;stroke-linecap:round;transition:transform 420ms cubic-bezier(.2,.7,.3,1)}
+  .needle-tip{fill:var(--fg)}
+  .dial-center{fill:var(--surface-2);stroke:var(--line)}
+  .compass-label{fill:var(--fg-3);font:600 11px var(--f);text-anchor:middle}
+  .arc-hint{min-height:1.2em;text-align:center;font-size:.82rem;color:var(--fg-2);margin-top:10px}
+  .arc-hint b{color:var(--fg)}
+  .scrubber{margin-top:16px}
+  .scrubber label{display:block;font-size:.78rem;color:var(--fg-2);margin-bottom:6px}
+  .scrub-row{display:flex;align-items:center;gap:10px}
+  input[type=range]{flex:1;accent-color:var(--go)}
+  #nowBtn{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 10px;font-size:.75rem;color:var(--fg-2)}
+  #nowBtn:hover{color:var(--fg)}
+  .time-readout{text-align:center;margin-top:8px;font-family:var(--f-mono);font-size:.9rem;font-variant-numeric:tabular-nums;color:var(--fg)}
+  .status-col{flex:1 1 260px;max-width:320px;display:flex;flex-direction:column;gap:10px}
+  .spot-row{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:10px 12px}
+  .dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+  .spot-row .name{font-weight:600;font-size:.9rem}
+  .spot-row .word{font-size:.78rem;color:var(--fg-2)}
+  .spot-row.lit{border-color:var(--go-dim)}
+  .spot-row.aflandig{border-color:#5a2a2a}
+  .spot-row .kn{margin-left:auto;text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+  .spot-row .kn .knots{font-size:1.1rem;font-weight:700;color:var(--fg)}
+  .spot-row .kn .kite{display:block;font-size:.72rem;color:var(--fg-2)}
+  .spot-row.no-kite .kn{color:var(--fg-3)}
+  .summary{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:12px;font-size:.85rem;color:var(--fg-2);line-height:1.5}
+  .summary b{color:var(--fg);font-weight:600}
+  .legend-note{font-size:.72rem;color:var(--fg-3);text-align:center;margin-top:2px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Windklok</h1>
+  <div class="toggle" role="group" aria-label="Databron">
+    <button id="btnLive" type="button" aria-pressed="true">Deze week</button>
+    <button id="btnDemo" type="button" aria-pressed="false"></button>
+  </div>
+</header>
+
+<main>
+  <section class="dial-card">
+    <svg viewBox="0 0 300 300" role="img" aria-labelledby="dialTitle">
+      <title id="dialTitle">Kompas met windrichting en veilige zones per spot</title>
+      <g id="ringGroup"></g>
+      <circle class="dial-center" cx="150" cy="150" r="46" stroke-width="1"></circle>
+      <g class="needle" id="needle">
+        <line class="needle-line" x1="150" y1="150" x2="150" y2="62"></line>
+        <polygon class="needle-tip" points="150,52 144,68 156,68"></polygon>
+      </g>
+      <text class="compass-label" x="150" y="14">N</text>
+      <text class="compass-label" x="286" y="155">O</text>
+      <text class="compass-label" x="150" y="296">Z</text>
+      <text class="compass-label" x="14" y="155">W</text>
+    </svg>
+    <p class="arc-hint" id="arcHint" aria-live="polite">&nbsp;</p>
+
+    <div class="scrubber">
+      <label for="scrub" id="scrubLabel">Tijd</label>
+      <div class="scrub-row">
+        <input type="range" id="scrub" min="0" max="0" value="0" step="1">
+        <button id="nowBtn" type="button">Nu</button>
+      </div>
+      <div class="time-readout" id="timeReadout">—</div>
+    </div>
+  </section>
+
+  <section class="status-col" aria-live="polite">
+    <div id="rows"></div>
+    <div class="summary" id="summary"></div>
+    <p class="legend-note">Kleur van de ring = spot. Woord bij elke stip is altijd leidend, nooit alleen kleur.</p>
+  </section>
+</main>
+
+<script src="../../data.js"></script>
+<script>
+(function(){
+  "use strict";
+  var KW = window.KW;
+  var spots = KW.spots;
+  var rider = KW.rider;
+  var CX = 150, CY = 150;
+
+  var demoBtn = document.getElementById("btnDemo");
+  demoBtn.textContent = "Demo: winddraaier";
+  demoBtn.title = KW.demoLabel;
+
+  var ringColors = {
+    zandmotor: "var(--sea)",
+    wassenaar: "var(--sand)",
+    noordpier: "var(--info)"
+  };
+  var ringRadii = { zandmotor: 138, wassenaar: 118, noordpier: 98 };
+
+  var mode = "live"; // "live" | "demo"
+  var idx = 0;
+
+  function blocksFor(spot){ return mode === "live" ? spot.blokken : spot.demo; }
+  function currentLen(){ return blocksFor(spots[0]).length; }
+
+  function angleToXY(r, deg){
+    var rad = deg * Math.PI / 180;
+    return { x: CX + r * Math.sin(rad), y: CY - r * Math.cos(rad) };
+  }
+
+  function arcPath(r, from, to){
+    var sweep = (to - from + 360) % 360;
+    if (sweep === 0) sweep = 360;
+    var large = sweep > 180 ? 1 : 0;
+    var p1 = angleToXY(r, from);
+    var p2 = angleToXY(r, from + sweep);
+    return "M " + p1.x.toFixed(2) + " " + p1.y.toFixed(2) +
+      " A " + r + " " + r + " 0 " + large + " 1 " + p2.x.toFixed(2) + " " + p2.y.toFixed(2);
+  }
+
+  function circularMeanDeg(degs){
+    var sx = 0, sy = 0;
+    degs.forEach(function(d){
+      var rad = d * Math.PI / 180;
+      sx += Math.sin(rad); sy += Math.cos(rad);
+    });
+    var deg = Math.atan2(sx, sy) * 180 / Math.PI;
+    return (deg + 360) % 360;
+  }
+
+  function kiteSize(windKn){
+    var m2 = 2.2 * rider.gewicht / windKn * rider.boards.twintip;
+    return Math.round(m2 * 2) / 2;
+  }
+
+  function statusFor(spot){
+    var block = blocksFor(spot)[idx];
+    if (!block) return { key: "geen-data", block: null };
+    if (block.aflandig) return { key: "aflandig", block: block };
+    if (block.p50 < 14) return { key: "rustig", block: block };
+    return { key: "veilig", block: block };
+  }
+
+  var dayNames = ["zo","ma","di","wo","do","vr","za"];
+  function formatTime(t){
+    var parts = t.split("T");
+    var d = new Date(parts[0] + "T" + parts[1] + ":00");
+    return dayNames[d.getDay()] + " " + parts[1];
+  }
+
+  // --- ringen tekenen (eenmalig, kleur/venstergeometrie verandert niet) ---
+  var ringGroup = document.getElementById("ringGroup");
+  var arcEls = {}; // spotId -> [{el, from, to}]
+
+  spots.forEach(function(spot){
+    var r = ringRadii[spot.id];
+    var color = ringColors[spot.id];
+    arcEls[spot.id] = [];
+    spot.vensters.forEach(function(v, i){
+      var g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      g.setAttribute("class", "spot-arc");
+      g.setAttribute("tabindex", "0");
+      g.setAttribute("role", "button");
+      g.setAttribute("aria-label", spot.naam + ": veilig van " + v[0] + "° tot " + v[1] + "°");
+
+      var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      path.setAttribute("class", "arc-line");
+      path.setAttribute("d", arcPath(r, v[0], v[1]));
+      path.setAttribute("fill", "none");
+      path.setAttribute("stroke", color);
+      path.setAttribute("stroke-linecap", "round");
+      g.appendChild(path);
+      ringGroup.appendChild(g);
+      arcEls[spot.id].push({ el: path, from: v[0], to: v[1] });
+
+      function showHint(){
+        document.getElementById("arcHint").innerHTML =
+          "<b>" + spot.naam + "</b> — veilig " + v[0] + "°–" + v[1] + "°" + (spot.note ? " · " + spot.note : "");
+      }
+      function hideHint(){ document.getElementById("arcHint").innerHTML = "&nbsp;"; }
+      g.addEventListener("mouseenter", showHint);
+      g.addEventListener("mouseleave", hideHint);
+      g.addEventListener("focus", showHint);
+      g.addEventListener("blur", hideHint);
+    });
+  });
+
+  var needle = document.getElementById("needle");
+  var scrub = document.getElementById("scrub");
+  var timeReadout = document.getElementById("timeReadout");
+  var scrubLabel = document.getElementById("scrubLabel");
+  var rowsEl = document.getElementById("rows");
+  var summaryEl = document.getElementById("summary");
+
+  var statusWords = {
+    "veilig": "veilig",
+    "rustig": "rustig",
+    "aflandig": "aflandig",
+    "geen-data": "geen data"
+  };
+
+  function render(){
+    var blocks = spots.map(function(s){ return blocksFor(s)[idx]; });
+    var dirs = blocks.filter(Boolean).map(function(b){ return b.dir; });
+    var avgDir = dirs.length ? circularMeanDeg(dirs) : 0;
+    needle.style.transform = "rotate(" + avgDir + "deg)";
+    needle.setAttribute("transform-origin", CX + " " + CY);
+    needle.style.transformOrigin = CX + "px " + CY + "px";
+
+    timeReadout.textContent = blocks[0] ? formatTime(blocks[0].t) + "  ·  wind uit " + Math.round(avgDir) + "°" : "—";
+
+    rowsEl.innerHTML = "";
+    var litNames = [];
+    var allCalm = true, anyOffshore = false;
+
+    spots.forEach(function(spot){
+      var st = statusFor(spot);
+      var color = ringColors[spot.id];
+      var row = document.createElement("div");
+      row.className = "spot-row";
+
+      var arcs = arcEls[spot.id];
+      arcs.forEach(function(a){
+        if (st.key === "aflandig"){
+          a.el.setAttribute("stroke", "var(--no)");
+          a.el.setAttribute("stroke-width", "9");
+          a.el.setAttribute("stroke-opacity", "0.9");
+          a.el.style.filter = "none";
+        } else if (st.key === "veilig"){
+          a.el.setAttribute("stroke", color);
+          a.el.setAttribute("stroke-width", "15");
+          a.el.setAttribute("stroke-opacity", "1");
+          a.el.style.filter = "drop-shadow(0 0 6px " + color + ")";
+        } else {
+          a.el.setAttribute("stroke", color);
+          a.el.setAttribute("stroke-width", "9");
+          a.el.setAttribute("stroke-opacity", "0.4");
+          a.el.style.filter = "none";
+        }
+      });
+
+      var dot = document.createElement("span");
+      dot.className = "dot";
+      dot.style.background = st.key === "aflandig" ? "var(--no)" : color;
+
+      var name = document.createElement("span");
+      name.className = "name";
+      name.textContent = spot.naam;
+
+      var word = document.createElement("span");
+      word.className = "word";
+      word.textContent = statusWords[st.key] + (st.block && st.block.vlagerig ? " · vlagerig" : "");
+
+      row.appendChild(dot);
+      var nameWrap = document.createElement("span");
+      nameWrap.style.display = "flex";
+      nameWrap.style.flexDirection = "column";
+      nameWrap.appendChild(name);
+      nameWrap.appendChild(word);
+      row.appendChild(nameWrap);
+
+      if (st.key === "veilig" && st.block){
+        row.classList.add("lit");
+        litNames.push(spot.naam);
+        allCalm = false;
+        var kn = document.createElement("span");
+        kn.className = "kn";
+        kn.innerHTML = "<span class='knots'>" + Math.round(st.block.p50) + " kn</span>" +
+          "<span class='kite'>" + kiteSize(st.block.p50) + " m² twintip</span>";
+        row.appendChild(kn);
+      } else {
+        row.classList.add("no-kite");
+        if (st.key === "aflandig"){ row.classList.add("aflandig"); anyOffshore = true; allCalm = false; }
+        var kn2 = document.createElement("span");
+        kn2.className = "kn";
+        kn2.textContent = st.block ? Math.round(st.block.p50) + " kn" : "";
+        row.appendChild(kn2);
+      }
+
+      rowsEl.appendChild(row);
+    });
+
+    if (litNames.length){
+      summaryEl.innerHTML = "<b>" + litNames.join(" + ") + "</b> haalbaar op dit moment.";
+    } else if (anyOffshore && allCalm === false){
+      summaryEl.innerHTML = "Alle spots <b>aflandig</b> of te weinig wind op dit moment. Niet gaan.";
+    } else {
+      summaryEl.innerHTML = "<b>Rustig</b> — onder de 14 kn op alle spots. Mooi voor een pauze, niet voor kiten.";
+    }
+  }
+
+  function setupScrubForMode(){
+    var len = currentLen();
+    scrub.max = String(len - 1);
+    idx = mode === "demo" ? 0 : findClosestToNow();
+    scrub.value = String(idx);
+    scrubLabel.textContent = mode === "live" ? "Tijd (komende 6 dagen)" : "Tijd — " + KW.demoLabel;
+    render();
+  }
+
+  function findClosestToNow(){
+    var blocks = blocksFor(spots[0]);
+    var now = Date.now();
+    var best = 0, bestDiff = Infinity;
+    blocks.forEach(function(b, i){
+      var t = new Date(b.t.replace("T", "T") + ":00").getTime();
+      var diff = Math.abs(t - now);
+      if (diff < bestDiff){ bestDiff = diff; best = i; }
+    });
+    return best;
+  }
+
+  scrub.addEventListener("input", function(){
+    idx = parseInt(scrub.value, 10);
+    render();
+  });
+
+  document.getElementById("nowBtn").addEventListener("click", function(){
+    if (mode !== "live"){
+      mode = "live";
+      document.getElementById("btnLive").setAttribute("aria-pressed", "true");
+      document.getElementById("btnDemo").setAttribute("aria-pressed", "false");
+    }
+    setupScrubForMode();
+  });
+
+  document.getElementById("btnLive").addEventListener("click", function(){
+    mode = "live";
+    document.getElementById("btnLive").setAttribute("aria-pressed", "true");
+    document.getElementById("btnDemo").setAttribute("aria-pressed", "false");
+    setupScrubForMode();
+  });
+  document.getElementById("btnDemo").addEventListener("click", function(){
+    mode = "demo";
+    document.getElementById("btnLive").setAttribute("aria-pressed", "false");
+    document.getElementById("btnDemo").setAttribute("aria-pressed", "true");
+    setupScrubForMode();
+  });
+
+  setupScrubForMode();
+})();
+</script>
+</body>
+</html>

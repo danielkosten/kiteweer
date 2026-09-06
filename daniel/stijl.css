@@ -1,0 +1,291 @@
+/* Kiteweer — warm, redactioneel, licht. Kleur betekent iets of hij staat er niet. */
+
+:root{
+  --papier:#FBF8F4;
+  --kaart:#FFFFFF;
+  --inkt:#17130F;
+  --zacht:#6B6157;
+  --flauw:#989086;
+  --lijn:#E7DFD5;
+  --lijn-2:#F1EBE3;
+
+  /* vijf niveaus, één kleur per niveau */
+  --perfect:#0E7A54;
+  --goed:#3E9B6E;
+  --matig:#C08315;
+  --weinig:#A9A096;
+  --aflandig:#CE4A1F;
+
+  --perfect-v:#E3F3EC;
+  --goed-v:#EAF5EF;
+  --matig-v:#FBF0DA;
+  --weinig-v:#F2EEE9;
+  --aflandig-v:#FBE7DF;
+
+  --r:16px; --r-s:10px; --r-pil:999px;
+  --kop:"Bricolage Grotesque",Georgia,serif;
+  --tekst:"Albert Sans",system-ui,-apple-system,sans-serif;
+  --t:170ms cubic-bezier(.2,.8,.3,1);
+  --schaduw:0 1px 2px rgba(23,19,15,.05), 0 8px 24px -12px rgba(23,19,15,.12);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--papier);color:var(--inkt);
+  font-family:var(--tekst);font-weight:500;font-size:16px;line-height:1.5;
+  -webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--kop);font-weight:800;letter-spacing:-.025em;margin:0}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+a{color:var(--inkt)}
+:focus-visible{outline:2.5px solid var(--inkt);outline-offset:2px;border-radius:5px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.wrap{max-width:900px;margin:0 auto;padding:0 20px}
+main{padding-bottom:64px}
+
+/* ── kop ─────────────────────────────────────────── */
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:22px 0 16px;
+  border-bottom:1px solid var(--lijn)}
+.merk{display:flex;align-items:center;gap:9px;margin-right:auto}
+.merk h1{font-size:20px;letter-spacing:-.03em}
+.mark{width:22px;height:22px;border-radius:50%;flex:none;border:2.5px solid var(--inkt);
+  position:relative}
+.mark::after{content:"";position:absolute;inset:4px;border-radius:50%;background:var(--inkt)}
+
+.seg{display:inline-flex;border:1px solid var(--lijn);border-radius:var(--r-pil);
+  padding:3px;gap:2px;background:var(--kaart)}
+.seg button{padding:7px 15px;border-radius:var(--r-pil);font-weight:700;font-size:14px;
+  color:var(--zacht);transition:background var(--t),color var(--t);white-space:nowrap}
+.seg button:hover{color:var(--inkt)}
+.seg button.on{background:var(--inkt);color:var(--papier)}
+
+/* ── nu gemeten ──────────────────────────────────── */
+.nu{margin:20px 0 0;padding:16px 18px;background:var(--kaart);border:1px solid var(--lijn);
+  border-radius:var(--r);box-shadow:var(--schaduw)}
+.nu-kop{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.nu-dot{width:8px;height:8px;border-radius:50%;background:var(--perfect);
+  animation:puls 2.4s infinite}
+@keyframes puls{70%{box-shadow:0 0 0 9px rgba(14,122,84,0)}100%{box-shadow:0 0 0 0 rgba(14,122,84,0)}}
+.nu-kop b{font-size:12px;letter-spacing:.13em;text-transform:uppercase}
+.nu-kop span{font-size:12.5px;color:var(--zacht);margin-left:auto}
+.stations{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:2px 18px}
+.stn{display:flex;align-items:baseline;gap:8px;padding:5px 0;border-bottom:1px dotted var(--lijn-2)}
+.stn:last-child{border-bottom:0}
+.stn .snaam{font-size:13.5px;color:var(--zacht);flex:1;min-width:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stn .swind{font-family:var(--kop);font-size:17px}
+.stn .sdir{font-size:12px;color:var(--zacht);display:inline-flex;align-items:center;gap:3px}
+.stn.hoofd .swind{color:var(--perfect)}
+
+/* ── hero ────────────────────────────────────────── */
+.hero{margin:16px 0 0;padding:26px;background:var(--kaart);border:1px solid var(--lijn);
+  border-radius:var(--r);box-shadow:var(--schaduw);border-left:5px solid var(--tint,var(--lijn))}
+.kicker{margin:0 0 3px;font-size:12px;font-weight:700;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--tint,var(--zacht))}
+.verdict{font-size:clamp(30px,6vw,46px);line-height:1.02;margin-bottom:4px}
+.onder-verdict{color:var(--zacht);font-size:15px}
+.groot-rij{display:flex;gap:26px;flex-wrap:wrap;margin-top:18px;align-items:flex-start}
+.meet{min-width:0}
+.meet .mv{font-family:var(--kop);font-size:34px;line-height:1;white-space:nowrap}
+.meet .ml{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--zacht);margin-top:5px}
+.meet .mv em{font-style:normal;font-size:17px;color:var(--zacht)}
+.cta-rij{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}
+.cta{display:inline-flex;align-items:center;gap:7px;background:var(--inkt);color:var(--papier);
+  padding:12px 20px;border-radius:var(--r-pil);font-weight:700;font-size:14.5px;
+  text-decoration:none;transition:opacity var(--t)}
+.cta:hover{opacity:.86}
+.cta.ghost{background:transparent;border:1px solid var(--lijn);color:var(--inkt)}
+.cta.ghost:hover{background:var(--lijn-2);opacity:1}
+
+/* ── secties ─────────────────────────────────────── */
+.sec{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--zacht);
+  margin:34px 0 12px;font-family:var(--tekst);font-weight:700}
+.sec i{font-style:normal;letter-spacing:0;text-transform:none;font-weight:500;opacity:.85}
+
+/* ── kit ─────────────────────────────────────────── */
+.kit{background:var(--kaart);border:1px solid var(--lijn);border-radius:var(--r);padding:18px}
+.kitrij{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;
+  padding-bottom:16px;border-bottom:1px solid var(--lijn-2);margin-bottom:16px}
+.veld{display:flex;flex-direction:column;gap:7px}
+.veld>span:first-child,.veld>label{font-size:11.5px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--zacht)}
+.invoer{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--lijn);
+  border-radius:var(--r-pil);padding:7px 14px;background:var(--papier)}
+.invoer input{width:52px;background:none;border:0;color:var(--inkt);font:700 16px var(--tekst)}
+.invoer b{font-size:13px;color:var(--zacht);font-weight:700}
+.kites{display:flex;gap:8px;flex-wrap:wrap}
+.kitepil{border:1px solid var(--lijn);border-radius:var(--r-pil);padding:7px 14px;
+  font-weight:700;font-size:14px;background:var(--papier);transition:all var(--t)}
+.kitepil.aan{background:var(--inkt);color:var(--papier);border-color:var(--inkt)}
+.advies{display:flex;gap:12px;flex-wrap:wrap}
+.kadvies{flex:1;min-width:140px;border:1px solid var(--lijn);border-radius:var(--r-s);
+  padding:13px 15px;background:var(--tint-v);border-left:4px solid var(--tint)}
+.kadvies b{font-family:var(--kop);font-size:24px;display:block}
+.kadvies span{font-size:12.5px;color:var(--zacht);display:block;margin-top:2px}
+.kadvies .kwan{font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--tint);margin-bottom:5px;display:block}
+
+/* ── detail ──────────────────────────────────────── */
+.sheet{position:fixed;inset:0;background:rgba(23,19,15,.42);display:flex;
+  align-items:flex-end;justify-content:center;z-index:50;padding:14px}
+.sheet[hidden]{display:none}
+.sheet-in{background:var(--kaart);border-radius:var(--r);padding:24px;max-width:420px;
+  width:100%;position:relative;box-shadow:0 20px 60px -20px rgba(23,19,15,.4)}
+.sheet h3{font-size:21px;margin-bottom:14px;padding-right:30px}
+.sheet .x{position:absolute;right:14px;top:11px;font-size:26px;line-height:1;color:var(--zacht)}
+.rij{display:flex;justify-content:space-between;gap:14px;padding:9px 0;
+  border-bottom:1px solid var(--lijn-2);font-size:14.5px}
+.rij:last-child{border-bottom:0}
+.rij span:first-child{color:var(--zacht)}
+.rij span:last-child{font-weight:700;text-align:right}
+@media(min-width:600px){.sheet{align-items:center}}
+
+.voet{border-top:1px solid var(--lijn);padding:20px 0 40px;font-size:13px;color:var(--zacht)}
+.voet a{color:var(--zacht);text-decoration:underline;text-underline-offset:3px}
+.voet .dot{margin:0 8px;opacity:.5}
+
+@media(max-width:600px){
+  .groot-rij{gap:18px}
+  .meet .mv{font-size:27px}
+  .blok{min-width:42px}
+}
+
+
+/* ── week in één blik ────────────────────────────── */
+.weekstrip{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px}
+.dagkaart{display:block;background:var(--tint-v);border:1px solid var(--lijn);border-radius:var(--r-s);
+  padding:12px 12px 10px;text-decoration:none;border-top:4px solid var(--tint);transition:transform var(--t)}
+.dagkaart:hover{transform:translateY(-2px)}
+.dagkaart .dk{display:block;font-size:12px;font-weight:700;color:var(--zacht)}
+.dagkaart .dv{display:block;font-family:var(--kop);font-size:22px;margin:4px 0 2px;color:var(--tint);white-space:nowrap}
+.dagkaart .dv em{font-style:normal;font-size:12px;color:var(--zacht)}
+.dagkaart .dn{display:block;font-size:12px;font-weight:700;color:var(--tint);line-height:1.3}
+.ind{display:block;font-size:10.5px;color:var(--flauw);margin-top:5px}
+
+/* ── uur voor uur, per dag een tabel ──────────────── */
+.dagen{display:flex;flex-direction:column;gap:14px}
+.dag{background:var(--kaart);border:1px solid var(--lijn);border-radius:var(--r);overflow:hidden;box-shadow:var(--schaduw)}
+.dagkop{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding:12px 16px 8px;border-left:5px solid var(--tint)}
+.dagkop b{font-family:var(--kop);font-size:18px}
+.dagkop .dagv{font-size:13px;font-weight:700;color:var(--tint)}
+.dagkop .ind{margin:0;width:100%}
+.scroll{overflow-x:auto;padding:0 10px 10px}
+.uurtabel{border-collapse:separate;border-spacing:3px 0;width:100%;min-width:640px;table-layout:fixed}
+.uurtabel th{font-size:11px;font-weight:700;color:var(--zacht);text-align:left;white-space:normal;width:74px;line-height:1.2;padding-right:6px}
+.uurtabel td{text-align:center;padding:2px 0;font-size:13.5px;position:relative}
+.uurtabel td.aan{background:var(--lijn-2)}
+.uurtabel .tu button{font-weight:700;font-size:13px;color:var(--zacht);padding:6px 0;width:100%;border-radius:6px}
+.uurtabel .tu button:hover{background:var(--lijn-2);color:var(--inkt)}
+.uurtabel .tu.aan button{background:var(--inkt);color:var(--papier)}
+.uurtabel .tw{height:64px;vertical-align:bottom;padding-bottom:0}
+.uurtabel .tw b{display:block;font-family:var(--kop);font-size:15px;line-height:1;margin-bottom:3px}
+.uurtabel .tw .staaf{display:block;width:100%;border-radius:3px 3px 0 0;min-height:3px}
+.uurtabel .tv{background:var(--tint-v);color:var(--tint);font-weight:700;padding:6px 0;border-radius:0 0 4px 4px}
+.uurtabel .tn i{display:block;height:5px;border-radius:3px;margin-top:3px}
+.uurtabel .wijzer{width:16px;height:16px}
+
+.wijzer{width:14px;height:14px;flex:none;vertical-align:middle}
+.wijzer path{fill:currentColor}
+.legenda{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:var(--zacht)}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+/* ── het strand, echte luchtfoto, noorden boven ──── */
+.scenekaart{background:var(--kaart);border:1px solid var(--lijn);border-radius:var(--r);overflow:hidden;box-shadow:var(--schaduw)}
+.scene{position:relative;aspect-ratio:900/480;background:#7A8A96}
+#kaart{position:absolute;inset:0}
+#pijlen{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:500}
+.scene-label{position:absolute;left:14px;top:14px;z-index:600;background:rgba(251,248,244,.94);border-radius:var(--r-s);
+  padding:10px 14px;display:flex;flex-direction:column;line-height:1.3}
+.scene-label b{font-family:var(--kop);font-size:28px}
+.scene-label span{font-size:12.5px;color:var(--zacht);font-weight:700}
+.leaflet-container{font-family:var(--tekst)}
+.leaflet-control-attribution{font-size:9px;opacity:.7}
+.scene-uitleg{padding:16px 18px;display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.oordeel{display:flex;gap:11px;align-items:flex-start}
+.oordeel .bol{width:11px;height:11px;border-radius:50%;background:var(--tint);margin-top:5px;flex:none}
+.oordeel b{display:block;font-size:14.5px}
+.oordeel span{display:block;font-size:13px;color:var(--zacht);line-height:1.45}
+
+@media(max-width:600px){.scene-label b{font-size:22px}}
+
+.dagkaart{text-align:left;width:100%;cursor:pointer;border:1.5px solid var(--lijn);border-top:4px solid var(--tint)}
+.dagkaart.aan{border-color:var(--inkt);box-shadow:0 0 0 1px var(--inkt)}
+.uurtabel .ts small,.uurtabel .tx small{display:block;font-size:11px;color:var(--zacht);font-weight:700}
+.uurtabel .ts{padding-top:6px}
+.uurtabel .tx span{font-size:16px;line-height:1.1;display:block}
+.schuifrij{display:flex;align-items:center;gap:14px;padding:12px 18px 6px;border-top:1px solid var(--lijn-2)}
+.schuifuur{font-family:var(--kop);font-size:18px;min-width:52px}
+.schuifkolom{flex:1}
+.schuiflabels{display:flex;gap:2px;height:6px;margin:0 8px 4px}
+.schuiflabels i{flex:1;border-radius:2px}
+#schuif{width:100%;accent-color:var(--inkt);margin:0}
+.onder-verdict b{color:var(--tint)}
+.flauw{color:var(--flauw);font-size:13px}
+.uurtabel td{cursor:pointer}
+.uurtabel td:hover{background:var(--lijn-2)}
+.uurtabel .tb small,.uurtabel .tg small,.uurtabel .tk small{display:block;font-size:11px;color:var(--zacht);font-weight:700;line-height:1.25}
+.uurtabel .tb .eens{background:linear-gradient(90deg,var(--goed) var(--p),var(--lijn) var(--p));background-size:100% 3px;background-repeat:no-repeat;background-position:bottom;padding-bottom:4px}
+.uurtabel .tg span{font-weight:700;display:block}
+.uurtabel .tk{background:var(--tint-v);color:var(--tint);border-radius:4px;padding:5px 0}
+.uurtabel .tk small{color:var(--tint);font-size:10.5px}
+.dagkaart .dn{font-size:11.5px}
+
+/* rider in de kop */
+.rider{display:flex;align-items:center;gap:8px}
+.seg.klein button{padding:5px 11px;font-size:13px}
+.rider .invoer{padding:5px 12px}
+.rider .invoer input{width:42px;font-size:15px}
+/* vensters onder elkaar */
+.vensters{display:flex;flex-direction:column;gap:8px;margin:14px 0 10px}
+.venster{border:1px solid var(--lijn);border-left:5px solid var(--tint);border-radius:var(--r-s);background:var(--tint-v)}
+.venster{width:100%;text-align:left;display:grid;grid-template-columns:auto auto auto auto 1fr auto;align-items:center;gap:6px 16px;padding:11px 14px;cursor:pointer;list-style:none}
+.venster:hover{border-color:var(--inkt)}
+.venster .vt{font-family:var(--kop);font-size:22px;white-space:nowrap}
+.venster .vk{font-family:var(--kop);font-size:18px;color:var(--tint);white-space:nowrap}
+.venster .vkite{font-size:13px;font-weight:700;color:var(--zacht);white-space:nowrap}
+.venster .vc{font-family:var(--kop);font-size:20px;background:var(--tint);color:#fff;border-radius:8px;padding:2px 9px;line-height:1.2}
+.venster .veen{font-size:13.5px;color:var(--inkt)}
+.venster .info{font-style:normal;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center}
+
+.venster ul{margin:0;padding:0 14px 12px 34px;font-size:13.5px;color:var(--zacht)}
+.venster li.p::marker{content:"+ ";color:var(--perfect)}
+.venster li.m::marker{content:"− ";color:var(--aflandig)}
+@media(max-width:640px){.venster{grid-template-columns:auto auto 1fr auto}.venster .vkite,.venster .veen{grid-column:1/-1}}
+/* scene-kaarten */
+.scene-uitleg{gap:12px}
+.oordeel{display:block;background:var(--tint-v);border-left:5px solid var(--tint);border-radius:var(--r-s);padding:12px 14px}
+.oordeel .okop{display:block;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--tint);margin-bottom:3px}
+.oordeel b{font-size:15px;display:block;margin-bottom:6px}
+.oordeel ul{margin:0;padding-left:18px;font-size:13px;color:var(--zacht);line-height:1.45}
+.oordeel li::marker{color:var(--tint)}
+/* regen */
+.uurtabel .tr .drup{font-size:10px;letter-spacing:-2px;display:block;line-height:1.3}
+.uurtabel .tr small{display:block;font-size:11px;font-weight:700;color:#41607A}
+.uurtabel .tr .droog{color:var(--flauw);font-weight:500}
+
+.venster{margin:0}
+.sheet-een{font-size:15px;margin:0 0 10px}
+.redenen{margin:0 0 12px;padding-left:22px;font-size:14px;color:var(--zacht)}
+.redenen li.p::marker{content:"+ ";color:var(--perfect)}
+.redenen li.m::marker{content:"− ";color:var(--aflandig)}
+.nu-kop a{color:var(--perfect);font-weight:700}
+/* venster-rij in de tabel */
+.uurtabel .vrij td{padding:0 0 4px}
+.vpil{display:block;background:var(--tint);color:#fff;font-size:11.5px;font-weight:700;border-radius:6px;padding:4px 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* mobiel: eerste kolom blijft staan, kop wrapt netjes */
+.uurtabel th{position:sticky;left:0;background:var(--kaart);z-index:1}
+@media(max-width:600px){
+  .top{gap:10px}
+  .merk{width:100%}
+  .rider{margin-left:auto}
+  .seg button{padding:6px 11px;font-size:13px}
+  .hero{padding:18px 16px}
+  .verdict{font-size:28px}
+  .venster .vt{font-size:19px}
+  .weekstrip{grid-template-columns:repeat(2,1fr)}
+  .scene-uitleg{grid-template-columns:1fr}
+  .schuifrij{padding:10px 12px 4px}
+}
+.venster .vc{justify-self:start}

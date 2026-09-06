@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kiteweer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Albert+Sans:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="stijl.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="merk"><span class="mark" aria-hidden="true"></span><h1>Kiteweer</h1></div>
+    <div class="seg" id="periode" role="group" aria-label="Periode">
+      <button type="button" class="on" data-per="vandaag">Vandaag</button>
+      <button type="button" data-per="week">Komende dagen</button>
+      <button type="button" data-per="demo">31 aug</button>
+    </div>
+  </header>
+</div>
+
+<main class="wrap">
+
+  <section class="nu" id="nu" aria-labelledby="nu-h"></section>
+
+  <section class="hero" id="hero" aria-live="polite">
+    <p class="kicker" id="kicker">—</p>
+    <h2 class="verdict" id="verdict">—</h2>
+    <p class="onder-verdict" id="onderverdict"></p>
+    <div class="groot-rij" id="meters"></div>
+    <div class="cta-rij" id="ctas"></div>
+  </section>
+
+  <section id="weeksectie" hidden>
+    <h3 class="sec">Komende dagen</h3>
+    <div class="week" id="week"></div>
+  </section>
+
+  <section>
+    <h3 class="sec">Waar <i id="waarnote"></i></h3>
+    <div class="spots" id="spots"></div>
+  </section>
+
+  <section>
+    <h3 class="sec">Op het strand <i id="scenenote"></i></h3>
+    <div class="scenekaart">
+      <div class="scene" id="scene"></div>
+      <div class="scene-uitleg" id="sceneuitleg"></div>
+    </div>
+  </section>
+
+  <section>
+    <h3 class="sec">Uur voor uur <i id="uurnote"></i></h3>
+    <div class="urenkaart"><div class="uren" id="uren"></div></div>
+    <div class="legenda" id="legenda"></div>
+  </section>
+
+  <section>
+    <h3 class="sec">Welke kite</h3>
+    <div class="kit">
+      <div class="kitrij">
+        <label class="veld">
+          <span>Gewicht</span>
+          <span class="invoer"><input id="kg" type="number" min="40" max="140" step="1" value="85"><b>kg</b></span>
+        </label>
+        <div class="veld">
+          <span id="bl">Board</span>
+          <div class="seg" role="group" aria-labelledby="bl">
+            <button type="button" class="on" data-board="twintip">Twintip</button>
+            <button type="button" data-board="directional">Directional</button>
+            <button type="button" data-board="foil">Foil</button>
+          </div>
+        </div>
+        <div class="veld">
+          <span id="ql">Jouw kites</span>
+          <div class="kites" id="quiver" role="group" aria-labelledby="ql"></div>
+        </div>
+      </div>
+      <div class="advies" id="advies"></div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="voet wrap">
+  <span id="ververst"></span>
+  <span class="dot">·</span><a href="../richting-uitleg.html">waarom aflandig telt</a>
+  <span class="dot">·</span><a href="../index.html">andere vormen</a>
+</footer>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t" hidden>
+  <div class="sheet-in">
+    <button type="button" class="x" id="sheet-x" aria-label="Sluiten">&times;</button>
+    <h3 id="sheet-t"></h3>
+    <div id="sheet-b"></div>
+  </div>
+</div>
+
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

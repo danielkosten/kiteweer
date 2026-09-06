@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kiteweer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Albert+Sans:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="stijl.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="merk"><span class="mark" aria-hidden="true"></span><h1>Kiteweer</h1></div>
+    <div class="seg" id="spotkeuze" role="group" aria-label="Spot"></div>
+    <div class="rider">
+      <label class="invoer"><input id="kg" type="number" min="40" max="140" step="1" value="85" aria-label="Gewicht"><b>kg</b></label>
+      <div class="seg klein" role="group" aria-label="Board">
+        <button type="button" class="on" data-board="twintip">Twintip</button>
+        <button type="button" data-board="directional">Directional</button>
+      </div>
+    </div>
+  </header>
+</div>
+
+<main class="wrap">
+
+  <section class="nu" id="nu" aria-labelledby="nu-h"></section>
+
+  <section class="hero" id="hero" aria-live="polite">
+    <p class="kicker" id="kicker">—</p>
+    <h2 class="verdict" id="verdict">—</h2>
+    <div class="vensters" id="vensterlijst"></div>
+    <p class="onder-verdict" id="onderverdict"></p>
+  </section>
+
+  <section>
+    <h3 class="sec">Welke dag <i>— klik een dag, alles hieronder volgt</i></h3>
+    <div class="weekstrip" id="weekstrip"></div>
+  </section>
+
+  <section>
+    <h3 class="sec">Uur voor uur <i id="uurnote"></i></h3>
+    <div class="dagen" id="dagen"></div>
+    <div class="legenda" id="legenda"></div>
+  </section>
+
+  <section>
+    <h3 class="sec">Op het strand <i id="scenenote"></i></h3>
+    <div class="scenekaart">
+      <div class="scene" id="scene"><div id="kaart"></div><svg id="pijlen" viewBox="0 0 900 480" aria-hidden="true"></svg><div class="scene-label" id="scenelabel"></div></div>
+      <div class="schuifrij"><span class="schuifuur" id="schuifuur"></span><div class="schuifkolom"><div class="schuiflabels" id="schuiflabels" aria-hidden="true"></div><input type="range" id="schuif" min="0" max="14" step="1" value="0" aria-label="Uur van de dag"></div></div>
+      <div class="scene-uitleg" id="sceneuitleg"></div>
+    </div>
+  </section>
+
+
+</main>
+
+<footer class="voet wrap">
+  <span id="ververst"></span>
+  <span class="dot">·</span><a href="../richting-uitleg.html">waarom aflandig telt</a>
+  <span class="dot">·</span><a href="../index.html">andere vormen</a>
+</footer>
+
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t" hidden>
+  <div class="sheet-in">
+    <button type="button" class="x" id="sheet-x" aria-label="Sluiten">&times;</button>
+    <h3 id="sheet-t"></h3>
+    <div id="sheet-b"></div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../data.js"></script>
+<script src="../uur.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

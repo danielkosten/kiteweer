@@ -1,0 +1,69 @@
+<!doctype html><html lang="nl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daniel-view — optieborden</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+body{font:16px/1.55 var(--f);padding:36px 20px;max-width:1000px;margin-inline:auto}
+h1{font-size:26px;margin:0 0 6px}
+p{color:var(--fg-2);margin:6px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:var(--gap);margin:26px 0}
+a.card{display:block;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:var(--pad);text-decoration:none;color:inherit;transition:border-color var(--t),transform var(--t)}
+a.card:hover{border-color:var(--go);transform:translateY(-2px)}
+a.card.gekozen{border-color:var(--go-dim);background:linear-gradient(var(--surface),var(--surface))}
+a.card b{display:block;font-size:17px;margin-bottom:4px}
+a.card span{color:var(--fg-2);font-size:14px}
+.tag{display:inline-block;font-size:11px;color:var(--fg-3);border:1px solid var(--line);
+  border-radius:99px;padding:1px 8px;margin-top:10px}
+hr{border:0;border-top:1px solid var(--line);margin:30px 0}
+table{border-collapse:collapse;width:100%;font-size:14px}
+td,th{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--fg-3);font-weight:500}
+.no{color:var(--no)} .go{color:var(--go)}
+code{background:var(--surface-2);padding:1px 6px;border-radius:5px;font-family:var(--f-mono);font-size:13px}
+</style></head><body>
+<h1>Daniel-view — vier vormen</h1>
+<p>Zelfde echte data, vier presentaties. Klik erdoorheen.</p>
+<p style="margin-top:10px"><b style="color:var(--go)">Aflandig-regel aangepast in alle vier.</b>
+Aflandig waarschuwt nu alleen nog boven 14 knopen &mdash; dezelfde ondergrens die de app van je vader
+gebruikt. Aflandig bij 4 knopen is geen gevaar, dat is gewoon geen wind. Dat haalde
+<b>45 van de 48</b> rode blokken weg. De drie die overblijven zijn maandagochtend op Wassenaar en
+Wijk aan Zee: de echte, de reden dat je naar de Zandmotor ging.</p>
+
+<p style="margin:22px 0 0"><a class="card" href="daniel/index.html" style="display:block;border-color:var(--go)">
+<b style="font-size:20px">→ Kiteweer &mdash; de gebouwde versie</b>
+<span>Nu op het water &middot; beste venster per dag &middot; de wind zie je draaien &middot; kitemaat &middot; stroming</span>
+</a></p>
+<h2 style="font-size:16px;margin:30px 0 6px;color:var(--fg-2)">De vier verkenningen</h2>
+<div class="grid">
+ <a class="card gekozen" href="opties/A-nu-eerst/index.html"><b>A · Nu eerst <span style="color:var(--go);font-size:12px;font-weight:600">&nbsp;← mijn keuze</span></b>
+   <span>Eén enorm antwoord bovenaan: welke spot, hoeveel knopen, welke kite. Rest verborgen.</span>
+   <span class="tag">minste op het scherm · doet in één regel wat je vroeg</span></a>
+ <a class="card" href="opties/B-windklok/index.html"><b>B · De windklok</b>
+   <span>Kompas in het midden. Schuif door de dag, spots lichten op als de wind hun hoek raakt.</span>
+   <span class="tag">laat maandag zien</span></a>
+ <a class="card" href="opties/C-drie-kolommen/index.html"><b>C · Drie kolommen</b>
+   <span>Windfinder-vorm, uitgekleed. Drie spots naast elkaar, tijd naar beneden, alleen knopen.</span>
+   <span class="tag">meest vertrouwd</span></a>
+ <a class="card" href="opties/D-bandenstrook/index.html"><b>D · Bandenstrook</b>
+   <span>Geen cijfers op het scherm. Dikte van de band = onzekerheid. Vorm vertelt het verhaal.</span>
+   <span class="tag">meest visueel</span></a>
+</div>
+
+<hr>
+<h2 style="font-size:18px;margin:0 0 8px">Waarom maandag zowel goed als aflandig was</h2>
+<p>De wind draaide 70° tussen 8 uur en 3 uur. Gemeten, KNMI Hoek van Holland.</p>
+<table>
+<tr><th>uur</th><th>wind</th><th>uit</th><th>Zandmotor</th><th>Wassenaar</th><th>Wijk aan Zee</th></tr>
+<tr><td>08:00</td><td class="num">19 kn</td><td class="num">200°</td><td class="go">ja</td><td class="no">aflandig</td><td class="no">aflandig</td></tr>
+<tr><td>09:00</td><td class="num">21 kn</td><td class="num">200°</td><td class="go">ja</td><td class="no">aflandig</td><td class="no">aflandig</td></tr>
+<tr><td>10:00</td><td class="num">23 kn</td><td class="num">210°</td><td class="go">ja</td><td class="no">aflandig</td><td class="go">ja</td></tr>
+<tr><td>12:00</td><td class="num">23 kn</td><td class="num">260°</td><td class="go">ja</td><td class="go">ja</td><td class="go">ja</td></tr>
+<tr><td>15:00</td><td class="num">23 kn</td><td class="num">270°</td><td class="go">ja</td><td class="go">ja</td><td class="go">ja</td></tr>
+</table>
+<p style="margin-top:14px">Jij was 's ochtends op de Zandmotor en later op het strand. Allebei klopte.
+De app van je vader liet één getal per spot per blok zien en kon dit niet vertellen.</p>
+
+<hr>
+<p><a href="richting-uitleg.html" style="color:var(--go)">→ de richtingsregel uitgelegd (kompas, schuifbaar)</a></p>
+</body></html>
