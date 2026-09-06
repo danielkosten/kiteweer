@@ -170,7 +170,8 @@
   function ideaal(kn) { return 2.2 * st.kg / kn * BOARDS[st.board]; }
   function staat(maat, kn) {
     var r = maat / ideaal(kn);
-    return r > 1.22 ? "over" : r > 1.08 ? "iets over" : r < 0.80 ? "te klein" : r < 0.93 ? "iets under" : "goed";
+    // Geijkt op Daniels sessies: 10 m bij 23 kn (ratio 1,23) voelde "lekker powered", niet over.
+    return r > 1.35 ? "over" : r > 1.15 ? "lekker powered" : r < 0.80 ? "te klein" : r < 0.90 ? "iets under" : "goed";
   }
   /* Welke maat past bij een windbereik: afgerond op hele meters, hoog naar laag. */
   /* Maat op de gemiddelde wind. Trekkracht groeit met wind², dus bij vlaag/wind ≥ 1,5 één maat kleiner.
@@ -397,7 +398,7 @@
       '<li class="p"><b>AJK-mix</b>: fijn en grof tellen samen 50/50 (Arthurs besluit, zodat vier fijne modellen niet vanzelf de meerderheid zijn). De gewichten ×1,16 … ×0,88 zijn gemeten: een jaar lang, 9 KNMI-stations, 78.000 vergelijkingen.</li>' +
       '<li class="p"><b>DJK-mix</b>: alleen fijn zolang het reikt (2 dagen), daarna grof.</li>' +
       '<li class="p"><b>Toets 30-08 t/m 05-09</b> tegen KNMI Hoek van Holland, 84 daglichturen: fijn-mix 1,3 kn te laag · AJK 3,0 te laag · grof 3,8 te laag · AROME-HD +0,8 (beste) · ECMWF 6,0 te laag. Maandag 31-08 09:00 mat het station 23 kn, geen model zat boven 20.</li>' +
-      '<li class="p"><b>Jouw sessies (Garmin)</b> tegen het station: zo 30-08 09:50–11:20 gemeten 19 kn (AROME 22–24, Harmonie 20–22, ECMWF 10–11) · ma 31-08 13:05–15:15 gemeten 23 (AROME 21–23, Harmonie 19–21, ECMWF 13) · vr 04-09 18:38–19:38 Wassenaar, gemeten 23–25 (AROME 22–24, Harmonie 19–20, ECMWF 13). Elke keer: fijn dichtbij, grof 8–10 kn te laag.</li>' +
+      '<li class="p"><b>Jouw sessies (Garmin)</b> tegen het station: zo 30-08 09:50–11:20, 10 m twintip, goed powered, sprongen van 10 m, station 19 kn (AROME 22–24, Harmonie 20–22, ECMWF 10–11) · ma 31-08 13:05–15:15, 10 m twintip, goed powered, station 23 (AROME 21–23, Harmonie 19–21, ECMWF 13) · vr 04-09 18:38–19:38 Wassenaar, 8 m directional, lekker powered, station 23–25 (AROME 22–24, Harmonie 19–20, ECMWF 13). Elke keer: station en fijne modellen klopten met je gevoel, grof zat 8–10 kn te laag.</li>' +
       '<li class="m">Voorbij 2 dagen is alles grof: een indicatie, geen plan.</li>' +
       '<li class="m">Het model is niet de grootste fout. Zelfde model, andere plek: tot 5 kn verschil. Zandmotor heeft geen eigen meetstation; "nu gemeten" is Hoek van Holland, 12 km verderop.</li></ul>' +
       '<div class="rij"><span>modellen eens</span><span>gewogen deel dat zegt: genoeg wind uit een veilige hoek</span></div>' +
