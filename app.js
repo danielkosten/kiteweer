@@ -157,8 +157,16 @@ window.KWU_READY.then(function () {
     var ks = Object.keys(som); if (!ks.length) return null;
     var out = {}; ks.forEach(function (e) { out[e] = Math.round(som[e] / n[e]); }); return out;
   }
-  function kansTekst(k) { if (!k) return ""; var f = function (e) { return k[e] != null ? (e === "gfs" ? "GFS " : "ECMWF ") + k[e] + "%" : ""; };
-    return [f("gfs"), f("ecmwf")].filter(Boolean).join(" · "); }
+  /* Eén getal in plaats van "GFS 23% · ECMWF 81%". Welk rekencentrum het zei zegt jou niks; hoe
+     zeker ze zijn wel. Lopen ze meer dan 20 punten uiteen, dan is die onenigheid zelf het nieuws
+     en tonen we het bereik. */
+  function kansTekst(k) {
+    if (!k) return "";
+    var v = ["gfs", "ecmwf"].map(function (e) { return k[e]; }).filter(function (x) { return x != null; });
+    if (!v.length) return "";
+    var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v);
+    return hi - lo > 20 ? lo + "–" + hi + "%" : Math.round((lo + hi) / 2) + "%";
+  }
   function indicatieTekst(i, d) { if (fijnBij(d)) return ""; var k = kansTekst(dagKans(d)); return " · indicatie" + (k ? " · kans op kitewind " + k : ", alleen grove modellen"); }
   /* Gekozen uur; standaard het eerste kitebare uur van de dag, anders het hardste. */
   function gekozen() {
@@ -451,7 +459,7 @@ window.KWU_READY.then(function () {
         '<span class="dvl">vlagen ' + (o.v ? o.v.vlLo + "–" + o.v.vlHi : o.b.vl) + '</span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
         '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : (o.b.knLo != null ? " · " + o.b.knLo + "–" + o.b.knHi + " kn uiteen" : "")) + '</span>' +
-        (!fijnBij(d) && kansTekst(dagKans(d)) ? '<span class="ind kans-ens">kans ' + kansTekst(dagKans(d)) + '</span>' : '') + '</button>';
+        (!fijnBij(d) && kansTekst(dagKans(d)) ? '<span class="ind kans-ens">kans op kitewind ' + kansTekst(dagKans(d)) + '</span>' : '') + '</button>';
     });
     var nauw = ds.map(fijnBij), split = nauw.findIndex(function (n) { return n === 0; });
     if (split < 0) split = ds.length;
@@ -470,6 +478,9 @@ window.KWU_READY.then(function () {
         d.uren.map(function (u) { return '<i style="height:' + Math.max(8, Math.round(u.kn / maxKn * 100)) + '%;background:' + knKleur(u.kn, niveau(u)) + '"></i>'; }).join("") + '</span></button>';
     }).join("");
   }
+
+  /* Kleinste hoek tussen twee kompaskoersen, 0 t/m 180. */
+  function hoekAfwijking(a2, b2) { var d = Math.abs(a2 - b2) % 360; return d > 180 ? 360 - d : d; }
 
   /* ── wat er echt gemeten is ────────────────────────────
      meting.js komt elk kwartier vers van Rijkswaterstaat (gen-meting.mjs). Per spot het
@@ -539,16 +550,19 @@ window.KWU_READY.then(function () {
       rij("wind kn", function (u) { return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>'); }) +
       rij("vlagen", function (u) { var n = niveau(u), g = n === "aflandig" ? "aflandig" : band(u.vl); return td(u, "tv", u.vl, "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
       rij("", function (u) { return td(u, "tn", '<i style="background:' + knKleur(u.kn, niveau(u)) + '"></i>'); }) +
-      (i === 0 && meetstation() ? rij('gemeten<br><small>' + esc(meetstation().naam) + '<br>' + String(meetstation().km).replace(".", ",") + ' km</small>', function (u) {
+      (i === 0 && meetstation() ? rij('gemeten <button type="button" class="info" data-info="meten" aria-label="Welk meetstation en hoe ver weg">i</button>', function (u) {
         var m = metingBij(u.t);
         if (m == null) return td(u, "tmeet", '<small>—</small>');
         var v = Math.round((m.kn - u.kn) * 10) / 10;
         var kl = Math.abs(v) < 1.5 ? "raak" : v > 0 ? "meer" : "minder";
-        return td(u, "tmeet", '<b>' + Math.round(m.kn) + '</b><small class="' + kl + '">' + (v > 0 ? "+" : "") + String(v).replace(".", ",") + '</small>');
+        /* Ook de gemeten richting, want een model dat de kracht raakt maar de hoek mist stuurt je
+           alsnog het water op met aflandige wind. De pijl wijst waar de wind heen gaat. */
+        return td(u, "tmeet", (m.dir != null ? pijl(m.dir, hoekAfwijking(m.dir, u.dir) >= 45 ? KLEUR.matig : "#17130F") : '') +
+          '<b>' + Math.round(m.kn) + '</b><small class="' + kl + '">' + (v > 0 ? "+" : "") + String(v).replace(".", ",") + '</small>');
       }) : "") +
       rij('kite m <button type="button" class="info" data-info="kite" aria-label="Hoe de kitemaat wordt berekend">i</button><br><small>' + st.kg + ' kg, ' + st.board + '</small>', function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
         var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : k.maat - 1) + '–' + (k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
-      rij("modellen eens", function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
+      rij('hoe zeker <button type="button" class="info" data-info="zeker" aria-label="Wat dit percentage betekent">i</button>', function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
         return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span><small>' + u.knLo + "–" + u.knHi + ' kn</small>'); }) +
       rij("stroming", function (u) { var b = blokBij(u.t), c = stroomC(b, u.dir);
@@ -566,7 +580,7 @@ window.KWU_READY.then(function () {
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg"><b>pijl</b> waar wind of stroom heen gaat</span><span class="lg"><b>modellen eens</b> gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg"><b>stroming</b> sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af. Alleen het getij, zonder wat de wind er bovenop duwt</span><span class="lg"><b>regen</b> 💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg"><b>kite</b> maat bij jouw gewicht en board, groot getal = lekker powered, eronder de veilige en de gepowerde kant</span><span class="lg disclaimer"><b>⚠️ schatting</b> uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
+      '<span class="lg"><b>pijl</b> waar wind of stroom heen gaat</span><span class="lg"><b>hoe zeker</b> deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste schatting</span><span class="lg"><b>gemeten</b> wat het meetstation echt mat, eronder het verschil met het model</span><span class="lg"><b>stroming</b> sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af. Alleen het getij, zonder wat de wind er bovenop duwt</span><span class="lg"><b>regen</b> 💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg"><b>kite</b> maat bij jouw gewicht en board, groot getal = lekker powered, eronder de veilige en de gepowerde kant</span><span class="lg disclaimer"><b>⚠️ schatting</b> uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
   }
 
   function openVenster(j) {
@@ -582,6 +596,33 @@ window.KWU_READY.then(function () {
       ].map(function (r) { return '<div class="rij"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join("");
     $("sheet").hidden = false; $("sheet-x").focus();
   }
+  /* Wat het meetstation is, hoe ver het weg staat, en wanneer je het wel en niet moet geloven. */
+  function openMeten() {
+    var s = meetstation();
+    $("sheet-t").textContent = "Wat er echt gemeten is";
+    $("sheet-b").innerHTML = '<ul class="redenen">' +
+      (s ? '<li class="p"><b>' + esc(s.naam) + '</b>, het dichtstbijzijnde meetstation van Rijkswaterstaat dat vandaag werkt. Hemelsbreed <b>' + String(s.km).replace(".", ",") + ' km</b> van ' + esc(spot().naam) + '.</li>' : '') +
+      '<li class="p"><b>Het getal is echt gemeten</b>, geen model: de paal op zee tikt elke tien minuten door, wij pakken per uur de meting die het dichtst bij het hele uur ligt.</li>' +
+      '<li class="p"><b>Het cijfer eronder is het verschil</b> met wat het model voor dit uur zei. Groen = er stond méér wind dan voorspeld, oker = minder, grijs = het model zat erop.</li>' +
+      '<li class="p"><b>Waar je het voor gebruikt</b>: zit het station de hele ochtend 3 kn boven de voorspelling, tel er dan vanmiddag ook 3 bij op. Dat is de hele reden dat de DAJK-mix bestaat.</li>' +
+      '<li class="p"><b>De pijl is de gemeten richting.</b> Wijkt die meer dan 45° af van wat het model zegt, dan kleurt hij oker: de hoek klopt niet, en de hoek bepaalt of je überhaupt gaat.</li>' +
+      '<li class="m">Onder de 10 km is het jouw strand, boven de 20 km is het een aanwijzing. Een paal op zee vangt meer wind dan een strand in de luwte van de duinen.</li></ul>';
+    $("sheet").hidden = false; $("sheet-x").focus();
+  }
+
+  /* Waarom een percentage boven een windgetal staat, en wat je ermee doet. */
+  function openZeker() {
+    $("sheet-t").textContent = "Hoe zeker is dit uur";
+    $("sheet-b").innerHTML = '<ul class="redenen">' +
+      '<li class="p"><b>Tien weermodellen rekenen apart.</b> Het percentage is het deel dat zegt: hier staat genoeg wind (' + RIJDBAAR + ' kn of meer) én uit een hoek die op deze spot veilig is. Het trefzekerste model telt het zwaarst.</li>' +
+      '<li class="p"><b>90% betekent: ze zijn het eens.</b> Daar kun je een dag op plannen, en de kans dat het tegenvalt zit in de kracht, niet in of het doorgaat.</li>' +
+      '<li class="p"><b>30% betekent: één of twee modellen zien het.</b> Leuk om in de gaten te houden, niks om vrij voor te nemen.</li>' +
+      '<li class="p"><b>0% bij een dag die er goed uitziet</b> betekent bijna altijd de hoek, niet de kracht: er staat wind, maar aflandig. Kijk naar de pijlenrij erboven.</li>' +
+      '<li class="p"><b>Het bereik eronder</b> is het laagste en het hoogste dat een model voor dit uur zegt. Ver uit elkaar = de modellen weten het nog niet.</li>' +
+      '<li class="m">Verder dan twee dagen vooruit vallen de fijne modellen weg en wordt dit vanzelf voorzichtiger. Boven de dagkaarten staat dan de kans uit de ensembles: honderden losse doorrekeningen van hetzelfde weer.</li></ul>';
+    $("sheet").hidden = false; $("sheet-x").focus();
+  }
+
   function openKite() {
     $("sheet-t").textContent = "Hoe de kitemaat wordt berekend";
     $("sheet-b").innerHTML =
@@ -676,6 +717,8 @@ window.KWU_READY.then(function () {
     if (e.target.closest("[data-open-modellen]")) return openModelPaneel();
     if (e.target.closest("[data-info=\"modellen\"]")) return openModellen();
     if (e.target.closest("[data-info=\"kite\"]")) return openKite();
+    if (e.target.closest("[data-info=\"meten\"]")) return openMeten();
+    if (e.target.closest("[data-info=\"zeker\"]")) return openZeker();
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
     var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; teken();
@@ -699,4 +742,20 @@ window.KWU_READY.then(function () {
     $("ververst").textContent = "bijgewerkt: " + regels.join(" · ");
     teken();
   });
+
+  /* Een pagina die uren openstaat (telefoon in je zak op het strand) wees anders nog naar het uur
+     waarop je hem opende, en na middernacht naar de verkeerde dag. Elke minuut kijken of het uur
+     is verschoven; is dat zo, opnieuw tekenen. Is de dag verschoven, dan eerst verse data halen,
+     want de dagenlijst zelf klopt dan niet meer. */
+  (function () {
+    var laatsteUur = uurNu();
+    setInterval(function () {
+      var nu = uurNu();
+      if (nu === laatsteUur) return;
+      var andereDag = nu.slice(0, 10) !== laatsteUur.slice(0, 10);
+      laatsteUur = nu;
+      if (andereDag) { location.reload(); return; }
+      teken();
+    }, 60e3);
+  })();
 });

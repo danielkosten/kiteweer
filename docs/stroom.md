@@ -119,3 +119,18 @@ Het zijn ongeveer 96 bot-commits per dag op een pagina zonder bezoekersteller, d
 behalve regels in de geschiedenis. De alternatieven waren duurder: een tussenstation bij Cloudflare
 is een extra ding dat kan omvallen, en rechtstreeks vanuit de browser mag niet, want die server geeft
 een webpagina geen toestemming om mee te kijken (nagemeten: de stroom-deur wel, de wind-deur niet).
+
+## Hoe goed is het model eigenlijk
+
+Gemeten op 11-09, 19 uren, model KNMI Harmonie tegen het dichtstbijzijnde station:
+
+| Spot | Station | Afstand | Fout in kracht | Fout in hoek |
+|---|---|---|---|---|
+| Kijkduin | Hoek van Holland | 10,4 km | 3,2 kn | 25° |
+| Noordpier | IJmuiden Buitenhaven | 4,2 km | 4,2 kn | 17° |
+| Texel paal 17 | Den Helder De Kooy | 18 km | 3,0 kn | 20° |
+| Workum | Stavoren | 9,5 km | 2,1 kn | 13° |
+
+Eén dag, dus een aanwijzing en geen claim. Maar de hoek zit er net zo goed naast als de kracht, en
+de hoek beslist of je überhaupt gaat. Daarom staat de gemeten richting als pijl in de rij, en kleurt
+hij oker zodra hij meer dan 45° van het model afwijkt.
