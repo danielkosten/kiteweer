@@ -586,11 +586,12 @@ window.KWU_READY.then(function () {
       }) : "") +
       rij(rijkop("kite m", "kite", "Hoe de kitemaat wordt berekend", st.kg + " kg, " + st.board), function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
         var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : k.maat - 1) + '–' + (k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
-      rij(rijkop("kans dat je kunt kiten", "zeker", "Waar dit percentage over gaat", RIJDBAAR + "–" + TEVEEL + " kn, veilige hoek"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
+      rij(rijkop("kans op een sessie", "zeker", "Waar dit percentage over gaat", RIJDBAAR + "–" + TEVEEL + " kn, veilige hoek"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
         /* Waarom het percentage laag is, staat eronder: te weinig wind, te hard, of de verkeerde hoek.
            Zonder die reden is 0% naast 34 kn onbegrijpelijk. */
-        var waarom = u.knLo > TEVEEL ? "te hard" : u.knHi < RIJDBAAR ? "te weinig" : (k < 25 && niveau(u) === "aflandig" ? "aflandig" : "");
+        var n = niveau(u);
+        var waarom = k >= 50 ? "" : u.kn > TEVEEL ? "te hard" : n === "aflandig" ? "aflandig" : u.kn < RIJDBAAR ? "te weinig" : "";
         return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span><small>' + u.knLo + "–" + u.knHi + ' kn' + (waarom ? ", " + waarom : "") + '</small>'); }) +
       rij(rijkop("stroming", "stroom", "Wat de stroming met je doet"), function (u) { var b = blokBij(u.t), c = stroomC(b, u.dir);
         return td(u, "ts", b && b.stroom ? pijl(b.stroom.naar + 180, c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '<small>' + b.stroom.kn.toFixed(1) + ' kn</small><small style="color:' + (c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '">' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</small>' : '<small>—</small>'); }) +
