@@ -584,10 +584,10 @@ window.KWU_READY.then(function () {
       rij(rijkop("richting", "richting", "Wat de windpijl betekent"), function (u) { return td(u, "", pijl(u.dir, niveau(u) === "aflandig" ? KLEUR.aflandig : "#17130F")); }) +
       /* Onder de wind staat hoe ver de modellen uit elkaar liggen: dat is de onzekerheid van dat
          uur. Stond eerst onder het percentage, maar hij hoort bij de wind. */
-      rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "modellen laag–hoog"), function (u) {
+      rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "laag–hoog"), function (u) {
         return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>' +
           (u.nModellen > 1 ? '<small' + (u.knHi - u.knLo > 7 ? ' class="onzeker"' : '') + '>' + u.knLo + "–" + u.knHi + '</small>' : '')); }) +
-      rij(rijkop("vlagen", "vlagen", "Wat vlagen en spreiding van elkaar verschillen", "en hoeveel erbij"), function (u) { var n = niveau(u);
+      rij(rijkop("vlagen", "vlagen", "Wat vlagen en spreiding van elkaar verschillen", "en verschil"), function (u) { var n = niveau(u);
         /* Het gekleurde vlak zit om het getal heen, niet om de hele cel: nu elke rij even hoog is
            zou een cel-achtergrond een blok van 56 px worden. */
         /* Gemeten aan Hoek van Holland, 485 daglichturen 1 aug t/m 10 sep: een vlaag is 1,4x de
