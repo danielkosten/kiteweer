@@ -54,7 +54,8 @@ window.KWU_READY.then(function () {
   /* Doorlopende kleur voor staaf en vlagen: geel (12) → groen (19) → donkergroen (24). Labels blijven vijf. */
   function knKleur(kn, n) {
     if (n === "weinig" || n === "aflandig") return KLEUR[n];
-    var t = Math.max(0, Math.min(1, (kn - 12) / 12));               // 12 → 0, 24 → 1
+    var g = genoegKn();
+    var t = Math.max(0, Math.min(1, (kn - g) / 10));                // 14 → 0 (oker), 24 → 1 (groen)
     var h = 42 + t * 115, sat = 62 - t * 10, l = 44 - t * 16;        // 42 = oker, 157 = groen
     return "hsl(" + h.toFixed(0) + " " + sat.toFixed(0) + "% " + l.toFixed(0) + "%)";
   }
@@ -232,6 +233,10 @@ window.KWU_READY.then(function () {
   /* ── kitemaat ──────────────────────────────────────
      ideaal = 2,2 x kg / knopen x boardfactor. Per kite uit JOUW quiver zeggen we hoe hij staat. */
   function ideaal(kn) { return 2.2 * st.kg / kn * BOARDS[st.board]; }
+  /* Wind waarbij je grootste kite (13 m) net trekt: 2,2 x gewicht / 13. Bij 85 kg twintip is dat
+     14 kn. Daaronder sta je stil, ook met alles uitgerold. Dit is de streep in de weekbalk en het
+     punt waar de kleur begint te lopen: 12 kn hoorde niet groen te zijn. */
+  function genoegKn() { return Math.round(2.2 * st.kg * BOARDS[st.board] / 13); }
   function staat(maat, kn) {
     var r = maat / ideaal(kn);
     // Geijkt op Daniels sessies: 10 m bij 23 kn (ratio 1,23) voelde "lekker powered", niet over.
@@ -473,12 +478,13 @@ window.KWU_READY.then(function () {
       (split < ds.length ? kop("Indicatie", "grove modellen, kans uit de ensembles", "grof") + kaarten.slice(split).join("") : "") +
       (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
     /* Overzichtsbalk boven de dagkaarten: de hele week in één rij, per dag een staafje per uur.
-       De streep dwars door de balk staat op 12 kn, de grens waarboven je kunt varen: alles wat
-       erboven uitkomt is een sessie. Rechtsboven per dag de hardste wind van die dag.
+       De streep dwars door de balk staat op de wind waarbij je grootste kite net trekt (genoegKn):
+       alles wat daarboven uitkomt is een sessie. Rechtsboven per dag de hardste wind van die dag.
        Klik op een dag springt naar de kaart en de uurtabel eronder. */
     var maxKn = Math.max(24, Math.max.apply(null, ds.map(function (d) { return top(d.uren).kn; })));
     $("weekmini").hidden = false; $("wmuitleg").hidden = false;
-    $("weekmini").style.setProperty("--grens", Math.round(RIJDBAAR / maxKn * 100) + "%");
+    $("weekmini").style.setProperty("--grens", Math.round(genoegKn() / maxKn * 100) + "%");
+    $("wmuitleg").innerHTML = "Elk staafje is een uur. De streep staat op " + genoegKn() + " kn: daaronder trekt zelfs je grootste kite (13 m) je niet op het board. Het getal rechts van de dag is de hardste wind van die dag.";
     $("weekmini").innerHTML = ds.map(function (d, i) {
       var o = dagOordeel(d), hardste = top(d.uren).kn;
       return '<button type="button" class="wm' + (i === st.dag ? " aan" : "") + (i === split ? " grof" : "") + '" data-dag="' + i + '" data-spring="1" aria-label="' + dagStr(d.uren[0].t) + ', hardste ' + hardste + ' kn" style="--tint:' + tint(o.n) + '">' +
@@ -576,11 +582,20 @@ window.KWU_READY.then(function () {
     var tabel = '<table class="uurtabel"><tbody>' + (o.v ? vensterRij : "") +
       rij("uur", function (u) { return td(u, "tu", '<button type="button">' + u.t.slice(11,13) + (u.t === nu ? '<small>nu</small>' : '') + '</button>'); }) +
       rij("richting", function (u) { return td(u, "", pijl(u.dir, niveau(u) === "aflandig" ? KLEUR.aflandig : "#17130F")); }) +
-      rij("wind kn", function (u) { return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>'); }) +
+      /* Onder de wind staat hoe ver de modellen uit elkaar liggen: dat is de onzekerheid van dat
+         uur. Stond eerst onder het percentage, maar hij hoort bij de wind. */
+      rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "laagste–hoogste"), function (u) {
+        return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>' +
+          (u.nModellen > 1 ? '<small>' + u.knLo + "–" + u.knHi + '</small>' : '')); }) +
       rij("vlagen", function (u) { var n = niveau(u), g = n === "aflandig" ? "aflandig" : band(u.vl);
         /* Het gekleurde vlak zit om het getal heen, niet om de hele cel: nu elke rij even hoog is
            zou een cel-achtergrond een blok van 56 px worden. */
-        return td(u, "tv", '<span class="vp">' + u.vl + '</span>', "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
+        /* Een vlaag is altijd ongeveer 1,4x de wind (gemeten, Hoek van Holland, 485 daglichturen
+           1 aug t/m 10 sep: mediaan 1,40, p10 1,20, p90 1,67). Het absolute getal zegt dus weinig;
+           hoeveel er bovenop komt wel. Vandaar "+9" en het woord "vlagerig" vanaf 1,5x. */
+        var extra = Math.max(0, Math.round(u.vl - u.kn)), verhouding = u.kn ? u.vl / u.kn : 0;
+        return td(u, "tv", '<span class="vp">+' + extra + '</span>' +
+          (verhouding >= 1.5 ? '<small>vlagerig</small>' : ''), "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
       (i === 0 && meetstation() ? rij(rijkop("gemeten", "meten", "Welk meetstation en hoe ver weg"), function (u) {
         var m = metingBij(u.t);
         if (m == null) return td(u, "tmeet", '<small>—</small>');
@@ -599,7 +614,7 @@ window.KWU_READY.then(function () {
            de verkeerde hoek ("aflandig"). Te weinig wind zie je al aan de windrij, dat woord is ruis. */
         var n = niveau(u);
         var waarom = k >= 50 ? "" : u.kn > TEVEEL ? "te hard" : n === "aflandig" ? "aflandig" : "";
-        return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span><small>' + u.knLo + "–" + u.knHi + ' kn' + (waarom ? ", " + waarom : "") + '</small>'); }) +
+        return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span>' + (waarom ? '<small>' + waarom + '</small>' : '')); }) +
       rij(rijkop("stroming", "stroom", "Wat de stroming met je doet"), function (u) { var b = blokBij(u.t), c = stroomC(b, u.dir);
         return td(u, "ts", b && b.stroom ? pijl(b.stroom.naar + 180, c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '<small>' + b.stroom.kn.toFixed(1) + ' kn</small><small style="color:' + (c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '">' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</small>' : '<small>—</small>'); }) +
       rij("golven", function (u) { return td(u, "tg", u.golf ? '<span>' + u.golf.m.toFixed(1) + ' m</span><small>' + u.golf.s + ' s</small>' : '<small>—</small>'); }) +
@@ -615,6 +630,7 @@ window.KWU_READY.then(function () {
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14 of boven 30, kleine kite" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
+      '<span class="lg"><b>vlagen +9</b> zoveel knopen komt er in een vlaag bovenop; +40% is normaal, vanaf +50% heet het vlagerig</span>' +
       '<span class="lg"><b>pijl</b> waar de wind of de stroom heen gaat</span>' +
       '<span class="lg"><b>regen</b> 1 druppel is licht, 3 is 1 mm per uur, 5 is een plensbui</span>' +
       '<span class="lg"><b>de rest</b> staat achter de ronde i-knoppen links van de tabel</span>' +

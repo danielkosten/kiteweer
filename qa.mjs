@@ -31,7 +31,7 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   if (errs.length||lek.length||breed||buiten.length||mist.length) stuk++;
 
   // 4. elk uitlegvenster openen en op lek controleren
-  for (const sel of ['[data-info="meten"]','[data-info="zeker"]','[data-info="kite"]','[data-info="stroom"]']) {
+  for (const sel of ['[data-info="meten"]','[data-info="zeker"]','[data-info="kite"]','[data-info="stroom"]','.uurtabel [data-info="modellen"]']) {
     if (!await p.$(sel)) { console.log('  venster', sel, ': knop ontbreekt'); continue; }
     await p.click(sel); await p.waitForTimeout(350);
     const s = await p.evaluate(()=>({t:document.getElementById('sheet-t').textContent, b:document.getElementById('sheet-b').innerText, open:!document.getElementById('sheet').hidden, past:(()=>{const r=document.querySelector('.sheet-in').getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1;})()}));
