@@ -81,3 +81,10 @@ dagen vooruit reikt. Getij is astronomisch, dus een dag oude voorspelling is nog
 
 Getest door de bron expres onbereikbaar te maken: alle 20 calls mislukten, alle 17 punten bleven
 staan.
+
+## De terugval-bundel ververst mee
+
+`uur.js` is de noodvoorraad wind: die laadt alleen als Open-Meteo niet reageert. Hij liep ook af,
+op 12-09 23:00, want hij is één keer met de hand gemaakt. Dezelfde nachtelijke Action draait nu ook
+`gen-uur.mjs`, dus die voorraad is nooit meer dan een dag oud. Vier spots, zoals altijd: het is een
+noodgeval-bundel, geen tweede databron.

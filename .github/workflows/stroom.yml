@@ -1,6 +1,7 @@
-name: stroom verversen
+name: data verversen
 
-# Haalt elke nacht de getijstroom op bij Rijkswaterstaat en commit stroom.js.
+# Haalt elke nacht de getijstroom op bij Rijkswaterstaat (stroom.js) en de wind bij
+# Open-Meteo als terugval-bundel (uur.js), en commit wat er veranderd is.
 # Handmatig starten kan ook, via de Actions-tab.
 on:
   schedule:
@@ -19,11 +20,12 @@ jobs:
         with:
           node-version: "22"
       - run: node gen-stroom.mjs
+      - run: node gen-uur.mjs
       - name: committen als er iets veranderd is
         run: |
           git config user.name "kiteweer-bot"
           git config user.email "kiteweer-bot@users.noreply.github.com"
-          git add stroom.js
+          git add stroom.js uur.js
           git diff --staged --quiet && echo "niets veranderd" && exit 0
-          git commit -m "Stroming ververst bij Rijkswaterstaat"
+          git commit -m "Stroming en terugval-bundel ververst"
           git push

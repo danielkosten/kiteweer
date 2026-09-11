@@ -2,7 +2,7 @@
 
 **kiteweer** — Live: https://danielkosten.github.io/kiteweer/
 
-Stack: — · 23 tracked files · last commit 2026-09-06 · regenerate with `code-map repo --write`
+Stack: — · 27 tracked files · last commit 2026-09-11 · regenerate with `code-map repo --write`
 
 ## Start here
 
@@ -12,17 +12,18 @@ This repo declares no entry point — no `bin`, no boot script, no `__main__.py`
 
 | Dir | Files | Mostly |
 |---|---|---|
-| `docs/` | 9 | `.md` |
+| `docs/` | 10 | `.md` |
 
 ## Docs
 
-Live docs (3) — current, gated by `docs-truth check`:
+Live docs (4) — current, gated by `docs-truth check`:
 
 | Doc |
 |---|
 | `CLAUDE.md` |
 | `README.md` |
 | `docs/dajk-mix.md` |
+| `docs/stroom.md` |
 
 <!-- code-map:end -->
 
