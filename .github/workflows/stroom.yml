@@ -1,0 +1,29 @@
+name: stroom verversen
+
+# Haalt elke nacht de getijstroom op bij Rijkswaterstaat en commit stroom.js.
+# Handmatig starten kan ook, via de Actions-tab.
+on:
+  schedule:
+    - cron: "20 2 * * *"   # 02:20 UTC, elke nacht
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verversen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node gen-stroom.mjs
+      - name: committen als er iets veranderd is
+        run: |
+          git config user.name "kiteweer-bot"
+          git config user.email "kiteweer-bot@users.noreply.github.com"
+          git add stroom.js
+          git diff --staged --quiet && echo "niets veranderd" && exit 0
+          git commit -m "Stroming ververst bij Rijkswaterstaat"
+          git push

@@ -165,11 +165,25 @@ window.KWU_READY.then(function () {
     if (u) return u;
     var o = dagOordeel(d); u = o.v ? o.v.uren[0] : o.b; st.t = u.t; return u;
   }
-  /* Dichtstbijzijnde 3-uursblok uit data.js: stroming + spreiding tussen de modellen. */
+  /* Stroming bij een uur. Eerst stroom.js: dat wordt elke nacht vers bij Rijkswaterstaat opgehaald
+     (gen-stroom.mjs, zie docs/stroom.md) en dekt 35 spots. Lukt dat niet, dan de oude 3-uursblokken
+     uit data.js, de handgemaakte kopie uit Arthurs database. Zelfde vorm: { stroom: { kn, naar } }. */
   function blokBij(t) {
+    var vers = versStroom(t); if (vers) return vers;
     var bl = spot().blokken || [], ms = new Date(t).getTime(), beste = null;
     bl.forEach(function (b) { var d = Math.abs(new Date(b.t).getTime() - ms); if (!beste || d < beste.d) beste = { b:b, d:d }; });
     return beste && beste.d <= 2*3600e3 ? beste.b : null;
+  }
+  /* Dichtstbijzijnde meting binnen het uur; verder weg dan een uur telt niet, dan is de reeks op. */
+  function versStroom(t) {
+    var K = window.KWS; if (!K || !K.spots || !K.punten) return null;
+    var rij = K.punten[K.spots[st.spot]]; if (!rij || !rij.length) return null;
+    var ms = new Date(t).getTime(), beste = null;
+    for (var i = 0; i < rij.length; i++) {
+      var d = Math.abs(new Date(rij[i][0]).getTime() - ms);
+      if (beste === null || d < beste.d) beste = { r:rij[i], d:d };
+    }
+    return beste && beste.d <= 3600e3 ? { t:t, stroom:{ kn:beste.r[1], naar:beste.r[2] } } : null;
   }
 
   /* ── stroming, de regel van Arthur (SPEC §9) ──────────
@@ -486,7 +500,7 @@ window.KWU_READY.then(function () {
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg"><b>pijl</b> waar wind of stroom heen gaat</span><span class="lg"><b>modellen eens</b> gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg"><b>stroming</b> sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af</span><span class="lg"><b>regen</b> 💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg"><b>kite</b> maat bij jouw gewicht en board, groot getal = lekker powered, eronder de veilige en de gepowerde kant</span><span class="lg disclaimer"><b>⚠️ schatting</b> uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
+      '<span class="lg"><b>pijl</b> waar wind of stroom heen gaat</span><span class="lg"><b>modellen eens</b> gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg"><b>stroming</b> sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af. Alleen het getij, zonder wat de wind er bovenop duwt</span><span class="lg"><b>regen</b> 💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg"><b>kite</b> maat bij jouw gewicht en board, groot getal = lekker powered, eronder de veilige en de gepowerde kant</span><span class="lg disclaimer"><b>⚠️ schatting</b> uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
   }
 
   function openVenster(j) {
