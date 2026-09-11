@@ -153,9 +153,11 @@ main{padding-bottom:64px}
 .uurtabel th .info:hover{border-color:var(--inkt);color:var(--inkt)}
 /* Rijkop met uitleg: tekst links, knop tegen de rechterrand. Alle knoppen staan zo onder elkaar. */
 .uurtabel th .rk{display:block;padding-right:23px}
-/* Kans per windsterkte in het uitlegvenster: drie kaartjes, één beslissing per kaartje. */
-.drempels{display:flex;gap:8px;margin:0 0 14px}
-.dr{flex:1;background:var(--tint-v);border-radius:var(--r-s,8px);padding:10px 8px;text-align:center}
+/* Kans per windsterkte in het uitlegvenster: vier kaartjes, één beslissing per kaartje.
+   Op een telefoon twee naast elkaar, anders wordt "te hard, blijf aan land" een kolom van losse letters. */
+.drempels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}
+@media(max-width:600px){.drempels{grid-template-columns:repeat(2,1fr)}}
+.dr{background:var(--tint-v);border-radius:var(--r-s,8px);padding:10px 8px;text-align:center}
 .dr b{display:block;font-family:var(--kop);font-size:24px;line-height:1.05;color:var(--tint)}
 .dr span{display:block;font-size:12px;font-weight:700;margin-top:2px}
 .dr small{display:block;font-size:11px;color:var(--zacht);margin-top:1px}

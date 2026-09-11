@@ -8,6 +8,9 @@ window.KWU_READY.then(function () {
   "use strict";
 
   var RIJDBAAR = KW.rijdbaar || 12;
+  /* Boven de 30 kn ga je niet meer het water op: te veel wind telt dus niet mee als "je kunt kiten".
+     Anders zegt de pagina 100% bij 35 kn storm, en dat klopt niet met wat je doet. */
+  var TEVEEL = 30;
   var DAGL = ["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"];
   var DAGK = ["zo","ma","di","wo","do","vr","za"];
   var KOMPAS = ["N","NNO","NO","ONO","O","OZO","ZO","ZZO","Z","ZZW","ZW","WZW","W","WNW","NW","NNW"];
@@ -46,7 +49,7 @@ window.KWU_READY.then(function () {
   function inSector(dir, v) { var d = ((dir%360)+360)%360; return v[0] <= v[1] ? (d >= v[0] && d <= v[1]) : (d >= v[0] || d <= v[1]); }
   function veilig(s, dir) { return s.vensters.some(function (v) { return inSector(dir, v); }); }
   /* Daniel 2026-09-06: 14–16 kn met vlagen 22–26 is een goede kitedag, dus goed vanaf 14. */
-  function band(kn) { return kn < RIJDBAAR ? "weinig" : kn < 14 ? "matig" : kn < 19 ? "goed" : kn <= 30 ? "perfect" : "matig"; }
+  function band(kn) { return kn < RIJDBAAR ? "weinig" : kn < 14 ? "matig" : kn < 19 ? "goed" : kn <= TEVEEL ? "perfect" : "matig"; }
   /* Doorlopende kleur voor staaf en vlagen: geel (12) → groen (19) → donkergroen (24). Labels blijven vijf. */
   function knKleur(kn, n) {
     if (n === "weinig" || n === "aflandig") return KLEUR[n];
@@ -96,14 +99,14 @@ window.KWU_READY.then(function () {
       /* kans uit de ensembles: deel van de leden (na de optelling) dat rijdbaar geeft; alleen in de DAJK-mix, alleen wind */
       var ens = null;
       if (st.mix === "dajk" && sp.ens) { ens = {}; Object.keys(sp.ens).forEach(function (e) { var v = sp.ens[e][i]; if (!v) return;
-        ens[e] = Math.round(v.filter(function (x) { return x + off >= RIJDBAAR; }).length / v.length * 100); }); if (!Object.keys(ens).length) ens = null; }
+        ens[e] = Math.round(v.filter(function (x) { return x + off >= RIJDBAAR && x + off <= TEVEEL; }).length / v.length * 100); }); if (!Object.keys(ens).length) ens = null; }
       var sx = 0, sy = 0, ja = 0; rows.forEach(function (r, j) {
         sx += ws[j]*Math.cos(r[2]*Math.PI/180); sy += ws[j]*Math.sin(r[2]*Math.PI/180);
-        if (r[0] >= RIJDBAAR && veilig(s, r[2])) ja += ws[j];                       // Arthurs gate, per model één stem
+        if (r[0] >= RIJDBAAR && r[0] <= TEVEEL && veilig(s, r[2])) ja += ws[j];                       // Arthurs gate, per model één stem
       });
       var kns = rows.map(function (r) { return r[0]; });
       return Object.assign({}, u, { kn:gewMediaan(kns, ws), vl:gewMediaan(rows.map(function (r) { return r[1]; }), ws),
-        dir:Math.round((Math.atan2(sy, sx)*180/Math.PI + 360) % 360), nModellen:rows.length, nJa:rows.filter(function (r) { return r[0] >= RIJDBAAR && veilig(s, r[2]); }).length,
+        dir:Math.round((Math.atan2(sy, sx)*180/Math.PI + 360) % 360), nModellen:rows.length, nJa:rows.filter(function (r) { return r[0] >= RIJDBAAR && r[0] <= TEVEEL && veilig(s, r[2]); }).length,
         kans:Math.round(ja*100), knLo:Math.min.apply(null,kns), knHi:Math.max.apply(null,kns), ens:ens, off:off });
     });
     cache.key = key; return cache.uren;
@@ -167,7 +170,7 @@ window.KWU_READY.then(function () {
     var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v);
     return hi - lo > 20 ? lo + "–" + hi + "%" : Math.round((lo + hi) / 2) + "%";
   }
-  function indicatieTekst(i, d) { if (fijnBij(d)) return ""; var k = kansTekst(dagKans(d)); return " · indicatie" + (k ? " · kans op genoeg wind " + k : ", alleen grove modellen"); }
+  function indicatieTekst(i, d) { if (fijnBij(d)) return ""; var k = kansTekst(dagKans(d)); return " · indicatie" + (k ? " · kans dat je kunt kiten " + k : ", alleen grove modellen"); }
   /* Gekozen uur; standaard het eerste kitebare uur van de dag, anders het hardste. */
   function gekozen() {
     var d = huidigeDag(), u = d.uren.filter(function (x) { return x.t === st.t; })[0];
@@ -459,7 +462,7 @@ window.KWU_READY.then(function () {
         '<span class="dvl">vlagen ' + (o.v ? o.v.vlLo + "–" + o.v.vlHi : o.b.vl) + '</span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
         '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : (o.b.knLo != null ? " · " + o.b.knLo + "–" + o.b.knHi + " kn uiteen" : "")) + '</span>' +
-        (!fijnBij(d) && kansTekst(dagKans(d)) ? '<span class="ind kans-ens">kans op genoeg wind ' + kansTekst(dagKans(d)) + '</span>' : '') + '</button>';
+        (!fijnBij(d) && kansTekst(dagKans(d)) ? '<span class="ind kans-ens">kans dat je kunt kiten ' + kansTekst(dagKans(d)) + '</span>' : '') + '</button>';
     });
     var nauw = ds.map(fijnBij), split = nauw.findIndex(function (n) { return n === 0; });
     if (split < 0) split = ds.length;
@@ -583,9 +586,12 @@ window.KWU_READY.then(function () {
       }) : "") +
       rij(rijkop("kite m", "kite", "Hoe de kitemaat wordt berekend", st.kg + " kg, " + st.board), function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
         var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : k.maat - 1) + '–' + (k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
-      rij(rijkop("kans dat het kan", "zeker", "Waar dit percentage over gaat"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
+      rij(rijkop("kans dat je kunt kiten", "zeker", "Waar dit percentage over gaat", RIJDBAAR + "–" + TEVEEL + " kn, veilige hoek"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
-        return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span><small>' + u.knLo + "–" + u.knHi + ' kn</small>'); }) +
+        /* Waarom het percentage laag is, staat eronder: te weinig wind, te hard, of de verkeerde hoek.
+           Zonder die reden is 0% naast 34 kn onbegrijpelijk. */
+        var waarom = u.knLo > TEVEEL ? "te hard" : u.knHi < RIJDBAAR ? "te weinig" : (k < 25 && niveau(u) === "aflandig" ? "aflandig" : "");
+        return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span><small>' + u.knLo + "–" + u.knHi + ' kn' + (waarom ? ", " + waarom : "") + '</small>'); }) +
       rij(rijkop("stroming", "stroom", "Wat de stroming met je doet"), function (u) { var b = blokBij(u.t), c = stroomC(b, u.dir);
         return td(u, "ts", b && b.stroom ? pijl(b.stroom.naar + 180, c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '<small>' + b.stroom.kn.toFixed(1) + ' kn</small><small style="color:' + (c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '">' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</small>' : '<small>—</small>'); }) +
       rij("golven", function (u) { return td(u, "tg", u.golf ? '<span>' + u.golf.m.toFixed(1) + ' m</span><small>' + u.golf.s + ' s</small>' : '<small>—</small>'); }) +
@@ -639,17 +645,18 @@ window.KWU_READY.then(function () {
   }
 
   /* Kans per windsterkte voor één uur, uit de losse ensembleleden (31 GFS-runs + 51 ECMWF-runs).
-     Drie drempels omdat ze drie verschillende beslissingen zijn: 12 = ga ik, 15 = wordt het leuk,
-     20 = neem ik de kleine kite mee. Geeft null als er geen ensemble is voor dit uur. */
+     Vier kaartjes omdat het vier verschillende beslissingen zijn: 12 = ga ik, 15 = wordt het leuk,
+     20 = neem ik de kleine kite mee, boven 30 = ik blijf aan land. Geeft null als er geen ensemble is. */
   function kansPerDrempel(t) {
     var sp = KWU.spots[st.spot]; if (!sp || !sp.ens) return null;
     var i = sp.uren.findIndex(function (x) { return x.t === t; }); if (i < 0) return null;
     var leden = [], off = st.mix === "dajk" ? optelling() : 0;
     Object.keys(sp.ens).forEach(function (e) { var v = sp.ens[e][i]; if (v) v.forEach(function (x) { leden.push(x + off); }); });
     if (leden.length < 20) return null;
+    var pct = function (f) { return Math.round(leden.filter(f).length / leden.length * 100); };
     return [RIJDBAAR, 15, 20].map(function (g) {
-      return { grens:g, pct:Math.round(leden.filter(function (x) { return x >= g; }).length / leden.length * 100) };
-    });
+      return { grens:g, pct:pct(function (x) { return x >= g; }) };
+    }).concat([{ grens:TEVEEL, boven:true, pct:pct(function (x) { return x > TEVEEL; }) }]);
   }
 
   /* Waarom een percentage boven een windgetal staat, en wat je ermee doet. */
@@ -657,16 +664,19 @@ window.KWU_READY.then(function () {
     var u = gekozen(), kd = kansPerDrempel(u.t);
     $("sheet-t").textContent = "Kans dat je kunt kiten om " + uurStr(u.t);
     $("sheet-b").innerHTML = (kd ? '<div class="drempels">' + kd.map(function (k) {
-        var kl = k.pct >= 70 ? "perfect" : k.pct >= 40 ? "goed" : k.pct >= 15 ? "matig" : "weinig";
+        var kl = k.boven ? (k.pct >= 40 ? "aflandig" : k.pct >= 15 ? "matig" : "weinig")
+              : k.pct >= 70 ? "perfect" : k.pct >= 40 ? "goed" : k.pct >= 15 ? "matig" : "weinig";
         return '<div class="dr" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '"><b>' + k.pct + '%</b>' +
-          '<span>' + k.grens + ' kn of meer</span><small>' + (k.grens === RIJDBAAR ? "je kunt varen" : k.grens === 15 ? "lekker powered" : "kleine kite mee") + '</small></div>';
+          '<span>' + (k.boven ? "meer dan " + k.grens + " kn" : k.grens + ' kn of meer') + '</span><small>' +
+          (k.boven ? "te hard, blijf aan land" : k.grens === RIJDBAAR ? "je kunt varen" : k.grens === 15 ? "lekker powered" : "kleine kite mee") + '</small></div>';
       }).join("") + '</div>' : "") +
       '<ul class="redenen">' +
-      (kd ? '<li class="p"><b>Die drie kaartjes</b> komen uit 82 doorrekeningen van hetzelfde weer, elk met een klein duwtje verschil. Ze kijken alleen naar de kracht, niet naar de hoek.</li>' : "") +
-      '<li class="p"><b>Het getal in de tabel is iets anders.</b> Dat is het deel van de tien modellen dat zegt: ' + RIJDBAAR + ' kn of meer, en uit een hoek die op ' + esc(spot().naam) + ' veilig is. Het model dat het vaakst gelijk had, telt zwaarder.</li>' +
+      (kd ? '<li class="p"><b>Die vier kaartjes</b> komen uit 82 doorrekeningen van hetzelfde weer, elk met een klein duwtje verschil. Ze kijken alleen naar de kracht, niet naar de hoek.</li>' : "") +
+      '<li class="p"><b>Het getal in de tabel telt drie dingen samen.</b> Het is het deel van de tien modellen dat zegt: minstens ' + RIJDBAAR + ' kn, hoogstens ' + TEVEEL + ' kn, en uit een hoek die op ' + esc(spot().naam) + ' veilig is. Het model dat het vaakst gelijk had, telt zwaarder.</li>' +
+      '<li class="p"><b>Te veel wind telt dus als nee.</b> Staat er 35 kn, dan is de kans laag en staat er "te hard" onder: boven ' + TEVEEL + ' kn ga je niet meer het water op.</li>' +
       '<li class="p"><b>90% is een plan.</b> De modellen zijn het eens dat je kunt. Of het 14 of 18 kn wordt weet je nog niet.</li>' +
       '<li class="p"><b>30% is nieuwsgierig blijven.</b> Drie van de tien zien het, zeven niet.</li>' +
-      '<li class="p"><b>0% terwijl er wind staat, is de hoek.</b> Er waait genoeg, maar aflandig. Kijk naar de pijlen bovenin.</li>' +
+      '<li class="p"><b>0% terwijl er wind staat, is de hoek of te veel wind.</b> Onder het getal staat welke van de twee. Kijk daarna naar de pijlen bovenin.</li>' +
       '<li class="p"><b>Het bereik onder het getal</b> is de laagste en de hoogste schatting voor dit uur. Ver uit elkaar betekent: ze weten het nog niet.</li>' +
       '<li class="m">Na twee dagen vallen de fijne modellen weg en wordt alles voorzichtiger. Op de dagkaarten staat dan de kans uit dezelfde 82 doorrekeningen.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
