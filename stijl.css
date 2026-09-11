@@ -237,7 +237,8 @@ main{padding-bottom:64px}
 .uurtabel .tw .staaf{display:block;width:100%;border-radius:3px 3px 0 0;min-height:3px}
 .uurtabel .tw small{display:block;font-size:10.5px;color:var(--flauw);line-height:1.1;white-space:nowrap}
 .uurtabel .tw small.onzeker{color:var(--matig)}
-.uurtabel .tv small{display:block;font-size:10px;color:var(--matig);font-weight:700;margin-top:1px}
+.uurtabel .tv small{display:block;font-size:10px;color:var(--flauw);font-weight:700;margin-top:1px;white-space:nowrap}
+.uurtabel .tv small.vlagerig{color:var(--matig)}
 .uurtabel .tv .vp{display:inline-block;min-width:34px;background:var(--tint-v);color:var(--tint);font-weight:700;padding:5px 8px;border-radius:6px}
 .uurtabel .wijzer{width:16px;height:16px}
 

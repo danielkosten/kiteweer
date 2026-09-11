@@ -587,7 +587,7 @@ window.KWU_READY.then(function () {
       rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "modellen laag–hoog"), function (u) {
         return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>' +
           (u.nModellen > 1 ? '<small' + (u.knHi - u.knLo > 7 ? ' class="onzeker"' : '') + '>' + u.knLo + "–" + u.knHi + '</small>' : '')); }) +
-      rij(rijkop("vlagen", "vlagen", "Wat vlagen en spreiding van elkaar verschillen", "erbij in een vlaag"), function (u) { var n = niveau(u);
+      rij(rijkop("vlagen", "vlagen", "Wat vlagen en spreiding van elkaar verschillen", "en hoeveel erbij"), function (u) { var n = niveau(u);
         /* Het gekleurde vlak zit om het getal heen, niet om de hele cel: nu elke rij even hoog is
            zou een cel-achtergrond een blok van 56 px worden. */
         /* Gemeten aan Hoek van Holland, 485 daglichturen 1 aug t/m 10 sep: een vlaag is 1,4x de
@@ -599,8 +599,9 @@ window.KWU_READY.then(function () {
         var vlagerig = u.kn >= genoegKn() && verhouding >= 1.6;
         /* Sommige grove modellen leveren geen vlagen: dan is vlaag = wind en zou er "+0" staan.
            Een streepje is eerlijker dan een nul die op windstil lijkt. */
-        return td(u, "tv", '<span class="vp">' + (extra > 0 ? "+" + extra : "—") + '</span>' +
-          (vlagerig ? '<small>vlagerig</small>' : ''), "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
+        return td(u, "tv", '<span class="vp">' + u.vl + '</span>' +
+          '<small' + (vlagerig ? ' class="vlagerig"' : '') + '>' + (extra > 0 ? "+" + extra : "—") + (vlagerig ? " vlagerig" : "") + '</small>',
+          "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       (i === 0 && meetstation() ? rij(rijkop("gemeten", "meten", "Welk meetstation en hoe ver weg"), function (u) {
         var m = metingBij(u.t);
         if (m == null) return td(u, "tmeet", '<small>—</small>');
@@ -627,15 +628,17 @@ window.KWU_READY.then(function () {
       rij("regen mm/u", function (u) { var d = druppels(u.mm); return td(u, "tr", d ? '<span class="drup">' + "💧".repeat(d) + '</span><small>' + u.mm + '</small>' : '<small class="droog">droog</small>'); }) +
       '</tbody></table>';
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
-    /* Op een smal scherm past de dag niet in beeld. Schuif naar het uur van nu, of naar het
-       uur dat je hebt aangeklikt, zodat je nooit naar 03:00 zit te kijken. */
+    /* Op een smal scherm past de dag niet in beeld: schuif de TABEL naar het uur van nu.
+       Met scrollIntoView sprong de hele pagina omlaag bij elke klik op een knop of je gewicht,
+       want die schuift ook verticaal. Nu zetten we alleen scrollLeft van het tabelvak. */
     (function () {
-      var doel = $("dagen").querySelector("td.nuur") || $("dagen").querySelector("td.aan");
-      if (doel) doel.scrollIntoView({ block: "nearest", inline: "center" });
+      var vak = $("dagen").querySelector(".scroll"); if (!vak) return;
+      var doel = vak.querySelector("td.nuur") || vak.querySelector("td.aan"); if (!doel) return;
+      vak.scrollLeft = doel.offsetLeft - (vak.clientWidth - doel.offsetWidth) / 2;
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14 of boven 30, kleine kite" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg"><b>vlagen +9</b> wat er binnen dat uur echt gebeurt: zoveel knopen komt er in een piek bovenop. 40% erbij is normaal</span>' +
+      '<span class="lg"><b>vlagen 25 +9</b> wat er binnen dat uur echt gebeurt: de piek, en hoeveel knopen dat boven de wind is. 40% erbij is normaal</span>' +
       '<span class="lg"><b>8–22 onder de wind</b> geen wind maar twijfel: de laagste en hoogste van de tien modellen. Oker = meer dan 7 kn oneens</span>' +
       '<span class="lg"><b>pijl</b> waar de wind of de stroom heen gaat</span>' +
       '<span class="lg"><b>regen</b> 1 druppel is licht, 3 is 1 mm per uur, 5 is een plensbui</span>' +
