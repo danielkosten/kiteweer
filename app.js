@@ -192,7 +192,7 @@ window.KWU_READY.then(function () {
     var lo = Math.min.apply(null, v), hi = Math.max.apply(null, v);
     return hi - lo > 20 ? lo + "–" + hi + "%" : Math.round((lo + hi) / 2) + "%";
   }
-  function indicatieTekst(i, d) { if (fijnBij(d)) return ""; var k = kansTekst(dagKans(d)); return " · indicatie" + (k ? " · kans dat je kunt kiten " + k : ", alleen grove modellen"); }
+  function indicatieTekst(i, d) { if (fijnBij(d)) return ""; var k = kansTekst(dagKans(d)); return " · indicatie" + (k ? " · sessiekans " + k : ", alleen grove modellen"); }
   /* Gekozen uur; standaard het eerste kitebare uur van de dag, anders het hardste. */
   function gekozen() {
     var d = huidigeDag(), u = d.uren.filter(function (x) { return x.t === st.t; })[0];
@@ -493,7 +493,7 @@ window.KWU_READY.then(function () {
         '<span class="dvl">vlagen ' + (o.v ? o.v.vlLo + "–" + o.v.vlHi : o.b.vl) + '</span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
         '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : (o.b.knLo != null ? " · " + o.b.knLo + "–" + o.b.knHi + " kn uiteen" : "")) + '</span>' +
-        (!fijnBij(d) && kansTekst(dagKans(d)) ? '<span class="ind kans-ens">kans dat je kunt kiten ' + kansTekst(dagKans(d)) + '</span>' : '') + '</button>';
+        (!fijnBij(d) && kansTekst(dagKans(d)) ? '<span class="ind kans-ens">sessiekans ' + kansTekst(dagKans(d)) + '</span>' : '') + '</button>';
     });
     var nauw = ds.map(fijnBij), split = nauw.findIndex(function (n) { return n === 0; });
     if (split < 0) split = ds.length;
