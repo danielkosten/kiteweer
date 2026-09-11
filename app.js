@@ -878,9 +878,18 @@ window.KWU_READY.then(function () {
   if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";
   window.KWU_LAAD(st.spot).catch(function () { st.spot = "kijkduin"; return window.KWU_LAAD(st.spot); }).then(function () {
     var klok = function (x) { return x ? new Date(x).toLocaleString("nl-NL", { day:"numeric", month:"numeric", hour:"2-digit", minute:"2-digit" }) : "onbekend"; };
+    /* Hoe oud iets is zegt meer dan hoe laat het opgehaald is: bij een gemiste verversing zie je
+       meteen "3 uur oud" in plaats van een tijd die je zelf moet aftrekken. */
+    var oud = function (x) {
+      if (!x) return "";
+      var m = Math.round((Date.now() - new Date(x).getTime()) / 60000);
+      if (m < 2) return " (net)";
+      if (m < 90) return " (" + m + " min oud)";
+      return " (" + Math.round(m / 60) + " uur oud)";
+    };
     var regels = [(KWU.live ? "wind live opgehaald " : "wind uit de noodvoorraad, ") + klok(KWU.gegenereerd)];
     if (window.KWS) regels.push("stroming " + klok(window.KWS.gegenereerd));
-    if (window.KWM) regels.push("metingen " + klok(window.KWM.gegenereerd));
+    if (window.KWM) regels.push("metingen " + klok(window.KWM.gegenereerd) + oud(window.KWM.gegenereerd));
     $("ververst").textContent = "bijgewerkt: " + regels.join(" · ");
     teken();
   });
