@@ -88,3 +88,34 @@ staan.
 op 12-09 23:00, want hij is één keer met de hand gemaakt. Dezelfde nachtelijke Action draait nu ook
 `gen-uur.mjs`, dus die voorraad is nooit meer dan een dag oud. Vier spots, zoals altijd: het is een
 noodgeval-bundel, geen tweede databron.
+
+# Metingen: wat er echt stond
+
+`gen-meting.mjs` haalt elk kwartier op wat de meetstations van Rijkswaterstaat werkelijk meten, bij
+dezelfde openbare deur als de stroming maar uit een andere kast: `db=series`, `source=observed`,
+`wind_speed` in m/s en `wind_direction`. De GitHub Action `meting.yml` draait elke 15 minuten.
+
+Dat levert twee dingen op de pagina:
+
+- een rij **gemeten** onder de wind, voor de uren van vandaag die al geweest zijn, met eronder het
+  verschil met het model (groen = er stond meer, oker = er stond minder, grijs = model was raak);
+- een zin onder de tabel: *"Vandaag staat er meer wind dan voorspeld. Hoek van Holland op 10,4 km
+  meet 2,3 kn meer, gemiddeld over 8 uur."* Dat is precies de correctie die je de rest van de dag
+  mag verwachten.
+
+## Welk station bij welke spot
+
+Hier rekent het script het wél zelf uit: het dichtstbijzijnde station, met de afstand erbij zodat je
+zelf kunt wegen. Dat mag hier en niet bij de stroming, want wind over een strand lijkt op wind 5 km
+verderop, terwijl stroom in de ene geul niks zegt over de geul ernaast.
+
+Per spot worden de drie dichtstbijzijnde stations binnen 40 km bewaard. Ligt er een stil, dan schuift
+de spot door naar de volgende die wel meet. Resultaat op 11-09: 63 van de 64 spots, meestal binnen
+5 km, en 28 stations opgehaald.
+
+## Elk kwartier committen, is dat niet veel
+
+Het zijn ongeveer 96 bot-commits per dag op een pagina zonder bezoekersteller, dus het kost niets
+behalve regels in de geschiedenis. De alternatieven waren duurder: een tussenstation bij Cloudflare
+is een extra ding dat kan omvallen, en rechtstreeks vanuit de browser mag niet, want die server geeft
+een webpagina geen toestemming om mee te kijken (nagemeten: de stroom-deur wel, de wind-deur niet).

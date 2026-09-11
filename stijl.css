@@ -188,13 +188,26 @@ main{padding-bottom:64px}
 .uurtabel th{font-size:11px;font-weight:700;color:var(--zacht);text-align:left;white-space:normal;width:74px;line-height:1.2;padding-right:6px}
 .uurtabel td{text-align:center;padding:2px 0;font-size:13.5px;position:relative}
 .uurtabel td.aan{background:var(--lijn-2)}
-/* Het uur waar de klok nu in staat: één doorlopende streep door de hele kolom, zodat je in
-   één oogopslag ziet waar "nu" zit, ook als je een ander uur hebt aangeklikt. */
-.uurtabel td.nu::before{content:"";position:absolute;inset:0 -1px;border-left:2px solid var(--inkt);border-right:2px solid var(--inkt);pointer-events:none}
-.uurtabel tr:first-child td.nu::before{border-top:2px solid var(--inkt);border-radius:5px 5px 0 0}
-.uurtabel tr:last-child td.nu::before{border-bottom:2px solid var(--inkt);border-radius:0 0 5px 5px}
-.uurtabel .tu.nu button small{display:block;font-size:9px;font-weight:800;letter-spacing:.04em;line-height:1;margin-top:1px;text-transform:uppercase}
-.uurtabel .tu.nu button{background:var(--inkt);color:var(--papier);padding:4px 0}
+/* Het uur waar de klok nu in staat. Gekozen = inkt gevuld, nu = een dunne inktring met een
+   lichte was erachter: allebei zichtbaar, en je verwart ze niet met elkaar. */
+.uurtabel td.nuur::before{content:"";position:absolute;inset:0 -1px;
+  border-left:1px solid var(--inkt);border-right:1px solid var(--inkt);pointer-events:none}
+.uurtabel tr:first-child td.nuur::before{border-top:1px solid var(--inkt);border-radius:7px 7px 0 0}
+.uurtabel tr:last-child td.nuur::before{border-bottom:1px solid var(--inkt);border-radius:0 0 7px 7px}
+.uurtabel .tu.nuur button{color:var(--inkt);padding:4px 0}
+.uurtabel .tu.nuur button small{display:block;font-size:8.5px;font-weight:800;letter-spacing:.1em;line-height:1;margin-top:2px;color:var(--zacht);text-transform:uppercase}
+.uurtabel .tu.nuur.aan button small{color:var(--papier);opacity:.75}
+
+/* Wat het meetstation echt mat, met eronder hoeveel dat van het model afwijkt. Kleur alleen als
+   het verschil ertoe doet: onder 1,5 kn is het model gewoon raak. */
+.uurtabel .tmeet{padding:5px 0}
+.uurtabel .tmeet b{display:block;font-family:var(--kop);font-size:15px;line-height:1}
+.uurtabel .tmeet small{display:block;font-size:10.5px;font-weight:700;color:var(--zacht)}
+.uurtabel th small{font-weight:600;color:var(--zacht);line-height:1.15;display:block;margin-top:1px}
+.uurtabel .tmeet small.meer{color:var(--perfect)}
+.uurtabel .tmeet small.minder{color:var(--matig)}
+.uurtabel .tmeet small.raak{color:var(--zacht)}
+.sv.meet{border-left:2px solid var(--lijn);padding-left:10px}
 .uurtabel .tu button{font-weight:700;font-size:13px;color:var(--zacht);padding:6px 0;width:100%;border-radius:6px}
 .uurtabel .tu button:hover{background:var(--lijn-2);color:var(--inkt)}
 .uurtabel .tu.aan button{background:var(--inkt);color:var(--papier)}

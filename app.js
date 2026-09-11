@@ -350,7 +350,7 @@ window.KWU_READY.then(function () {
 
   // ── hero: de gekozen dag ─────────────────────────────
   function tekenHero() {
-    var ds = dagen(), d = huidigeDag(), s = spot(), o = dagOordeel(d), i = ds.indexOf(d);
+    var ds = dagen(), i = Math.min(st.dag, ds.length - 1), d = ds[i], s = spot(), o = dagOordeel(d);
     var beste = null, besteDag = null;
     ds.forEach(function (x) { var ox = dagOordeel(x);
       if (ox.v && (!beste || RANG[ox.n] < RANG[beste.n] || (RANG[ox.n] === RANG[beste.n] && ox.v.uren.length > beste.uren.length))) { beste = ox.v; besteDag = x; } });
@@ -406,9 +406,22 @@ window.KWU_READY.then(function () {
   function vet(p) { var m = /^([^,:]{3,48})([,:])(.+)$/.exec(p); return m ? "<b>" + m[1] + "</b>" + m[2] + m[3] : p; }
   function kenteringTekst(us) { var k = kenteringen(us); return k.length ? "stroom draait " + k.map(function (x) { return "rond " + uurStr(x.t) + " van " + x.van + " naar " + x.naar; }).join(", ") : ""; }
 
+  /* Eén zin: liep vandaag hoger of lager dan het model zei? Alleen op de dag van vandaag, en
+     alleen als er genoeg uren geweest zijn om er iets van te vinden. */
+  function meetZin() {
+    if (st.dag !== 0) return "";
+    var a = afwijkingVandaag(); if (!a) return "";
+    var kop = Math.abs(a.kn) < 1.5 ? "Het model zit er vandaag goed op."
+      : a.kn > 0 ? "Vandaag staat er meer wind dan voorspeld." : "Vandaag staat er minder wind dan voorspeld.";
+    var staart = Math.abs(a.kn) < 1.5
+      ? "het station zit gemiddeld " + String(Math.abs(a.kn)).replace(".", ",") + " kn van de voorspelling af over " + a.uren + " uur."
+      : String(Math.abs(a.kn)).replace(".", ",") + " kn " + (a.kn > 0 ? "meer" : "minder") + ", gemiddeld over " + a.uren + " uur die al geweest zijn. Reken daar de rest van de dag ook op.";
+    return '<p class="sv meet"><b>' + kop + '</b> ' + esc(a.station) + ' op ' + String(a.km).replace(".", ",") + ' km meet ' + staart + '</p>';
+  }
+
   function tekenSamenvatting() {
     var d = huidigeDag(), o = dagOordeel(d), el = $("samenvatting");
-    if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Geen kitewind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' +
+    if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Geen kitewind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' + meetZin() +
       '<p class="sv flauw">zon op ' + d.zon.op + ', onder ' + d.zon.onder +
       (st.dag === 0 ? ' · <a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a>' : '') + '</p>'; return; }
     var alle = [].concat.apply([], o.ws.map(function (w) { return w.uren; })).filter(function (u) { return uurScore(u) != null; });
@@ -420,6 +433,7 @@ window.KWU_READY.then(function () {
       html += '<p class="sv"><b>Ook prima ' + rr.map(runTekst).join(", ") + '</b> · ' + (lo2 === hi2 ? lo2 : lo2 + "–" + hi2) + ' kn · ' + waarom(rest) + '</p>'; }
     var niet = d.uren.filter(function (u) { return uurScore(u) == null; });
     if (niet.length) html += '<p class="sv flauw">Niet: ' + runs(niet).map(runTekst).join(", ") + ' · ' + (niet.some(function (u) { return niveau(u) === "aflandig"; }) ? "aflandig of " : "") + 'te weinig wind</p>';
+    html += meetZin();
     var kt = kenteringTekst(d.uren); if (kt) html += '<p class="sv"><b>Stroming:</b> ' + kt + ' (bron per 3 uur, dus ongeveer)</p>';
     html += '<p class="sv flauw">zon op ' + d.zon.op + ', onder ' + d.zon.onder + ' · <button type="button" class="link" data-venster="0">hoe het cijfer ontstaat</button>' +
       (st.dag === 0 ? ' · <a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a>' : '') + '</p>';
@@ -457,6 +471,37 @@ window.KWU_READY.then(function () {
     }).join("");
   }
 
+  /* ── wat er echt gemeten is ────────────────────────────
+     meting.js komt elk kwartier vers van Rijkswaterstaat (gen-meting.mjs). Per spot het
+     dichtstbijzijnde meetstation dat vandaag ook echt meet, met de afstand erbij: 4 km is jouw
+     strand, 26 km is een aanwijzing. Alleen uren die al geweest zijn, alleen vandaag. */
+  function meetstation() {
+    var M = window.KWM; if (!M || !M.spots) return null;
+    var k = M.spots[st.spot]; if (!k || !M.stations[k.station]) return null;
+    var s = M.stations[k.station];
+    return { code:k.station, km:k.km, naam:s.naam, uren:s.uren, oud:!!s.oud };
+  }
+  /* De meting die het dichtst bij dit hele uur ligt, of null als er niets is. */
+  function metingBij(t) {
+    var s = meetstation(); if (!s) return null;
+    var ms = new Date(t).getTime();
+    if (ms > Date.now()) return null;                       // de toekomst is nooit gemeten
+    for (var i = 0; i < s.uren.length; i++) {
+      if (Math.abs(new Date(s.uren[i][0]).getTime() - ms) < 1800e3) return { kn:s.uren[i][1], dir:s.uren[i][2] };
+    }
+    return null;
+  }
+  /* Hoe ver zat het model er vandaag naast, over alle uren die al geweest zijn?
+     Positief = er stond meer wind dan voorspeld. */
+  function afwijkingVandaag() {
+    var s = meetstation(); if (!s) return null;
+    var d = dagen()[0], paren = [];
+    d.uren.forEach(function (u) { var m = metingBij(u.t); if (m != null) paren.push(m.kn - u.kn); });
+    if (paren.length < 3) return null;
+    var som = paren.reduce(function (a, b) { return a + b; }, 0);
+    return { kn:Math.round(som / paren.length * 10) / 10, uren:paren.length, station:s.naam, km:s.km };
+  }
+
   /* Het uur waar de klok nu in staat, in dezelfde schrijfwijze als u.t ("2026-09-11T14:00").
      Alleen zinvol op de dag van vandaag; op een andere dag bestaat "nu" niet in de tabel. */
   function uurNu() {
@@ -467,13 +512,15 @@ window.KWU_READY.then(function () {
 
   // ── uur voor uur: één dag, tabel zoals Windfinder ────
   function tekenDag() {
-    var ds = dagen(), d = huidigeDag(), i = ds.indexOf(d), o = dagOordeel(d);
+    /* i uit st.dag, niet uit indexOf: dagen() bouwt elke aanroep verse objecten, dus indexOf gaf
+       altijd -1 en "vandaag," verscheen nooit in de kop. */
+    var ds = dagen(), i = Math.min(st.dag, ds.length - 1), d = ds[i], o = dagOordeel(d);
 
     var kop = '<div class="dagkop" style="--tint:' + tint(o.n) + '"><b>' + (i === 0 ? "vandaag, " : "") + dagLang(d.uren[0].t) + '</b>' +
       '<span class="dagv">' + (o.v ? o.ws.length + (o.ws.length === 1 ? " venster" : " vensters") + " · " + WOORD[o.n] : WOORD[o.n]) + '</span>' +
       '<span class="ind">zon op ' + d.zon.op + ', onder ' + d.zon.onder + indicatieTekst(i, d) + '</span></div>';
     var nu = uurNu();
-    var td = function (u, cls, inhoud, style) { return '<td class="' + cls + (u.t === st.t ? " aan" : "") + (u.t === nu ? " nu" : "") + '" data-t="' + u.t + '"' + (style ? ' style="' + style + '"' : '') + '>' + inhoud + '</td>'; };
+    var td = function (u, cls, inhoud, style) { return '<td class="' + cls + (u.t === st.t ? " aan" : "") + (u.t === nu ? " nuur" : "") + '" data-t="' + u.t + '"' + (style ? ' style="' + style + '"' : '') + '>' + inhoud + '</td>'; };
     var rij = function (lbl, cel) { return '<tr><th scope="row">' + lbl + '</th>' + d.uren.map(cel).join("") + '</tr>'; };
     var max = Math.max(30, top(d.uren).kn);
     var vensterRij = (function () {
@@ -492,6 +539,13 @@ window.KWU_READY.then(function () {
       rij("wind kn", function (u) { return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>'); }) +
       rij("vlagen", function (u) { var n = niveau(u), g = n === "aflandig" ? "aflandig" : band(u.vl); return td(u, "tv", u.vl, "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
       rij("", function (u) { return td(u, "tn", '<i style="background:' + knKleur(u.kn, niveau(u)) + '"></i>'); }) +
+      (i === 0 && meetstation() ? rij('gemeten<br><small>' + esc(meetstation().naam) + '<br>' + String(meetstation().km).replace(".", ",") + ' km</small>', function (u) {
+        var m = metingBij(u.t);
+        if (m == null) return td(u, "tmeet", '<small>—</small>');
+        var v = Math.round((m.kn - u.kn) * 10) / 10;
+        var kl = Math.abs(v) < 1.5 ? "raak" : v > 0 ? "meer" : "minder";
+        return td(u, "tmeet", '<b>' + Math.round(m.kn) + '</b><small class="' + kl + '">' + (v > 0 ? "+" : "") + String(v).replace(".", ",") + '</small>');
+      }) : "") +
       rij('kite m <button type="button" class="info" data-info="kite" aria-label="Hoe de kitemaat wordt berekend">i</button><br><small>' + st.kg + ' kg, ' + st.board + '</small>', function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
         var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : k.maat - 1) + '–' + (k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       rij("modellen eens", function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
@@ -507,7 +561,7 @@ window.KWU_READY.then(function () {
     /* Op een smal scherm past de dag niet in beeld. Schuif naar het uur van nu, of naar het
        uur dat je hebt aangeklikt, zodat je nooit naar 03:00 zit te kijken. */
     (function () {
-      var doel = $("dagen").querySelector("td.nu") || $("dagen").querySelector("td.aan");
+      var doel = $("dagen").querySelector("td.nuur") || $("dagen").querySelector("td.aan");
       if (doel) doel.scrollIntoView({ block: "nearest", inline: "center" });
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
@@ -638,7 +692,11 @@ window.KWU_READY.then(function () {
   document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
   if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";
   window.KWU_LAAD(st.spot).catch(function () { st.spot = "kijkduin"; return window.KWU_LAAD(st.spot); }).then(function () {
-    $("ververst").textContent = (KWU.live ? "live opgehaald " : "gebundeld, niet live: ") + new Date(KWU.gegenereerd).toLocaleString("nl-NL");
+    var klok = function (x) { return x ? new Date(x).toLocaleString("nl-NL", { day:"numeric", month:"numeric", hour:"2-digit", minute:"2-digit" }) : "onbekend"; };
+    var regels = [(KWU.live ? "wind live opgehaald " : "wind uit de noodvoorraad, ") + klok(KWU.gegenereerd)];
+    if (window.KWS) regels.push("stroming " + klok(window.KWS.gegenereerd));
+    if (window.KWM) regels.push("metingen " + klok(window.KWM.gegenereerd));
+    $("ververst").textContent = "bijgewerkt: " + regels.join(" · ");
     teken();
   });
 });

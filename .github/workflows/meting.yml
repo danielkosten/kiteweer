@@ -1,18 +1,18 @@
-name: data verversen
+name: metingen verversen
 
-# Haalt elke nacht de getijstroom op bij Rijkswaterstaat (stroom.js) en de wind bij
-# Open-Meteo als terugval-bundel (uur.js), en commit wat er veranderd is.
-# Handmatig starten kan ook, via de Actions-tab.
+# Haalt elk kwartier op wat de meetstations van Rijkswaterstaat echt meten en commit meting.js.
+# Daarmee staat er in de tabel naast de voorspelling wat er werkelijk stond.
 on:
   schedule:
-    - cron: "20 2 * * *"   # 02:20 UTC, elke nacht
+    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
 
+# Nooit twee tegelijk: de vorige mag afmaken, een wachtende run vervalt (de volgende komt zo weer).
 concurrency:
-  group: nachtdata
+  group: metingen
   cancel-in-progress: false
 
 jobs:
@@ -23,14 +23,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: node gen-stroom.mjs
-      - run: node gen-uur.mjs
+      - run: node gen-meting.mjs
       - name: committen als er iets veranderd is
         run: |
           git config user.name "kiteweer-bot"
           git config user.email "kiteweer-bot@users.noreply.github.com"
-          git add stroom.js uur.js
+          git add meting.js
           git diff --staged --quiet && echo "niets veranderd" && exit 0
-          git commit -m "Stroming en terugval-bundel ververst"
+          git commit -m "Metingen ververst"
           git pull --rebase --autostash origin main
           git push
