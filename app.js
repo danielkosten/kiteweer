@@ -8,9 +8,10 @@ window.KWU_READY.then(function () {
   "use strict";
 
   var RIJDBAAR = KW.rijdbaar || 12;
-  /* Boven de 30 kn ga je niet meer het water op: te veel wind telt dus niet mee als "je kunt kiten".
-     Anders zegt de pagina 100% bij 35 kn storm, en dat klopt niet met wat je doet. */
-  var TEVEEL = 30;
+  /* Twee grenzen boven "perfect". VEEL = 30: daarboven is het geen perfecte dag meer maar wel een
+     sessie, jij kite tot 40 met een kleine kite (Daniel, 11-09-2026). TEVEEL = 40: daarboven telt
+     een doorrekening niet meer als "je kunt kiten", anders zegt de pagina 100% bij 45 kn storm. */
+  var VEEL = 30, TEVEEL = 40;
   var DAGL = ["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"];
   var DAGK = ["zo","ma","di","wo","do","vr","za"];
   var KOMPAS = ["N","NNO","NO","ONO","O","OZO","ZO","ZZO","Z","ZZW","ZW","WZW","W","WNW","NW","NNW"];
@@ -49,7 +50,7 @@ window.KWU_READY.then(function () {
   function inSector(dir, v) { var d = ((dir%360)+360)%360; return v[0] <= v[1] ? (d >= v[0] && d <= v[1]) : (d >= v[0] || d <= v[1]); }
   function veilig(s, dir) { return s.vensters.some(function (v) { return inSector(dir, v); }); }
   /* Daniel 2026-09-06: 14–16 kn met vlagen 22–26 is een goede kitedag, dus goed vanaf 14. */
-  function band(kn) { return kn < RIJDBAAR ? "weinig" : kn < 14 ? "matig" : kn < 19 ? "goed" : kn <= TEVEEL ? "perfect" : "matig"; }
+  function band(kn) { return kn < RIJDBAAR ? "weinig" : kn < 14 ? "matig" : kn < 19 ? "goed" : kn <= VEEL ? "perfect" : "matig"; }
   /* Doorlopende kleur voor staaf en vlagen: geel (12) → groen (19) → donkergroen (24). Labels blijven vijf. */
   function knKleur(kn, n) {
     if (n === "weinig" || n === "aflandig") return KLEUR[n];
@@ -607,7 +608,7 @@ window.KWU_READY.then(function () {
       if (doel) doel.scrollIntoView({ block: "nearest", inline: "center" });
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
-      return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
+      return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14 of boven 30, kleine kite" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
       '<span class="lg"><b>pijl</b> waar de wind of de stroom heen gaat</span>' +
       '<span class="lg"><b>regen</b> 1 druppel is licht, 3 is 1 mm per uur, 5 is een plensbui</span>' +
       '<span class="lg"><b>de rest</b> staat achter de ronde i-knoppen links van de tabel</span>' +
@@ -676,7 +677,7 @@ window.KWU_READY.then(function () {
       '<ul class="redenen">' +
       (kd ? '<li class="p"><b>Die drie kaartjes</b> komen uit 82 doorrekeningen van hetzelfde weer, elk met een klein duwtje verschil. Ze kijken alleen naar de kracht, niet naar de hoek.</li>' : "") +
       '<li class="p"><b>Het getal in de tabel telt drie dingen samen.</b> Het is het deel van de tien modellen dat zegt: minstens ' + RIJDBAAR + ' kn, hoogstens ' + TEVEEL + ' kn, en uit een hoek die op ' + esc(spot().naam) + ' veilig is. Het model dat het vaakst gelijk had, telt zwaarder.</li>' +
-      '<li class="p"><b>Te veel wind telt dus als nee.</b> Staat er 35 kn, dan is de kans laag en staat er "te hard" onder: boven ' + TEVEEL + ' kn ga je niet meer het water op.</li>' +
+      '<li class="p"><b>Te veel wind telt dus als nee.</b> Tussen ' + VEEL + ' en ' + TEVEEL + ' kn is het jouw kleine kite, daarboven telt het als nee en staat er "te hard" onder het percentage.</li>' +
       '<li class="p"><b>90% is een plan.</b> De modellen zijn het eens dat je kunt. Of het 14 of 18 kn wordt weet je nog niet.</li>' +
       '<li class="p"><b>30% is nieuwsgierig blijven.</b> Drie van de tien zien het, zeven niet.</li>' +
       '<li class="p"><b>0% terwijl er wind staat, is de hoek of te veel wind.</b> Onder het getal staat welke van de twee. Kijk daarna naar de pijlen bovenin.</li>' +

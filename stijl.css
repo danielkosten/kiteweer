@@ -149,7 +149,7 @@ main{padding-bottom:64px}
 .uurtabel .tkite small{display:block;font-size:10.5px;font-weight:700;color:var(--zacht)}
 /* Absoluut tegen de rechterrand van de kop, niet achter de tekst aan: anders staat elke knop op
    een andere plek zodra het woord ervoor een letter langer is. */
-.uurtabel th .info{position:absolute;right:6px;top:0;font-style:normal;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center;background:none;cursor:pointer}
+.uurtabel th .info{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-style:normal;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center;background:none;cursor:pointer}
 .uurtabel th .info:hover{border-color:var(--inkt);color:var(--inkt)}
 /* Rijkop met uitleg: tekst links, knop tegen de rechterrand. Alle knoppen staan zo onder elkaar. */
 .uurtabel th .rk{display:block;padding-right:23px}
@@ -204,6 +204,9 @@ main{padding-bottom:64px}
 .scroll{overflow-x:auto;padding:0 10px 10px}
 .uurtabel{border-collapse:separate;border-spacing:3px 0;width:100%;min-width:640px;table-layout:fixed}
 .uurtabel th{font-size:11px;font-weight:700;color:var(--zacht);text-align:left;white-space:normal;width:74px;line-height:1.2;padding-right:6px;position:relative}
+/* Elke rij dezelfde hoogte, inhoud verticaal gecentreerd: anders is de windrij twee keer zo hoog
+   als de golvenrij en loopt de tabel ongelijk. */
+.uurtabel td,.uurtabel th{height:56px;vertical-align:middle}
 .uurtabel td{text-align:center;padding:2px 0;font-size:13.5px;position:relative}
 .uurtabel td.aan{background:var(--lijn-2)}
 /* Het uur waar de klok nu in staat. Gekozen = inkt gevuld, nu = een dunne inktring met een
