@@ -457,6 +457,14 @@ window.KWU_READY.then(function () {
     }).join("");
   }
 
+  /* Het uur waar de klok nu in staat, in dezelfde schrijfwijze als u.t ("2026-09-11T14:00").
+     Alleen zinvol op de dag van vandaag; op een andere dag bestaat "nu" niet in de tabel. */
+  function uurNu() {
+    var n = new Date();
+    return n.getFullYear() + "-" + ("0"+(n.getMonth()+1)).slice(-2) + "-" + ("0"+n.getDate()).slice(-2) +
+      "T" + ("0"+n.getHours()).slice(-2) + ":00";
+  }
+
   // ── uur voor uur: één dag, tabel zoals Windfinder ────
   function tekenDag() {
     var ds = dagen(), d = huidigeDag(), i = ds.indexOf(d), o = dagOordeel(d);
@@ -464,7 +472,8 @@ window.KWU_READY.then(function () {
     var kop = '<div class="dagkop" style="--tint:' + tint(o.n) + '"><b>' + (i === 0 ? "vandaag, " : "") + dagLang(d.uren[0].t) + '</b>' +
       '<span class="dagv">' + (o.v ? o.ws.length + (o.ws.length === 1 ? " venster" : " vensters") + " · " + WOORD[o.n] : WOORD[o.n]) + '</span>' +
       '<span class="ind">zon op ' + d.zon.op + ', onder ' + d.zon.onder + indicatieTekst(i, d) + '</span></div>';
-    var td = function (u, cls, inhoud, style) { return '<td class="' + cls + (u.t === st.t ? " aan" : "") + '" data-t="' + u.t + '"' + (style ? ' style="' + style + '"' : '') + '>' + inhoud + '</td>'; };
+    var nu = uurNu();
+    var td = function (u, cls, inhoud, style) { return '<td class="' + cls + (u.t === st.t ? " aan" : "") + (u.t === nu ? " nu" : "") + '" data-t="' + u.t + '"' + (style ? ' style="' + style + '"' : '') + '>' + inhoud + '</td>'; };
     var rij = function (lbl, cel) { return '<tr><th scope="row">' + lbl + '</th>' + d.uren.map(cel).join("") + '</tr>'; };
     var max = Math.max(30, top(d.uren).kn);
     var vensterRij = (function () {
@@ -478,7 +487,7 @@ window.KWU_READY.then(function () {
       return '<tr class="vrij"><th scope="row">venster</th>' + cells + '</tr>';
     })();
     var tabel = '<table class="uurtabel"><tbody>' + (o.v ? vensterRij : "") +
-      rij("uur", function (u) { return td(u, "tu", '<button type="button">' + u.t.slice(11,13) + '</button>'); }) +
+      rij("uur", function (u) { return td(u, "tu", '<button type="button">' + u.t.slice(11,13) + (u.t === nu ? '<small>nu</small>' : '') + '</button>'); }) +
       rij("richting", function (u) { return td(u, "", pijl(u.dir, niveau(u) === "aflandig" ? KLEUR.aflandig : "#17130F")); }) +
       rij("wind kn", function (u) { return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>'); }) +
       rij("vlagen", function (u) { var n = niveau(u), g = n === "aflandig" ? "aflandig" : band(u.vl); return td(u, "tv", u.vl, "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
@@ -495,6 +504,12 @@ window.KWU_READY.then(function () {
       rij("regen mm/u", function (u) { var d = druppels(u.mm); return td(u, "tr", d ? '<span class="drup">' + "💧".repeat(d) + '</span><small>' + u.mm + '</small>' : '<small class="droog">droog</small>'); }) +
       '</tbody></table>';
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
+    /* Op een smal scherm past de dag niet in beeld. Schuif naar het uur van nu, of naar het
+       uur dat je hebt aangeklikt, zodat je nooit naar 03:00 zit te kijken. */
+    (function () {
+      var doel = $("dagen").querySelector("td.nu") || $("dagen").querySelector("td.aan");
+      if (doel) doel.scrollIntoView({ block: "nearest", inline: "center" });
+    })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
       '<span class="lg"><b>pijl</b> waar wind of stroom heen gaat</span><span class="lg"><b>modellen eens</b> gewogen deel van de modellen dat zegt: genoeg wind uit een veilige hoek; eronder laagste–hoogste</span><span class="lg"><b>stroming</b> sterkte in kn, tegen de wind = goed (gratis hoogte), mee = je zakt af. Alleen het getij, zonder wat de wind er bovenop duwt</span><span class="lg"><b>regen</b> 💧 = licht · 💧💧💧 = 1 mm/u · 💧×5 = plensbui</span><span class="lg"><b>kite</b> maat bij jouw gewicht en board, groot getal = lekker powered, eronder de veilige en de gepowerde kant</span><span class="lg disclaimer"><b>⚠️ schatting</b> uit modellen, geen garantie: kijk zelf naar het water en beslis zelf wat je optuigt</span>';
