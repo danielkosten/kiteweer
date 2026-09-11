@@ -694,8 +694,10 @@ window.KWU_READY.then(function () {
     /* De drie kaartjes zijn kansen om te gaan. Te veel wind is geen kans maar een waarschuwing,
        dus die staat apart en niet als vierde kaartje. */
     var g0 = genoegKn();
-    return { kaarten: [g0, g0 + 3, g0 + 7].map(function (g) {
-      return { grens:g, pct:pct(function (x) { return x >= g; }) };
+    /* Het woord staat in het kaartje zelf, niet in het venster: daar is g0 niet bekend. */
+    var rollen = [[g0, "je grootste kite trekt"], [g0 + 3, "lekker powered"], [g0 + 7, "kleine kite mee"]];
+    return { kaarten: rollen.map(function (r) {
+      return { grens:r[0], rol:r[1], pct:pct(function (x) { return x >= r[0]; }) };
     }), teHard: pct(function (x) { return x > TEVEEL; }) };
   }
 
@@ -707,7 +709,7 @@ window.KWU_READY.then(function () {
         var kl = k.pct >= 70 ? "perfect" : k.pct >= 40 ? "goed" : k.pct >= 15 ? "matig" : "weinig";
         return '<div class="dr" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '"><b>' + k.pct + '%</b>' +
           '<span>' + k.grens + ' kn of meer</span><small>' +
-          (k.grens === g0 ? "je grootste kite trekt" : k.grens === g0 + 3 ? "lekker powered" : "kleine kite mee") + '</small></div>';
+          k.rol + '</small></div>';
       }).join("") + '</div>' +
       '<p class="tehard' + (kd.teHard >= 15 ? " op" : "") + '"><b>Te hard: ' + kd.teHard + '%</b> van die doorrekeningen geeft meer dan ' + TEVEEL + ' kn. Dat is geen kans maar een waarschuwing: dan blijf je aan land, en daarom telt het in de tabel als nee.</p>' : "") +
       '<ul class="redenen">' +
