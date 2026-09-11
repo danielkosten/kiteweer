@@ -584,10 +584,10 @@ window.KWU_READY.then(function () {
       rij("richting", function (u) { return td(u, "", pijl(u.dir, niveau(u) === "aflandig" ? KLEUR.aflandig : "#17130F")); }) +
       /* Onder de wind staat hoe ver de modellen uit elkaar liggen: dat is de onzekerheid van dat
          uur. Stond eerst onder het percentage, maar hij hoort bij de wind. */
-      rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "laagste–hoogste"), function (u) {
+      rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "modellen laag–hoog"), function (u) {
         return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>' +
-          (u.nModellen > 1 ? '<small>' + u.knLo + "–" + u.knHi + '</small>' : '')); }) +
-      rij("vlagen", function (u) { var n = niveau(u);
+          (u.nModellen > 1 ? '<small' + (u.knHi - u.knLo > 7 ? ' class="onzeker"' : '') + '>' + u.knLo + "–" + u.knHi + '</small>' : '')); }) +
+      rij(rijkop("vlagen", "vlagen", "Wat vlagen en spreiding van elkaar verschillen", "erbij in een vlaag"), function (u) { var n = niveau(u);
         /* Het gekleurde vlak zit om het getal heen, niet om de hele cel: nu elke rij even hoog is
            zou een cel-achtergrond een blok van 56 px worden. */
         /* Gemeten aan Hoek van Holland, 485 daglichturen 1 aug t/m 10 sep: een vlaag is 1,4x de
@@ -635,7 +635,8 @@ window.KWU_READY.then(function () {
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14 of boven 30, kleine kite" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg"><b>vlagen +9</b> zoveel knopen komt er in een vlaag bovenop. 40% erbij is normaal aan de kust; vanaf 60% erbij heet het vlagerig</span>' +
+      '<span class="lg"><b>vlagen +9</b> wat er binnen dat uur echt gebeurt: zoveel knopen komt er in een piek bovenop. 40% erbij is normaal</span>' +
+      '<span class="lg"><b>8–22 onder de wind</b> geen wind maar twijfel: de laagste en hoogste van de tien modellen. Oker = meer dan 7 kn oneens</span>' +
       '<span class="lg"><b>pijl</b> waar de wind of de stroom heen gaat</span>' +
       '<span class="lg"><b>regen</b> 1 druppel is licht, 3 is 1 mm per uur, 5 is een plensbui</span>' +
       '<span class="lg"><b>de rest</b> staat achter de ronde i-knoppen links van de tabel</span>' +
@@ -736,6 +737,19 @@ window.KWU_READY.then(function () {
       '<li class="m">Schatting uit modellen die er geregeld 3 tot 5 kn naast zitten. Kijk naar het water en naar wat de anderen optuigen, en beslis zelf.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
+  /* De vraag die twee keer is gesteld: is wind–vlagen niet hetzelfde als de spreiding? Nee.
+     Vlagen = wat er binnen dat uur echt gebeurt. Spreiding = hoe oneens de modellen zijn. */
+  function openVlagen() {
+    var u = gekozen();
+    $("sheet-t").textContent = "Vlagen en spreiding zijn twee dingen";
+    $("sheet-b").innerHTML = '<ul class="redenen">' +
+      '<li class="p"><b>De vlaag gebeurt echt.</b> Binnen één uur waait het niet gelijkmatig: de wind zakt weg en piekt een paar seconden. Dat plusje is hoeveel knopen zo\'n piek erbovenop komt. Hier om ' + uurStr(u.t) + ': ' + u.kn + ' kn met pieken tot ' + u.vl + '.</li>' +
+      '<li class="p"><b>Dat is normaal, geen waarschuwing.</b> Gemeten aan Hoek van Holland, 485 daglichturen deze zomer: een piek zit 40% boven de wind (middelste waarde), en bij negen van de tien uren tussen 20% en 67% erboven. Pas vanaf 60% erbij noemen we het vlagerig, en dan neem je een maat kleiner.</li>' +
+      '<li class="p"><b>De spreiding onder de wind is iets anders: dat is twijfel.</b> Tien rekenmodellen kijken naar dezelfde dag; ' + u.knLo + ' is de laagste die eruit komt, ' + u.knHi + ' de hoogste. Dat gaat niet gebeuren binnen een uur, dat is hoe oneens ze zijn.</li>' +
+      '<li class="p"><b>Daarom doe je er iets anders mee.</b> Een grote vlaag: kleinere kite meenemen. Een grote spreiding: morgen opnieuw kijken, want die krimpt als de dag dichterbij komt. Vandaag liggen ze een paar knopen uit elkaar, over vijf dagen tien of meer.</li>' +
+      '<li class="m">Wordt het bereik onder de wind oker, dan liggen ze meer dan 7 kn uit elkaar. Dat is geen plan maar een gokje.</li></ul>';
+    $("sheet").hidden = false; $("sheet-x").focus();
+  }
   function openModellen() {
     $("sheet-t").textContent = "Hoe de wind wordt berekend";
     $("sheet-b").innerHTML =
@@ -822,6 +836,7 @@ window.KWU_READY.then(function () {
     if (e.target.closest("[data-info=\"meten\"]")) return openMeten();
     if (e.target.closest("[data-info=\"zeker\"]")) return openZeker();
     if (e.target.closest("[data-info=\"stroom\"]")) return openStroom();
+    if (e.target.closest("[data-info=\"vlagen\"]")) return openVlagen();
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
     var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; teken();
