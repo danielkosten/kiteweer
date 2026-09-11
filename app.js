@@ -665,7 +665,7 @@ window.KWU_READY.then(function () {
   /* Waarom een percentage boven een windgetal staat, en wat je ermee doet. */
   function openZeker() {
     var u = gekozen(), kd = kansPerDrempel(u.t);
-    $("sheet-t").textContent = "Kans dat je kunt kiten om " + uurStr(u.t);
+    $("sheet-t").textContent = "Kans op een sessie om " + uurStr(u.t);
     $("sheet-b").innerHTML = (kd ? '<div class="drempels">' + kd.kaarten.map(function (k) {
         var kl = k.pct >= 70 ? "perfect" : k.pct >= 40 ? "goed" : k.pct >= 15 ? "matig" : "weinig";
         return '<div class="dr" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '"><b>' + k.pct + '%</b>' +
@@ -674,7 +674,7 @@ window.KWU_READY.then(function () {
       }).join("") + '</div>' +
       '<p class="tehard' + (kd.teHard >= 15 ? " op" : "") + '"><b>Te hard: ' + kd.teHard + '%</b> van die doorrekeningen geeft meer dan ' + TEVEEL + ' kn. Dat is geen kans maar een waarschuwing: dan blijf je aan land, en daarom telt het in de tabel als nee.</p>' : "") +
       '<ul class="redenen">' +
-      (kd ? '<li class="p"><b>Die vier kaartjes</b> komen uit 82 doorrekeningen van hetzelfde weer, elk met een klein duwtje verschil. Ze kijken alleen naar de kracht, niet naar de hoek.</li>' : "") +
+      (kd ? '<li class="p"><b>Die drie kaartjes</b> komen uit 82 doorrekeningen van hetzelfde weer, elk met een klein duwtje verschil. Ze kijken alleen naar de kracht, niet naar de hoek.</li>' : "") +
       '<li class="p"><b>Het getal in de tabel telt drie dingen samen.</b> Het is het deel van de tien modellen dat zegt: minstens ' + RIJDBAAR + ' kn, hoogstens ' + TEVEEL + ' kn, en uit een hoek die op ' + esc(spot().naam) + ' veilig is. Het model dat het vaakst gelijk had, telt zwaarder.</li>' +
       '<li class="p"><b>Te veel wind telt dus als nee.</b> Staat er 35 kn, dan is de kans laag en staat er "te hard" onder: boven ' + TEVEEL + ' kn ga je niet meer het water op.</li>' +
       '<li class="p"><b>90% is een plan.</b> De modellen zijn het eens dat je kunt. Of het 14 of 18 kn wordt weet je nog niet.</li>' +
