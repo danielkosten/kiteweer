@@ -472,14 +472,18 @@ window.KWU_READY.then(function () {
     $("weekstrip").innerHTML = kop("Nauwkeurig", "fijne modellen, 2 km", "eerste") + kaarten.slice(0, split).join("") +
       (split < ds.length ? kop("Indicatie", "grove modellen, kans uit de ensembles", "grof") + kaarten.slice(split).join("") : "") +
       (ds.length < 7 ? '<div class="dagkaart leeg"><span class="dk">verder</span><span class="dn">de gekozen modellen kijken niet verder dan ' + ds.length + ' dagen</span></div>' : '');
-    /* Mini-overzicht boven de rij (mobiel): per dag een staafje per uur, klik springt naar de kaart. */
-    var maxKn = Math.max(30, Math.max.apply(null, ds.map(function (d) { return top(d.uren).kn; })));
-    $("weekmini").hidden = false;
+    /* Overzichtsbalk boven de dagkaarten: de hele week in één rij, per dag een staafje per uur.
+       De streep dwars door de balk staat op 12 kn, de grens waarboven je kunt varen: alles wat
+       erboven uitkomt is een sessie. Rechtsboven per dag de hardste wind van die dag.
+       Klik op een dag springt naar de kaart en de uurtabel eronder. */
+    var maxKn = Math.max(24, Math.max.apply(null, ds.map(function (d) { return top(d.uren).kn; })));
+    $("weekmini").hidden = false; $("wmuitleg").hidden = false;
+    $("weekmini").style.setProperty("--grens", Math.round(RIJDBAAR / maxKn * 100) + "%");
     $("weekmini").innerHTML = ds.map(function (d, i) {
-      var o = dagOordeel(d);
-      return '<button type="button" class="wm' + (i === st.dag ? " aan" : "") + (i === split ? " grof" : "") + '" data-dag="' + i + '" data-spring="1" aria-label="' + dagStr(d.uren[0].t) + '" style="--tint:' + tint(o.n) + '">' +
-        '<span class="wmk">' + (i === 0 ? "nu" : DAGK[new Date(d.uren[0].t).getDay()]) + '</span><span class="wmb">' +
-        d.uren.map(function (u) { return '<i style="height:' + Math.max(8, Math.round(u.kn / maxKn * 100)) + '%;background:' + knKleur(u.kn, niveau(u)) + '"></i>'; }).join("") + '</span></button>';
+      var o = dagOordeel(d), hardste = top(d.uren).kn;
+      return '<button type="button" class="wm' + (i === st.dag ? " aan" : "") + (i === split ? " grof" : "") + '" data-dag="' + i + '" data-spring="1" aria-label="' + dagStr(d.uren[0].t) + ', hardste ' + hardste + ' kn" style="--tint:' + tint(o.n) + '">' +
+        '<span class="wmk"><b>' + (i === 0 ? "nu" : DAGK[new Date(d.uren[0].t).getDay()]) + '</b><em>' + hardste + '</em></span><span class="wmb">' +
+        d.uren.map(function (u) { return '<i style="height:' + Math.max(6, Math.round(u.kn / maxKn * 100)) + '%;background:' + knKleur(u.kn, niveau(u)) + '"></i>'; }).join("") + '</span></button>';
     }).join("");
   }
 

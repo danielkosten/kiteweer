@@ -383,14 +383,19 @@ main{padding-bottom:64px}
 .dsep.grof~.dagkaart{border-style:dashed}
 /* mini-overzicht van de week: zelfde balk op telefoon en op breed scherm. Per dag een staafje per
    uur, zo zie je in één blik waar de wind zit; klik springt naar die dag. */
-.weekmini{display:flex;gap:4px;margin-bottom:12px;padding:8px 8px 6px;background:var(--kaart);border:1px solid var(--lijn);border-radius:var(--r-s)}
-.wm{flex:1 1 0;min-width:0;padding:4px 3px 3px;border-radius:6px;cursor:pointer;background:none}
+.wmuitleg{font-size:11.5px;color:var(--flauw);margin:-8px 0 14px;padding:0 2px}
+.weekmini{display:flex;gap:2px;margin-bottom:14px;padding:10px 10px 8px;background:var(--kaart);border:1px solid var(--lijn);border-radius:var(--r-s)}
+.wm{flex:1 1 0;min-width:0;padding:4px 4px 3px;border-radius:6px;cursor:pointer;background:none}
 .wm:hover{background:var(--lijn-2)}
 .wm.aan{background:var(--lijn-2);box-shadow:0 0 0 1.5px var(--inkt) inset}
 .wm.grof{border-left:1.5px dashed var(--lijn);border-radius:0 6px 6px 0}
-.wmk{display:block;font-size:11px;font-weight:700;color:var(--tint);text-align:center;margin-bottom:4px}
-.wmb{display:flex;align-items:flex-end;gap:1px;height:38px}
-.wmb i{flex:1 1 0;border-radius:1px 1px 0 0;min-width:1px}
+/* dagnaam links, hardste wind van die dag rechts */
+.wmk{display:flex;justify-content:space-between;align-items:baseline;gap:4px;font-size:11.5px;font-weight:700;color:var(--tint);margin-bottom:5px}
+.wmk em{font-style:normal;font-size:11px;color:var(--zacht)}
+/* De streep op --grens staat op 12 kn: erboven kun je varen. */
+.wmb{position:relative;display:flex;align-items:flex-end;gap:1px;height:62px}
+.wmb::before{content:"";position:absolute;left:0;right:0;bottom:var(--grens,40%);border-top:1px dashed var(--lijn);pointer-events:none}
+.wmb i{flex:1 1 0;border-radius:1.5px 1.5px 0 0;min-width:1px}
 
 /* samenvatting onder de tabel */
 .hero{padding:18px 18px 14px}
@@ -460,10 +465,11 @@ details.modellen>div{margin-top:12px}
   .weekstrip .dsep.eerste{display:none}
   .weekstrip .dsep i{display:none}
   .weekstrip .kans-ens{display:none}
-  .weekmini{gap:3px;margin-bottom:10px;padding:6px 6px 4px}
+  .weekmini{gap:2px;margin-bottom:10px;padding:7px 6px 5px}
   .wm{padding:3px 2px 2px}
-  .wmk{font-size:10.5px;margin-bottom:3px}
-  .wmb{height:26px}
+  .wmk{font-size:10px;margin-bottom:3px}
+  .wmk em{font-size:9.5px}
+  .wmb{height:34px}
   .scene-label b{font-size:20px}
 }
 
