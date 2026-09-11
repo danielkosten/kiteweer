@@ -587,15 +587,18 @@ window.KWU_READY.then(function () {
       rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "laagste–hoogste"), function (u) {
         return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>' +
           (u.nModellen > 1 ? '<small>' + u.knLo + "–" + u.knHi + '</small>' : '')); }) +
-      rij("vlagen", function (u) { var n = niveau(u), g = n === "aflandig" ? "aflandig" : band(u.vl);
+      rij("vlagen", function (u) { var n = niveau(u);
         /* Het gekleurde vlak zit om het getal heen, niet om de hele cel: nu elke rij even hoog is
            zou een cel-achtergrond een blok van 56 px worden. */
-        /* Een vlaag is altijd ongeveer 1,4x de wind (gemeten, Hoek van Holland, 485 daglichturen
-           1 aug t/m 10 sep: mediaan 1,40, p10 1,20, p90 1,67). Het absolute getal zegt dus weinig;
-           hoeveel er bovenop komt wel. Vandaar "+9" en het woord "vlagerig" vanaf 1,5x. */
+        /* Gemeten aan Hoek van Holland, 485 daglichturen 1 aug t/m 10 sep: een vlaag is 1,4x de
+           wind (mediaan), p90 1,63. Onder de 12 kn is de mediaan al 1,50, dus daar zegt "vlagerig"
+           niets. Het woord valt daarom pas vanaf 1,6x en alleen als er genoeg wind staat om te gaan.
+           De kleur volgt het oordeel van dat uur, niet de vlaag: anders kleurt 9 kn wind groen
+           omdat de vlaag 16 haalt. */
         var extra = Math.max(0, Math.round(u.vl - u.kn)), verhouding = u.kn ? u.vl / u.kn : 0;
+        var vlagerig = u.kn >= genoegKn() && verhouding >= 1.6;
         return td(u, "tv", '<span class="vp">+' + extra + '</span>' +
-          (verhouding >= 1.5 ? '<small>vlagerig</small>' : ''), "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
+          (vlagerig ? '<small>vlagerig</small>' : ''), "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       (i === 0 && meetstation() ? rij(rijkop("gemeten", "meten", "Welk meetstation en hoe ver weg"), function (u) {
         var m = metingBij(u.t);
         if (m == null) return td(u, "tmeet", '<small>—</small>');
@@ -630,7 +633,7 @@ window.KWU_READY.then(function () {
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14 of boven 30, kleine kite" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
-      '<span class="lg"><b>vlagen +9</b> zoveel knopen komt er in een vlaag bovenop; +40% is normaal, vanaf +50% heet het vlagerig</span>' +
+      '<span class="lg"><b>vlagen +9</b> zoveel knopen komt er in een vlaag bovenop. 40% erbij is normaal aan de kust; vanaf 60% erbij heet het vlagerig</span>' +
       '<span class="lg"><b>pijl</b> waar de wind of de stroom heen gaat</span>' +
       '<span class="lg"><b>regen</b> 1 druppel is licht, 3 is 1 mm per uur, 5 is een plensbui</span>' +
       '<span class="lg"><b>de rest</b> staat achter de ronde i-knoppen links van de tabel</span>' +
