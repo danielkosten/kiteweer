@@ -7,7 +7,6 @@
 window.KWU_READY.then(function () {
   "use strict";
 
-  var RIJDBAAR = KW.rijdbaar || 12;                 // Arthurs ondergrens, alleen nog als naslag
   /* Je grootste kite is een instelling, want hij bepaalt alles: bij welke wind je kunt beginnen,
      waar de kleur begint, de streep in de weekbalk, en de sessiekans. Wie een 17 m heeft, kan bij
      minder wind al het water op; wie alleen een 9 m heeft, moet wachten. */
@@ -53,8 +52,24 @@ window.KWU_READY.then(function () {
      Aflandig telt alleen als er genoeg wind staat om te gaan. */
   function inSector(dir, v) { var d = ((dir%360)+360)%360; return v[0] <= v[1] ? (d >= v[0] && d <= v[1]) : (d >= v[0] || d <= v[1]); }
   function veilig(s, dir) { return s.vensters.some(function (v) { return inSector(dir, v); }); }
-  /* Daniel 2026-09-06: 14–16 kn met vlagen 22–26 is een goede kitedag, dus goed vanaf 14. */
-  function band(kn) { return kn < genoegKn() ? "weinig" : kn < 14 ? "matig" : kn < 19 ? "goed" : kn <= VEEL ? "perfect" : "matig"; }
+  /* De vier oordelen hangen niet aan vaste knopen maar aan hoe hard je grootste kite trekt:
+     druk = die maat gedeeld door de ideale maat bij die wind. Bij 85 kg twintip met een 13 m komen
+     de oude, op Daniels sessies geijkte grenzen er precies weer uit: 12 · 14 · 19 kn.
+     Zonder dit klopte het niet meer zodra je kite anders was: met een 9 m was alles boven de
+     ondergrens meteen "perfect", met een 13 m bestond de band "matig" niet meer (nagerekend 11-09).
+     De bovengrenzen blijven vaste knopen, want te hard is een kwestie van veiligheid, niet van maat. */
+  function druk(kn) { return GROOT() / ideaal(kn); }
+  /* Eén ondergrens voor de hele pagina: druk 0,97, de wind waarbij je grootste kite trekt.
+     Eerst had 12–14 kn nog de naam "matig" terwijl de sessiekans daar 0% gaf; dat sprak zichzelf
+     tegen, dus onder die grens heet alles nu gewoon te weinig wind. "Matig" is voortaan alleen
+     nog te véél wind: boven 30 kn kan het, maar met de kleine kite. */
+  function band(kn) {
+    var r = druk(kn);
+    if (kn > VEEL) return "matig";
+    return r < 0.97 ? "weinig" : r < 1.32 ? "goed" : "perfect";
+  }
+  /* Bij welke wind een bepaalde druk hoort: voor de legenda en de uitleg. */
+  function knBij(r) { return Math.round(r * 2.2 * st.kg * BOARDS[st.board] / GROOT()); }
   /* Doorlopende kleur voor staaf en vlagen: geel (12) → groen (19) → donkergroen (24). Labels blijven vijf. */
   function knKleur(kn, n) {
     if (n === "weinig" || n === "aflandig") return KLEUR[n];
@@ -64,7 +79,8 @@ window.KWU_READY.then(function () {
     return "hsl(" + h.toFixed(0) + " " + sat.toFixed(0) + "% " + l.toFixed(0) + "%)";
   }
   function niveau(u) { if (!u) return "weinig"; if (!veilig(spot(), u.dir) && u.kn >= genoegKn()) return "aflandig"; return band(u.kn); }
-  var WOORD = { perfect:"perfect", goed:"goed", matig:"matig", weinig:"te weinig wind", aflandig:"aflandig" };
+  /* "matig" heet nu "veel wind": het is de band boven 30 kn, niet meer de band net boven 12. */
+  var WOORD = { perfect:"perfect", goed:"goed", matig:"veel wind", weinig:"te weinig wind", aflandig:"aflandig" };
   var RANG  = { perfect:0, goed:1, matig:2, weinig:3, aflandig:4 };
   var KLEUR = { perfect:"#0E7A54", goed:"#3E9B6E", matig:"#C08315", weinig:"#A9A096", aflandig:"#CE4A1F" };
   function tint(n) { return "var(--" + n + ")"; }
@@ -240,7 +256,7 @@ window.KWU_READY.then(function () {
   /* Wind waarbij je grootste kite net trekt: 2,2 x gewicht / die maat. Bij 85 kg twintip met een
      13 m is dat 14 kn; met een 17 m 11 kn. Daaronder sta je stil, ook met alles uitgerold. Dit is
      de streep in de weekbalk, het punt waar de kleur begint, en de ondergrens van de sessiekans. */
-  function genoegKn() { return Math.round(2.2 * st.kg * BOARDS[st.board] / GROOT()); }
+  function genoegKn() { return Math.round(0.97 * 2.2 * st.kg * BOARDS[st.board] / GROOT()); }
   function staat(maat, kn) {
     var r = maat / ideaal(kn);
     // Geijkt op Daniels sessies: 10 m bij 23 kn (ratio 1,23) voelde "lekker powered", niet over.
@@ -393,9 +409,9 @@ window.KWU_READY.then(function () {
       }).join("");
       $("onderverdict").innerHTML = '<span class="flauw">' + zon + indicatieTekst(i, d) + '</span>';
     } else {
-      $("verdict").textContent = o.n === "aflandig" ? "Aflandig, niet gaan" : o.n === "matig" ? "Matig, " + o.b.kn + " kn" : "Te weinig wind";
+      $("verdict").textContent = o.n === "aflandig" ? "Aflandig, niet gaan" : o.n === "matig" ? "Veel wind, " + o.b.kn + " kn" : "Te weinig wind";
       $("vensterlijst").innerHTML = "";
-      $("onderverdict").innerHTML = (o.n === "matig" ? "wel te doen met een grote kite (" + kiteBereik(o.b.kn, o.b.kn, o.b.vl) + "), rond " + uurStr(o.b.t) : "hoogste " + o.b.kn + " kn om " + uurStr(o.b.t)) +
+      $("onderverdict").innerHTML = (o.n === "matig" ? "veel wind, kleine kite (" + kiteBereik(o.b.kn, o.b.kn, o.b.vl) + "), rond " + uurStr(o.b.t) : "hoogste " + o.b.kn + " kn om " + uurStr(o.b.t)) +
         (beste && besteDag !== d ? ' · <b>beste moment deze week: ' + dagLang(besteDag.uren[0].t) + " " + beste.tekst + ", " + beste.lo + "–" + beste.hi + " kn</b>" : "") +
         '<br><span class="flauw">' + zon + '</span>';
     }
@@ -647,7 +663,9 @@ window.KWU_READY.then(function () {
       vak.scrollLeft = doel.offsetLeft - (vak.clientWidth - doel.offsetWidth) / 2;
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
-      return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' + (k === "perfect" ? " 19–30" : k === "goed" ? " 14–19" : k === "matig" ? " 12–14 of boven 30, kleine kite" : k === "weinig" ? " &lt;12" : "") + '</span>'; }).join("") +
+      var g14 = genoegKn(), g19 = knBij(1.32);
+      return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' +
+        (k === "perfect" ? " " + g19 + "–" + VEEL : k === "goed" ? " " + g14 + "–" + g19 : k === "matig" ? " boven " + VEEL + ", kleine kite" : k === "weinig" ? " &lt;" + g14 + ", je " + GROOT() + " m trekt niet" : "") + '</span>'; }).join("") +
       '<span class="lg"><b>vlagen 25 +9</b> wat er binnen dat uur echt gebeurt: de piek, en hoeveel knopen dat boven de wind is. 40% erbij is normaal</span>' +
       '<span class="lg"><b>8–22 onder de wind</b> geen wind maar twijfel: de laagste en hoogste van de tien modellen. Oker = meer dan 7 kn oneens</span>' +
       '<span class="lg"><b>pijl</b> waar de wind of de stroom heen gaat</span>' +
