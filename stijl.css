@@ -224,7 +224,7 @@ main{padding-bottom:64px}
 .uurtabel .tmeet{padding:5px 0}
 .uurtabel .tmeet b{display:block;font-family:var(--kop);font-size:15px;line-height:1}
 .uurtabel .tmeet small{display:block;font-size:10.5px;font-weight:700;color:var(--zacht)}
-.uurtabel th small{font-weight:600;color:var(--zacht);line-height:1.15;display:block;margin-top:1px}
+.uurtabel th small{font-weight:600;color:var(--zacht);line-height:1.15;display:block;margin-top:1px;padding-right:23px}
 .uurtabel .tmeet small.meer{color:var(--perfect)}
 .uurtabel .tmeet small.minder{color:var(--matig)}
 .uurtabel .tmeet small.raak{color:var(--zacht)}
