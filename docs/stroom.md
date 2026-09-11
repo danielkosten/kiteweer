@@ -134,3 +134,19 @@ Gemeten op 11-09, 19 uren, model KNMI Harmonie tegen het dichtstbijzijnde statio
 Eén dag, dus een aanwijzing en geen claim. Maar de hoek zit er net zo goed naast als de kracht, en
 de hoek beslist of je überhaupt gaat. Daarom staat de gemeten richting als pijl in de rij, en kleurt
 hij oker zodra hij meer dan 45° van het model afwijkt.
+
+## Twee stations mengen, of alleen de dichtstbijzijnde
+
+Getest op 11-09: neem de 14 spots die een station binnen 6 km hebben, doe alsof dat station niet
+bestaat, en voorspel het met wat er verder weg staat. Dat station zelf is dan de waarheid.
+
+| | Gemiddelde fout |
+|---|---|
+| alleen het dichtstbijzijnde overgebleven station | 3,61 kn |
+| twee stations gemengd, naar afstand gewogen | 3,08 kn |
+
+Mengen was beter bij 11 van de 14. Dus doen, maar met een rem: het tweede station telt alleen mee
+als het binnen 2,5x de afstand van het eerste ligt. Anders trekt een paal op 37 km het getal scheef
+terwijl er een op 2 km staat. Op 11-09 werden 37 van de 63 spots gemengd.
+
+De richting middelt als vector, niet als getal: 350° en 10° is 0°, geen 180°.

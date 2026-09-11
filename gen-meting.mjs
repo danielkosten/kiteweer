@@ -162,13 +162,29 @@ for (const code of nodig) {
   if (uren.length) { stations[code] = { naam: o.naam, lat: o.lat, lon: o.lon, uren, oud: true }; gehouden++; }
 }
 
-/* Nu pas: elke spot krijgt het dichtstbijzijnde station dat vandaag ook echt gemeten heeft. */
+/* Nu pas: elke spot krijgt de stations die vandaag ook echt gemeten hebben.
+   Ligt er een tweede station bijna even dichtbij, dan tellen ze allebei mee, naar afstand gewogen.
+   Gemeten op 11-09 over 14 spots met een station binnen 6 km als waarheid: mengen haalde de fout
+   van 3,61 naar 3,08 kn, en was beter bij 11 van de 14. Maar alleen als dat tweede station ECHT
+   in de buurt ligt: een paal op 37 km trekt het getal alleen maar scheef, dus de grens is 2,5x de
+   afstand van de dichtstbijzijnde. */
+const MENG_FACTOR = 2.5;
 const bijSpot = {};
 for (const id of Object.keys(kandidaten)) {
-  const k = kandidaten[id].find(function (x) { return stations[x.code]; });
-  if (k) bijSpot[id] = { station: k.code, km: k.km };
+  const werkend = kandidaten[id].filter(function (x) { return stations[x.code]; });
+  if (!werkend.length) continue;
+  const dichtst = werkend[0].km;
+  const mee = werkend.filter(function (x) { return x.km <= Math.max(dichtst * MENG_FACTOR, dichtst + 1); }).slice(0, 2);
+  // gewicht = 1/afstand; een station op 2 km weegt vijf keer zo zwaar als een op 10 km
+  const gewichten = mee.map(function (x) { return 1 / Math.max(x.km, 0.3); });
+  const som = gewichten.reduce(function (a, b) { return a + b; }, 0);
+  bijSpot[id] = {
+    station: mee[0].code, km: mee[0].km,
+    bronnen: mee.map(function (x, n) { return { station: x.code, km: x.km, w: Math.round(gewichten[n] / som * 100) / 100 }; }),
+  };
 }
-console.error(Object.keys(bijSpot).length + " van de " + kw.spots.length + " spots hebben een meetstation");
+const gemengd = Object.values(bijSpot).filter(function (x) { return x.bronnen.length > 1; }).length;
+console.error(Object.keys(bijSpot).length + " van de " + kw.spots.length + " spots hebben een meetstation, " + gemengd + " uit twee gemengd");
 
 writeFileSync(pad, "window.KWM = " + JSON.stringify({
   gegenereerd: new Date().toISOString(),

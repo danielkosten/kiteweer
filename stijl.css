@@ -147,7 +147,19 @@ main{padding-bottom:64px}
 .uurtabel .tkite{font-weight:800;color:var(--tint);background:var(--tint-v);border-radius:4px;padding:5px 0}
 .uurtabel .tkite b{font-size:15px;display:block}
 .uurtabel .tkite small{display:block;font-size:10.5px;font-weight:700;color:var(--zacht)}
-.uurtabel th .info{font-style:normal;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-left:3px;background:none;cursor:pointer}
+/* Absoluut tegen de rechterrand van de kop, niet achter de tekst aan: anders staat elke knop op
+   een andere plek zodra het woord ervoor een letter langer is. */
+.uurtabel th .info{position:absolute;right:6px;top:0;font-style:normal;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center;background:none;cursor:pointer}
+.uurtabel th .info:hover{border-color:var(--inkt);color:var(--inkt)}
+/* Rijkop met uitleg: tekst links, knop tegen de rechterrand. Alle knoppen staan zo onder elkaar. */
+.uurtabel th .rk{display:block;padding-right:23px}
+/* Kans per windsterkte in het uitlegvenster: drie kaartjes, één beslissing per kaartje. */
+.drempels{display:flex;gap:8px;margin:0 0 14px}
+.dr{flex:1;background:var(--tint-v);border-radius:var(--r-s,8px);padding:10px 8px;text-align:center}
+.dr b{display:block;font-family:var(--kop);font-size:24px;line-height:1.05;color:var(--tint)}
+.dr span{display:block;font-size:12px;font-weight:700;margin-top:2px}
+.dr small{display:block;font-size:11px;color:var(--zacht);margin-top:1px}
+.uitleg-dr{font-size:12.5px;color:var(--zacht);margin:0 0 14px}
 .voet a{color:var(--zacht);text-decoration:underline;text-underline-offset:3px}
 .voet .dot{margin:0 8px;opacity:.5}
 
@@ -185,7 +197,7 @@ main{padding-bottom:64px}
 .dagkop .ind{margin:0;width:100%}
 .scroll{overflow-x:auto;padding:0 10px 10px}
 .uurtabel{border-collapse:separate;border-spacing:3px 0;width:100%;min-width:640px;table-layout:fixed}
-.uurtabel th{font-size:11px;font-weight:700;color:var(--zacht);text-align:left;white-space:normal;width:74px;line-height:1.2;padding-right:6px}
+.uurtabel th{font-size:11px;font-weight:700;color:var(--zacht);text-align:left;white-space:normal;width:74px;line-height:1.2;padding-right:6px;position:relative}
 .uurtabel td{text-align:center;padding:2px 0;font-size:13.5px;position:relative}
 .uurtabel td.aan{background:var(--lijn-2)}
 /* Het uur waar de klok nu in staat. Gekozen = inkt gevuld, nu = een dunne inktring met een
