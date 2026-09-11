@@ -23,9 +23,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      # Een hik bij een van de twee bronnen mag de andere niet meesleuren: allebei mogen falen,
+      # en daarna committen we wat er wel gelukt is.
       - run: node gen-stroom.mjs
+        continue-on-error: true
       - run: node gen-uur.mjs
+        continue-on-error: true
       - name: committen als er iets veranderd is
+        if: always()
         run: |
           git config user.name "kiteweer-bot"
           git config user.email "kiteweer-bot@users.noreply.github.com"

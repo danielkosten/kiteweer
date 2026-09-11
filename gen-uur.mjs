@@ -23,19 +23,43 @@ const MODELLEN = [
     { id: "jma_seamless", naam: "JMA 10 km", dagen: 7, arthur: false, klasse: "globaal", w: 1, tijd: true, off: true },
     { id: "gem_global", naam: "GEM 15 km", dagen: 7, arthur: false, klasse: "globaal", w: 1, tijd: true, off: true },
 ];
+/* Vanaf de GitHub-servers hikt Open-Meteo geregeld: op 11-09 sneuvelde de nachtelijke run op een
+   verbinding die na 10 seconden opgaf (marine-api, 152.53.84.37), en daardoor landde ook de
+   stroming niet, want die wordt in dezelfde run gecommit. Dus: vier pogingen, 30 seconden geduld,
+   en een spot die het helemaal niet haalt houdt zijn vorige uren. */
+async function haal(u) {
+  let laatste;
+  for (let poging = 1; poging <= 4; poging++) {
+    try {
+      const r = await fetch(u, { signal: AbortSignal.timeout(30000) });
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return await r.json();
+    } catch (e) { laatste = e; if (poging < 4) await new Promise(k => setTimeout(k, 3000 * poging)); }
+  }
+  throw laatste;
+}
+/* De vorige uur.js, om een mislukte spot uit te kunnen vullen. */
+let oud = {};
+try {
+  const tekst = await (await import("node:fs/promises")).readFile("uur.js", "utf8");
+  oud = JSON.parse(tekst.replace(/^window\.KWU = /, "").replace(/;\s*$/, "")).spots || {};
+} catch (e) { console.error("oude uur.js onleesbaar, genegeerd: " + e.message); }
+
 const out = { gegenereerd: new Date().toISOString(), bron: "Open-Meteo, per model", modellen: MODELLEN, spots: {} };
+let mislukt = 0;
 for (const s of SPOTS) {
+ try {
   const u = `https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}` +
     `&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code,temperature_2m,precipitation` +
     `&daily=sunrise,sunset&wind_speed_unit=kn&models=knmi_seamless&forecast_days=7&timezone=Europe/Amsterdam`;
-  const r = await (await fetch(u)).json(), j = r.hourly;
+  const r = await haal(u), j = r.hourly;
   // golven: aparte gratis marine-api (hoogte, periode, richting)
-  const m = (await (await fetch(`https://marine-api.open-meteo.com/v1/marine?latitude=${s.lat}&longitude=${s.lon}` +
-    `&hourly=wave_height,wave_period,wave_direction,wind_wave_height,wind_wave_period,swell_wave_height,swell_wave_period,swell_wave_direction&forecast_days=7&timezone=Europe/Amsterdam`)).json()).hourly;
+  const m = (await haal(`https://marine-api.open-meteo.com/v1/marine?latitude=${s.lat}&longitude=${s.lon}` +
+    `&hourly=wave_height,wave_period,wave_direction,wind_wave_height,wind_wave_period,swell_wave_height,swell_wave_period,swell_wave_direction&forecast_days=7&timezone=Europe/Amsterdam`)).hourly;
   // per model wind/vlagen/richting; ontbrekende uren (voorbij de horizon) worden null
-  const mw = await (await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}` +
+  const mw = await haal(`https://api.open-meteo.com/v1/forecast?latitude=${s.lat}&longitude=${s.lon}` +
     `&hourly=wind_speed_10m,wind_gusts_10m,wind_direction_10m&wind_speed_unit=kn&forecast_days=7&timezone=Europe/Amsterdam` +
-    `&models=${MODELLEN.map(m => m.id).join(",")}`)).json();
+    `&models=${MODELLEN.map(m => m.id).join(",")}`);
   const per = {};
   for (const mo of MODELLEN) {
     const k = mo.id, h = mw.hourly;
@@ -54,5 +78,15 @@ for (const s of SPOTS) {
     zon: r.daily.time.map((d, i) => ({ d, op: r.daily.sunrise[i].slice(11), onder: r.daily.sunset[i].slice(11) })),
   };
   console.log(s.id, out.spots[s.id].uren.length, "uren");
+ } catch (e) {
+  mislukt++;
+  console.error(s.id + ": FOUT " + e.message);
+  if (oud[s.id]) { out.spots[s.id] = oud[s.id]; console.error(s.id + ": vorige uren gehouden"); }
+ }
+}
+if (!Object.keys(out.spots).length) {
+  console.error("geen enkele spot gelukt, uur.js blijft zoals hij was");
+  process.exit(0);
 }
 await (await import("node:fs/promises")).writeFile("uur.js", "window.KWU = " + JSON.stringify(out) + ";\n");
+console.log(SPOTS.length - mislukt + " van " + SPOTS.length + " spots vers");
