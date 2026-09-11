@@ -100,10 +100,27 @@ async function station(code, van, tot) {
 
 // --- welk station hoort bij welke spot ---
 const kw = JSON.parse(readFileSync(new URL("./data.js", import.meta.url), "utf8").split("=").slice(1).join("=").trim().replace(/;\s*$/, ""));
-const cat = JSON.parse(await haal(CATALOGUS)).features.map(function (f) {
-  return { code: f.loc_id, naam: f.properties.label, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] };
-});
-console.error(cat.length + " meetstations in de catalogus");
+const pad = new URL("./meting.js", import.meta.url);
+const vorige = (function () {
+  if (!existsSync(pad)) return null;
+  try { return JSON.parse(readFileSync(pad, "utf8").replace(/^window\.KWM = /, "").trim().replace(/;$/, "")); }
+  catch (e) { console.error("oude meting.js onleesbaar: " + e.message); return null; }
+})();
+
+/* De lijst met meetstations verandert bijna nooit, maar de call ernaartoe mislukt vanaf de
+   GitHub-servers geregeld. Daarom: proberen, en anders de lijst gebruiken die in de vorige
+   meting.js is meegeschreven. Zonder die terugval sneuvelde de hele run op één hik. */
+let cat;
+try {
+  cat = JSON.parse(await haal(CATALOGUS)).features.map(function (f) {
+    return { code: f.loc_id, naam: f.properties.label, lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1] };
+  });
+  console.error(cat.length + " meetstations opgehaald");
+} catch (e) {
+  cat = vorige?.catalogus ?? null;
+  if (!cat) { console.error("catalogus mislukt en geen vorige lijst: " + e.message); process.exit(1); }
+  console.error("catalogus mislukt (" + e.message + "), lijst van vorige keer gebruikt: " + cat.length + " stations");
+}
 
 /* Per spot de drie dichtstbijzijnde stations, op afstand gesorteerd. Drie en niet één, omdat een
    station stil kan liggen: dan schuift de spot door naar de volgende die wel meet. Welke dat werd
@@ -137,18 +154,12 @@ if (!Object.keys(stations).length) { console.error("geen enkel station gelukt, m
 
 // Een station dat nu niet antwoordde houdt zijn vorige reeks; oude uren blijven geldig, het is
 // een meting van wat er geweest is.
-const pad = new URL("./meting.js", import.meta.url);
 let gehouden = 0;
-if (existsSync(pad)) {
-  try {
-    const oud = JSON.parse(readFileSync(pad, "utf8").replace(/^window\.KWM = /, "").trim().replace(/;$/, ""));
-    for (const code of nodig) {
-      if (stations[code]) continue;
-      const o = oud.stations?.[code];
-      const uren = (o?.uren ?? []).filter(function (r) { return new Date(r[0]).getTime() >= van.getTime(); });
-      if (uren.length) { stations[code] = { naam: o.naam, lat: o.lat, lon: o.lon, uren, oud: true }; gehouden++; }
-    }
-  } catch (e) { console.error("oude meting.js onleesbaar: " + e.message); }
+for (const code of nodig) {
+  if (stations[code]) continue;
+  const o = vorige?.stations?.[code];
+  const uren = (o?.uren ?? []).filter(function (r) { return new Date(r[0]).getTime() >= van.getTime(); });
+  if (uren.length) { stations[code] = { naam: o.naam, lat: o.lat, lon: o.lon, uren, oud: true }; gehouden++; }
 }
 
 /* Nu pas: elke spot krijgt het dichtstbijzijnde station dat vandaag ook echt gemeten heeft. */
@@ -163,6 +174,7 @@ writeFileSync(pad, "window.KWM = " + JSON.stringify({
   gegenereerd: new Date().toISOString(),
   bron: "Rijkswaterstaat MATROOS, waargenomen wind op 10 m",
   spots: bijSpot,      // spot -> { station, km }
+  catalogus: cat,      // alle meetstations met hun ligging, zodat een mislukte catalogus-call niet fataal is
   stations,            // code -> { naam, lat, lon, uren: [[uur UTC, kn, graden waarvandaan]] }
 }) + ";\n");
 console.error("meting.js geschreven: " + Object.keys(stations).length + " van " + nodig.size + " stations, " +
