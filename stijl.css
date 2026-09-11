@@ -203,7 +203,7 @@ main{padding-bottom:64px}
 .dagkop .ind{margin:0;width:100%}
 .scroll{overflow-x:auto;padding:0 10px 10px}
 .uurtabel{border-collapse:separate;border-spacing:3px 0;width:100%;min-width:640px;table-layout:fixed}
-.uurtabel th{font-size:11px;font-weight:700;color:var(--zacht);text-align:left;white-space:normal;width:74px;line-height:1.2;padding-right:6px;position:relative}
+.uurtabel th{font-size:11px;font-weight:700;color:var(--zacht);text-align:left;white-space:normal;width:88px;line-height:1.2;padding-right:6px;position:relative}
 /* Elke rij dezelfde hoogte, inhoud verticaal gecentreerd: anders is de windrij twee keer zo hoog
    als de golvenrij en loopt de tabel ongelijk. */
 .uurtabel td,.uurtabel th{height:56px;vertical-align:middle}
@@ -224,7 +224,7 @@ main{padding-bottom:64px}
 .uurtabel .tmeet{padding:5px 0}
 .uurtabel .tmeet b{display:block;font-family:var(--kop);font-size:15px;line-height:1}
 .uurtabel .tmeet small{display:block;font-size:10.5px;font-weight:700;color:var(--zacht)}
-.uurtabel th small{font-weight:600;color:var(--zacht);line-height:1.15;display:block;margin-top:1px;padding-right:23px}
+.uurtabel th small{font-weight:600;font-size:10px;color:var(--zacht);line-height:1.15;display:block;margin-top:1px;padding-right:23px;white-space:nowrap}
 .uurtabel .tmeet small.meer{color:var(--perfect)}
 .uurtabel .tmeet small.minder{color:var(--matig)}
 .uurtabel .tmeet small.raak{color:var(--zacht)}

@@ -587,7 +587,7 @@ window.KWU_READY.then(function () {
       rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "laag–hoog"), function (u) {
         return td(u, "tw", '<span class="staaf" style="height:' + Math.round(u.kn/max*44) + 'px;background:' + knKleur(u.kn, niveau(u)) + '"></span><b>' + u.kn + '</b>' +
           (u.nModellen > 1 ? '<small' + (u.knHi - u.knLo > 7 ? ' class="onzeker"' : '') + '>' + u.knLo + "–" + u.knHi + '</small>' : '')); }) +
-      rij(rijkop("vlagen", "vlagen", "Wat vlagen en spreiding van elkaar verschillen", "en verschil"), function (u) { var n = niveau(u);
+      rij(rijkop("vlagen", "vlagen", "Wat vlagen en spreiding van elkaar verschillen", "+ erbij"), function (u) { var n = niveau(u);
         /* Het gekleurde vlak zit om het getal heen, niet om de hele cel: nu elke rij even hoog is
            zou een cel-achtergrond een blok van 56 px worden. */
         /* Gemeten aan Hoek van Holland, 485 daglichturen 1 aug t/m 10 sep: een vlaag is 1,4x de
@@ -614,7 +614,7 @@ window.KWU_READY.then(function () {
       }) : "") +
       rij(rijkop("kite m", "kite", "Hoe de kitemaat wordt berekend", st.kg + " kg"), function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
         var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : k.maat - 1) + '–' + (k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
-      rij(rijkop("kans op sessie", "zeker", "Waar dit percentage over gaat", RIJDBAAR + "–" + TEVEEL + " kn"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
+      rij(rijkop("sessiekans", "zeker", "Waar dit percentage over gaat", RIJDBAAR + "–" + TEVEEL + " kn"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
         /* Alleen de twee verrassende redenen erbij: 0% bij 34 kn ("te hard") en 0% bij mooie wind uit
            de verkeerde hoek ("aflandig"). Te weinig wind zie je al aan de windrij, dat woord is ruis. */
@@ -625,7 +625,7 @@ window.KWU_READY.then(function () {
         return td(u, "ts", b && b.stroom ? pijl(b.stroom.naar + 180, c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '<small>' + b.stroom.kn.toFixed(1) + ' kn</small><small style="color:' + (c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '">' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</small>' : '<small>—</small>'); }) +
       rij(rijkop("golven", "golven", "Wat de golfhoogte en de periode betekenen"), function (u) { return td(u, "tg", u.golf ? '<span>' + u.golf.m.toFixed(1) + ' m</span><small>' + u.golf.s + ' s</small>' : '<small>—</small>'); }) +
       rij(rijkop("weer", "weer", "Wat het weericoon betekent"), function (u) { var w = weer(u.wx); return td(u, "tx", '<span>' + w[0] + '</span><small>' + u.temp + '°</small>'); }) +
-      rij(rijkop("regen mm/u", "regen", "Wat de druppels betekenen"), function (u) { var d = druppels(u.mm); return td(u, "tr", d ? '<span class="drup">' + "💧".repeat(d) + '</span><small>' + u.mm + '</small>' : '<small class="droog">droog</small>'); }) +
+      rij(rijkop("regen", "regen", "Wat de druppels betekenen", "mm per uur"), function (u) { var d = druppels(u.mm); return td(u, "tr", d ? '<span class="drup">' + "💧".repeat(d) + '</span><small>' + u.mm + '</small>' : '<small class="droog">droog</small>'); }) +
       '</tbody></table>';
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
     /* Op een smal scherm past de dag niet in beeld: schuif de TABEL naar het uur van nu.
