@@ -597,7 +597,9 @@ window.KWU_READY.then(function () {
            omdat de vlaag 16 haalt. */
         var extra = Math.max(0, Math.round(u.vl - u.kn)), verhouding = u.kn ? u.vl / u.kn : 0;
         var vlagerig = u.kn >= genoegKn() && verhouding >= 1.6;
-        return td(u, "tv", '<span class="vp">+' + extra + '</span>' +
+        /* Sommige grove modellen leveren geen vlagen: dan is vlaag = wind en zou er "+0" staan.
+           Een streepje is eerlijker dan een nul die op windstil lijkt. */
+        return td(u, "tv", '<span class="vp">' + (extra > 0 ? "+" + extra : "—") + '</span>' +
           (vlagerig ? '<small>vlagerig</small>' : ''), "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       (i === 0 && meetstation() ? rij(rijkop("gemeten", "meten", "Welk meetstation en hoe ver weg"), function (u) {
         var m = metingBij(u.t);
