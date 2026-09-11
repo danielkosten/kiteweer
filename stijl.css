@@ -153,10 +153,14 @@ main{padding-bottom:64px}
 .uurtabel th .info:hover{border-color:var(--inkt);color:var(--inkt)}
 /* Rijkop met uitleg: tekst links, knop tegen de rechterrand. Alle knoppen staan zo onder elkaar. */
 .uurtabel th .rk{display:block;padding-right:23px}
-/* Kans per windsterkte in het uitlegvenster: vier kaartjes, één beslissing per kaartje.
-   Op een telefoon twee naast elkaar, anders wordt "te hard, blijf aan land" een kolom van losse letters. */
-.drempels{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 0 14px}
-@media(max-width:600px){.drempels{grid-template-columns:repeat(2,1fr)}}
+/* Kans per windsterkte in het uitlegvenster: drie kaartjes, één beslissing per kaartje. */
+.drempels{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:0 0 10px}
+/* Te veel wind is geen kans om te gaan, dus geen kaartje: een regel eronder, en hij kleurt pas
+   op zodra er echt kans op storm is. */
+.tehard{font-size:12.5px;color:var(--zacht);margin:0 0 14px;line-height:1.45}
+.tehard b{color:var(--inkt)}
+.tehard.op{background:var(--matig-v);color:var(--inkt);border-radius:var(--r-s,8px);padding:8px 10px}
+.tehard.op b{color:var(--matig)}
 .dr{background:var(--tint-v);border-radius:var(--r-s,8px);padding:10px 8px;text-align:center}
 .dr b{display:block;font-family:var(--kop);font-size:24px;line-height:1.05;color:var(--tint)}
 .dr span{display:block;font-size:12px;font-weight:700;margin-top:2px}

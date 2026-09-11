@@ -584,9 +584,9 @@ window.KWU_READY.then(function () {
         return td(u, "tmeet", (m.dir != null ? pijl(m.dir, hoekAfwijking(m.dir, u.dir) >= 45 ? KLEUR.matig : "#17130F") : '') +
           '<b>' + Math.round(m.kn) + '</b><small class="' + kl + '">' + (v > 0 ? "+" : "") + String(v).replace(".", ",") + '</small>');
       }) : "") +
-      rij(rijkop("kite m", "kite", "Hoe de kitemaat wordt berekend", st.kg + " kg, " + st.board), function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
+      rij(rijkop("kite m", "kite", "Hoe de kitemaat wordt berekend", st.kg + " kg"), function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
         var k = kiteAdvies(u.kn, u.vl); return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : k.maat - 1) + '–' + (k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
-      rij(rijkop("kans op sessie", "zeker", "Waar dit percentage over gaat", RIJDBAAR + "–" + TEVEEL + " kn, veilige hoek"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
+      rij(rijkop("kans op sessie", "zeker", "Waar dit percentage over gaat", RIJDBAAR + "–" + TEVEEL + " kn"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
         /* Alleen de twee verrassende redenen erbij: 0% bij 34 kn ("te hard") en 0% bij mooie wind uit
            de verkeerde hoek ("aflandig"). Te weinig wind zie je al aan de windrij, dat woord is ruis. */
@@ -655,22 +655,24 @@ window.KWU_READY.then(function () {
     Object.keys(sp.ens).forEach(function (e) { var v = sp.ens[e][i]; if (v) v.forEach(function (x) { leden.push(x + off); }); });
     if (leden.length < 20) return null;
     var pct = function (f) { return Math.round(leden.filter(f).length / leden.length * 100); };
-    return [RIJDBAAR, 15, 20].map(function (g) {
+    /* De drie kaartjes zijn kansen om te gaan. Te veel wind is geen kans maar een waarschuwing,
+       dus die staat apart en niet als vierde kaartje. */
+    return { kaarten: [RIJDBAAR, 15, 20].map(function (g) {
       return { grens:g, pct:pct(function (x) { return x >= g; }) };
-    }).concat([{ grens:TEVEEL, boven:true, pct:pct(function (x) { return x > TEVEEL; }) }]);
+    }), teHard: pct(function (x) { return x > TEVEEL; }) };
   }
 
   /* Waarom een percentage boven een windgetal staat, en wat je ermee doet. */
   function openZeker() {
     var u = gekozen(), kd = kansPerDrempel(u.t);
     $("sheet-t").textContent = "Kans dat je kunt kiten om " + uurStr(u.t);
-    $("sheet-b").innerHTML = (kd ? '<div class="drempels">' + kd.map(function (k) {
-        var kl = k.boven ? (k.pct >= 40 ? "aflandig" : k.pct >= 15 ? "matig" : "weinig")
-              : k.pct >= 70 ? "perfect" : k.pct >= 40 ? "goed" : k.pct >= 15 ? "matig" : "weinig";
+    $("sheet-b").innerHTML = (kd ? '<div class="drempels">' + kd.kaarten.map(function (k) {
+        var kl = k.pct >= 70 ? "perfect" : k.pct >= 40 ? "goed" : k.pct >= 15 ? "matig" : "weinig";
         return '<div class="dr" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '"><b>' + k.pct + '%</b>' +
-          '<span>' + (k.boven ? "meer dan " + k.grens + " kn" : k.grens + ' kn of meer') + '</span><small>' +
-          (k.boven ? "te hard, blijf aan land" : k.grens === RIJDBAAR ? "je kunt varen" : k.grens === 15 ? "lekker powered" : "kleine kite mee") + '</small></div>';
-      }).join("") + '</div>' : "") +
+          '<span>' + k.grens + ' kn of meer</span><small>' +
+          (k.grens === RIJDBAAR ? "je kunt varen" : k.grens === 15 ? "lekker powered" : "kleine kite mee") + '</small></div>';
+      }).join("") + '</div>' +
+      '<p class="tehard' + (kd.teHard >= 15 ? " op" : "") + '"><b>Te hard: ' + kd.teHard + '%</b> van die doorrekeningen geeft meer dan ' + TEVEEL + ' kn. Dat is geen kans maar een waarschuwing: dan blijf je aan land, en daarom telt het in de tabel als nee.</p>' : "") +
       '<ul class="redenen">' +
       (kd ? '<li class="p"><b>Die vier kaartjes</b> komen uit 82 doorrekeningen van hetzelfde weer, elk met een klein duwtje verschil. Ze kijken alleen naar de kracht, niet naar de hoek.</li>' : "") +
       '<li class="p"><b>Het getal in de tabel telt drie dingen samen.</b> Het is het deel van de tien modellen dat zegt: minstens ' + RIJDBAAR + ' kn, hoogstens ' + TEVEEL + ' kn, en uit een hoek die op ' + esc(spot().naam) + ' veilig is. Het model dat het vaakst gelijk had, telt zwaarder.</li>' +
