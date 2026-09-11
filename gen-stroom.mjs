@@ -75,11 +75,13 @@ function lees(ruw) {
   return uit;
 }
 
-/* RWS knijpt af bij te snel achter elkaar vragen: drie pogingen met oplopende pauze. */
+/* RWS knijpt af bij te snel achter elkaar vragen, en vanaf de GitHub-servers gebeurt dat vaker dan
+   vanaf een laptop (gemeten 11-09: 3 van de 20 punten thuis, 9 van de 20 daar). Vijf pogingen met
+   een steeds langere pauze. Wat dan nog mislukt, blijft staan op wat er al in stroom.js stond. */
 async function haal(u) {
   let laatste;
-  for (let p = 0; p < 3; p++) {
-    if (p) await new Promise(function (k) { setTimeout(k, 3000 * p); });
+  for (let p = 0; p < 5; p++) {
+    if (p) await new Promise(function (k) { setTimeout(k, 5000 * p); });
     try {
       const r = await fetch(u, { signal: AbortSignal.timeout(45000) });
       const tekst = await r.text();
@@ -127,6 +129,26 @@ for (const naam of namen) {
   } catch (e) { mislukt++; console.error(naam + ": FOUT " + e.message); }
 }
 
+/* Een punt dat vandaag niet antwoordde houdt zijn vorige reeks, zolang die nog vooruit reikt.
+   Zonder dit gooit één slechte nacht de helft van de spots hun stroming weg. */
+const { existsSync, readFileSync, writeFileSync } = await import("node:fs");
+const pad = new URL("./stroom.js", import.meta.url);
+let hergebruikt = 0;
+if (existsSync(pad)) {
+  try {
+    const oud = JSON.parse(readFileSync(pad, "utf8").replace(/^window\.KWS = /, "").trim().replace(/;$/, ""));
+    const grens = nu.getTime() + 2 * 86400e3;   // minder dan 2 dagen vooruit is te weinig om te tonen
+    for (const naam of namen) {
+      if (punten[naam]) continue;
+      const rij = (oud.punten?.[naam] ?? []).filter(function (r) { return new Date(r[0]).getTime() >= van.getTime(); });
+      if (rij.length && new Date(rij[rij.length - 1][0]).getTime() >= grens) {
+        punten[naam] = rij; hergebruikt++;
+        console.error(naam + ": oude reeks gehouden, " + rij.length + " punten tot " + rij[rij.length - 1][0]);
+      }
+    }
+  } catch (e) { console.error("oude stroom.js onleesbaar, genegeerd: " + e.message); }
+}
+
 if (!Object.keys(punten).length) { console.error("geen enkel punt gelukt, stroom.js niet geschreven"); process.exit(1); }
 
 const uit = {
@@ -136,6 +158,6 @@ const uit = {
   spots: PUNTEN,
   punten,   // punt -> [[tijd UTC, kn, graden waarheen], ...] op de ruwe 10-minuten-stap
 };
-const { writeFileSync } = await import("node:fs");
-writeFileSync(new URL("./stroom.js", import.meta.url), "window.KWS = " + JSON.stringify(uit) + ";\n");
-console.error("stroom.js geschreven: " + namen.length + " punten gevraagd, " + mislukt + " mislukt");
+writeFileSync(pad, "window.KWS = " + JSON.stringify(uit) + ";\n");
+console.error("stroom.js geschreven: " + Object.keys(punten).length + " van " + namen.length + " punten, " +
+  mislukt + " mislukt, " + hergebruikt + " op de oude reeks gehouden");

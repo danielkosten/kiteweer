@@ -71,3 +71,13 @@ stroom bijna stil (0,2 kn), maar het gemiddelde over die drie uur is 0,7 kn.
 Voor deze pagina is de meting zelf de juiste keuze, want de tabel is per uur. Arthurs eigen code
 zegt hetzelfde over zijn kant: niet middelen over een uur, want dan verdwijnt de kentering
 (`src/feeds.ts`, opmerking bij `fetchMatroosSource`). Zijn gemiddelde hoort bij zijn 3-uursblokken.
+
+## Een slechte nacht mag niks wegnemen
+
+Vanaf de GitHub-servers mislukken meer punten dan vanaf een laptop: gemeten op 11-09 drie thuis
+tegen negen daar. RWS knijpt af bij te snel achter elkaar vragen. Daarom vijf pogingen met een
+steeds langere pauze, en wat dan nog mislukt **houdt de reeks van gisteren**, zolang die nog twee
+dagen vooruit reikt. Getij is astronomisch, dus een dag oude voorspelling is nog steeds goed.
+
+Getest door de bron expres onbereikbaar te maken: alle 20 calls mislukten, alle 17 punten bleven
+staan.
