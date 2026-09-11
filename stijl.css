@@ -111,7 +111,7 @@ main{padding-bottom:64px}
   text-transform:uppercase;color:var(--zacht)}
 .invoer{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--lijn);
   border-radius:var(--r-pil);padding:7px 14px;background:var(--papier)}
-.invoer input{width:52px;background:none;border:0;color:var(--inkt);font:700 16px var(--tekst)}
+.invoer input{width:46px;background:none;border:0;color:var(--inkt);font:700 16px var(--tekst)}
 .invoer b{font-size:13px;color:var(--zacht);font-weight:700}
 .kites{display:flex;gap:8px;flex-wrap:wrap}
 .kitepil{border:1px solid var(--lijn);border-radius:var(--r-pil);padding:7px 14px;

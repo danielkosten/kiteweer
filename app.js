@@ -8,7 +8,10 @@ window.KWU_READY.then(function () {
   "use strict";
 
   var RIJDBAAR = KW.rijdbaar || 12;                 // Arthurs ondergrens, alleen nog als naslag
-  var GROOTSTE = 13;                                // jouw grootste kite in meters
+  /* Je grootste kite is een instelling, want hij bepaalt alles: bij welke wind je kunt beginnen,
+     waar de kleur begint, de streep in de weekbalk, en de sessiekans. Wie een 17 m heeft, kan bij
+     minder wind al het water op; wie alleen een 9 m heeft, moet wachten. */
+  function GROOT() { return st.groot; }
   /* Twee grenzen boven "perfect". VEEL = 30: daarboven is het geen perfecte dag meer maar wel een
      sessie, jij kite tot 40 met een kleine kite (Daniel, 11-09-2026). TEVEEL = 40: daarboven telt
      een doorrekening niet meer als "je kunt kiten", anders zegt de pagina 100% bij 45 kn storm. */
@@ -26,15 +29,15 @@ window.KWU_READY.then(function () {
      op een landmast niet (De Kooy). Gemeten 60 dagen op Hoek van Holland (+3) en IJmuiden (+4), docs/dajk-mix.md. */
   var OPTELLING = { standaard: 3, noordpier: 4, zuidpier: 4, wijkaanzee: 4 };
   function optelling() { return OPTELLING[st.spot] != null ? OPTELLING[st.spot] : OPTELLING.standaard; }
-  var st = { board:"twintip", kg:85, spot:"kijkduin", dag:0, t:null, modellen:DAJK.slice(), mix:"dajk" };
+  var st = { board:"twintip", kg:85, groot:13, spot:"kijkduin", dag:0, t:null, modellen:DAJK.slice(), mix:"dajk" };
   try { var bewaard = JSON.parse(localStorage.getItem("kiteweer") || "{}");
-    ["board","kg","spot","modellen","mix"].forEach(function (k) { if (bewaard[k] != null) st[k] = bewaard[k]; });
+    ["board","kg","groot","spot","modellen","mix"].forEach(function (k) { if (bewaard[k] != null) st[k] = bewaard[k]; });
     if (bewaard.v !== 3) { st.mix = "dajk"; st.modellen = DAJK.slice(); }   // eenmalig: iedereen naar de nieuwe DAJK-mix
     if (!KW.spots.some(function (s) { return s.id === st.spot; })) st.spot = KW.spots[0].id;
     st.modellen = st.modellen.map(function (m) { return m === "ecmwf_ifs025" ? "ecmwf_ifs" : m; });   // oude opgeslagen keuze: 25 km → 9 km
     st.modellen = st.modellen.filter(function (m) { return KWU.modellen.some(function (x) { return x.id === m; }); }); if (!st.modellen.length) st.modellen = ARTHUR.slice();
   } catch (e) {}
-  function bewaar() { try { localStorage.setItem("kiteweer", JSON.stringify({ v:3, board:st.board, kg:st.kg, spot:st.spot, modellen:st.modellen, mix:st.mix })); } catch (e) {} }
+  function bewaar() { try { localStorage.setItem("kiteweer", JSON.stringify({ v:3, board:st.board, kg:st.kg, groot:st.groot, spot:st.spot, modellen:st.modellen, mix:st.mix })); } catch (e) {} }
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };
@@ -234,10 +237,10 @@ window.KWU_READY.then(function () {
   /* ── kitemaat ──────────────────────────────────────
      ideaal = 2,2 x kg / knopen x boardfactor. Per kite uit JOUW quiver zeggen we hoe hij staat. */
   function ideaal(kn) { return 2.2 * st.kg / kn * BOARDS[st.board]; }
-  /* Wind waarbij je grootste kite (13 m) net trekt: 2,2 x gewicht / 13. Bij 85 kg twintip is dat
-     14 kn. Daaronder sta je stil, ook met alles uitgerold. Dit is de streep in de weekbalk en het
-     punt waar de kleur begint te lopen: 12 kn hoorde niet groen te zijn. */
-  function genoegKn() { return Math.round(2.2 * st.kg * BOARDS[st.board] / GROOTSTE); }
+  /* Wind waarbij je grootste kite net trekt: 2,2 x gewicht / die maat. Bij 85 kg twintip met een
+     13 m is dat 14 kn; met een 17 m 11 kn. Daaronder sta je stil, ook met alles uitgerold. Dit is
+     de streep in de weekbalk, het punt waar de kleur begint, en de ondergrens van de sessiekans. */
+  function genoegKn() { return Math.round(2.2 * st.kg * BOARDS[st.board] / GROOT()); }
   function staat(maat, kn) {
     var r = maat / ideaal(kn);
     // Geijkt op Daniels sessies: 10 m bij 23 kn (ratio 1,23) voelde "lekker powered", niet over.
@@ -246,17 +249,17 @@ window.KWU_READY.then(function () {
   /* Welke maat past bij een windbereik: afgerond op hele meters, hoog naar laag. */
   /* Maat op de gemiddelde wind. Trekkracht groeit met wind², dus bij vlaag/wind ≥ 1,5 één maat kleiner.
      Geijkt op één sessie (30-08, 19 kn → 10 m bij 85 kg): medium zekerheid. */
-  /* Nooit een maat adviseren die je niet hebt: je grootste is 13 m. Komt de berekening hoger
+  /* Nooit een maat adviseren die je niet hebt: je grootste staat in de kop. Komt de berekening hoger
      uit, dan is er simpelweg te weinig wind en staat er een streepje in de tabel. */
   function kiteAdvies(kn, vl) {
     var m = Math.round(ideaal(kn)), vlagerig = vl / kn >= 1.5;
-    if (m > GROOTSTE) return null;
+    if (m > GROOT()) return null;
     return { maat:m, klein:vlagerig ? Math.max(5, m - 2) : null, vlagerig:vlagerig };
   }
   function kiteBereik(lo, hi, vl) {
     var a = kiteAdvies(hi, vl), b = kiteAdvies(lo, vl);
-    if (!a) return "te weinig wind voor je " + GROOTSTE + " m";     // zelfs de hardste wind trekt je grootste kite niet
-    if (!b) b = { maat: GROOTSTE };                                 // onderkant valt buiten je maten: hou het bij je grootste
+    if (!a) return "te weinig wind voor je " + GROOT() + " m";     // zelfs de hardste wind trekt je grootste kite niet
+    if (!b) b = { maat: GROOT() };                                 // onderkant valt buiten je maten: hou het bij je grootste
     var tekst = a.maat === b.maat ? a.maat + " m" : a.maat + "–" + b.maat + " m";
     return a.vlagerig ? tekst + " (" + a.klein + " m kan, de vlagen dragen je)" : tekst;
   }
@@ -490,7 +493,7 @@ window.KWU_READY.then(function () {
     var maxKn = Math.max(24, Math.max.apply(null, ds.map(function (d) { return top(d.uren).kn; })));
     $("weekmini").hidden = false; $("wmuitleg").hidden = false;
     $("weekmini").style.setProperty("--grens", Math.round(genoegKn() / maxKn * 100) + "%");
-    $("wmuitleg").innerHTML = "Elk staafje is een uur. De streep staat op " + genoegKn() + " kn: daaronder trekt zelfs je grootste kite (13 m) je niet op het board. Het getal rechts van de dag is de hardste wind van die dag.";
+    $("wmuitleg").innerHTML = "Elk staafje is een uur. De streep staat op " + genoegKn() + " kn: daaronder trekt zelfs je grootste kite (" + GROOT() + " m) je niet op het board. Het getal rechts van de dag is de hardste wind van die dag.";
     $("weekmini").innerHTML = ds.map(function (d, i) {
       var o = dagOordeel(d), hardste = top(d.uren).kn;
       return '<button type="button" class="wm' + (i === st.dag ? " aan" : "") + (i === split ? " grof" : "") + '" data-dag="' + i + '" data-spring="1" aria-label="' + dagStr(d.uren[0].t) + ', hardste ' + hardste + ' kn" style="--tint:' + tint(o.n) + '">' +
@@ -620,7 +623,7 @@ window.KWU_READY.then(function () {
       }) : "") +
       rij(rijkop("kite m", "kite", "Hoe de kitemaat wordt berekend", st.kg + " kg"), function (u) { var n = niveau(u); if (n === "weinig" || n === "aflandig") return td(u, "tkite", '<small>—</small>');
         var k = kiteAdvies(u.kn, u.vl); if (!k) return td(u, "tkite", '<small>—</small>');
-        return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : Math.max(5, k.maat - 1)) + '–' + Math.min(GROOTSTE, k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
+        return td(u, "tkite", '<b>' + k.maat + '</b><small>' + (k.vlagerig ? k.klein : Math.max(5, k.maat - 1)) + '–' + Math.min(GROOT(), k.maat + 1) + '</small>', "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       rij(rijkop("sessiekans", "zeker", "Waar dit percentage over gaat", genoegKn() + "–" + TEVEEL + " kn"), function (u) { if (!u.nModellen) return td(u, "tm", '<small>—</small>');
         var k = u.kans, kl = k >= 80 ? "perfect" : k >= 50 ? "goed" : k >= 25 ? "matig" : "weinig";
         /* Alleen de twee verrassende redenen erbij: 0% bij 34 kn ("te hard") en 0% bij mooie wind uit
@@ -880,10 +883,12 @@ window.KWU_READY.then(function () {
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("sheet").hidden) sluit(); });
   document.addEventListener("input", function (e) { if (e.target.id === "spotzoek") { zoek = e.target.value; var lijst = $("sheet-b"); lijst.innerHTML = tekenSpots(); var z = $("spotzoek"); z.focus(); z.setSelectionRange(z.value.length, z.value.length); } });
   $("schuif").addEventListener("input", function (e) { st.t = huidigeDag().uren[+e.target.value].t; teken(); });
-  $("kg").addEventListener("input", function (e) { var v = parseInt(e.target.value,10); if (v >= 40 && v <= 140) { st.kg = v; teken(); } });
+  $("kg").addEventListener("input", function (e) { var v = parseInt(e.target.value,10); if (v >= 40 && v <= 140) { st.kg = v; bewaar(); teken(); } });
+  $("groot").addEventListener("input", function (e) { var v = parseInt(e.target.value,10); if (v >= 5 && v <= 21) { st.groot = v; bewaar(); teken(); } });
 
   $("legenda-box").open = window.matchMedia("(min-width:601px)").matches;
   $("kg").value = st.kg;
+  $("groot").value = st.groot;
   document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
   if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";
   window.KWU_LAAD(st.spot).catch(function () { st.spot = "kijkduin"; return window.KWU_LAAD(st.spot); }).then(function () {
