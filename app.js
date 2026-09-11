@@ -577,11 +577,11 @@ window.KWU_READY.then(function () {
           cells += '<td colspan="' + w.uren.length + '"><span class="vpil" title="' + w.tekst + " · " + WOORD[w.n] + '" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' + lbl + '</span></td>'; k += w.uren.length; }
         else { cells += '<td></td>'; k++; }
       }
-      return '<tr class="vrij"><th scope="row">venster</th>' + cells + '</tr>';
+      return '<tr class="vrij"><th scope="row">' + rijkop("venster", "venster", "Wat een venster is") + '</th>' + cells + '</tr>';
     })();
     var tabel = '<table class="uurtabel"><tbody>' + (o.v ? vensterRij : "") +
-      rij("uur", function (u) { return td(u, "tu", '<button type="button">' + u.t.slice(11,13) + (u.t === nu ? '<small>nu</small>' : '') + '</button>'); }) +
-      rij("richting", function (u) { return td(u, "", pijl(u.dir, niveau(u) === "aflandig" ? KLEUR.aflandig : "#17130F")); }) +
+      rij(rijkop("uur", "uur", "Wat het uur en de inktring betekenen"), function (u) { return td(u, "tu", '<button type="button">' + u.t.slice(11,13) + (u.t === nu ? '<small>nu</small>' : '') + '</button>'); }) +
+      rij(rijkop("richting", "richting", "Wat de windpijl betekent"), function (u) { return td(u, "", pijl(u.dir, niveau(u) === "aflandig" ? KLEUR.aflandig : "#17130F")); }) +
       /* Onder de wind staat hoe ver de modellen uit elkaar liggen: dat is de onzekerheid van dat
          uur. Stond eerst onder het percentage, maar hij hoort bij de wind. */
       rij(rijkop("wind kn", "modellen", "Hoe de wind wordt berekend", "modellen laag–hoog"), function (u) {
@@ -623,9 +623,9 @@ window.KWU_READY.then(function () {
         return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span>' + (waarom ? '<small>' + waarom + '</small>' : '')); }) +
       rij(rijkop("stroming", "stroom", "Wat de stroming met je doet"), function (u) { var b = blokBij(u.t), c = stroomC(b, u.dir);
         return td(u, "ts", b && b.stroom ? pijl(b.stroom.naar + 180, c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '<small>' + b.stroom.kn.toFixed(1) + ' kn</small><small style="color:' + (c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '">' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</small>' : '<small>—</small>'); }) +
-      rij("golven", function (u) { return td(u, "tg", u.golf ? '<span>' + u.golf.m.toFixed(1) + ' m</span><small>' + u.golf.s + ' s</small>' : '<small>—</small>'); }) +
-      rij("weer", function (u) { var w = weer(u.wx); return td(u, "tx", '<span>' + w[0] + '</span><small>' + u.temp + '°</small>'); }) +
-      rij("regen mm/u", function (u) { var d = druppels(u.mm); return td(u, "tr", d ? '<span class="drup">' + "💧".repeat(d) + '</span><small>' + u.mm + '</small>' : '<small class="droog">droog</small>'); }) +
+      rij(rijkop("golven", "golven", "Wat de golfhoogte en de periode betekenen"), function (u) { return td(u, "tg", u.golf ? '<span>' + u.golf.m.toFixed(1) + ' m</span><small>' + u.golf.s + ' s</small>' : '<small>—</small>'); }) +
+      rij(rijkop("weer", "weer", "Wat het weericoon betekent"), function (u) { var w = weer(u.wx); return td(u, "tx", '<span>' + w[0] + '</span><small>' + u.temp + '°</small>'); }) +
+      rij(rijkop("regen mm/u", "regen", "Wat de druppels betekenen"), function (u) { var d = druppels(u.mm); return td(u, "tr", d ? '<span class="drup">' + "💧".repeat(d) + '</span><small>' + u.mm + '</small>' : '<small class="droog">droog</small>'); }) +
       '</tbody></table>';
     $("dagen").innerHTML = '<div class="dag">' + kop + '<div class="scroll">' + tabel + '</div></div>';
     /* Op een smal scherm past de dag niet in beeld: schuif de TABEL naar het uur van nu.
@@ -669,10 +669,7 @@ window.KWU_READY.then(function () {
         : s ? '<li class="p"><b>Twee stations samen</b>, want ze liggen even ver van ' + esc(spot().naam) + ': ' +
             s.lijst.map(function (b) { return esc(b.naam) + ' op ' + String(b.km).replace(".", ",") + ' km telt voor ' + Math.round(b.w * 100) + '%'; }).join(", ") +
             '. Nagerekend scheelt dat een halve knoop.</li>' : '') +
-      '<li class="p"><b>Echt gemeten, geen model.</b> De paal tikt elke tien minuten door. Wij pakken per uur de meting die het dichtst bij het hele uur ligt.</li>' +
       '<li class="p"><b>Het kleine cijfer is het verschil</b> met wat het model voor dat uur zei. Groen is meer wind dan voorspeld, oker is minder, grijs betekent dat het model erop zat.</li>' +
-      '<li class="p"><b>Wat je ermee doet.</b> Zat het station de hele ochtend 3 kn boven de voorspelling, tel er vanmiddag dan ook 3 bij op.</li>' +
-      '<li class="p"><b>De pijl is de gemeten richting.</b> Hij kleurt oker zodra hij meer dan 45 graden van het model afwijkt. De hoek beslist of je gaat, dus dat is geen detail.</li>' +
       '<li class="m">Onder de 10 km is het jouw strand, boven de 20 km een aanwijzing. Een paal op zee vangt meer wind dan een strand in de luwte van de duinen.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
@@ -709,11 +706,7 @@ window.KWU_READY.then(function () {
       (kd ? '<li class="p"><b>Die drie kaartjes</b> komen uit 82 doorrekeningen van hetzelfde weer, elk met een klein duwtje verschil. Ze kijken alleen naar de kracht, niet naar de hoek.</li>' : "") +
       '<li class="p"><b>Het getal in de tabel telt drie dingen samen.</b> Het is het deel van de tien modellen dat zegt: minstens ' + RIJDBAAR + ' kn, hoogstens ' + TEVEEL + ' kn, en uit een hoek die op ' + esc(spot().naam) + ' veilig is. Het model dat het vaakst gelijk had, telt zwaarder.</li>' +
       '<li class="p"><b>Te veel wind telt dus als nee.</b> Tussen ' + VEEL + ' en ' + TEVEEL + ' kn is het jouw kleine kite, daarboven telt het als nee en staat er "te hard" onder het percentage.</li>' +
-      '<li class="p"><b>90% is een plan.</b> De modellen zijn het eens dat je kunt. Of het 14 of 18 kn wordt weet je nog niet.</li>' +
-      '<li class="p"><b>30% is nieuwsgierig blijven.</b> Drie van de tien zien het, zeven niet.</li>' +
-      '<li class="p"><b>0% terwijl er wind staat, is de hoek of te veel wind.</b> Onder het getal staat welke van de twee. Kijk daarna naar de pijlen bovenin.</li>' +
-      '<li class="p"><b>Het bereik onder het getal</b> is de laagste en de hoogste schatting voor dit uur. Ver uit elkaar betekent: ze weten het nog niet.</li>' +
-      '<li class="m">Na twee dagen vallen de fijne modellen weg en wordt alles voorzichtiger. Op de dagkaarten staat dan de kans uit dezelfde 82 doorrekeningen.</li></ul>';
+      '<li class="p"><b>0% terwijl er wind staat, is de hoek of te veel wind.</b> Onder het getal staat welke van de twee.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
 
@@ -723,9 +716,7 @@ window.KWU_READY.then(function () {
     $("sheet-b").innerHTML = '<ul class="redenen">' +
       '<li class="p"><b>Stroom tegen de wind in is gratis hoogte.</b> Het water duwt je bovenwinds terwijl je vaart, dus je verliest minder terrein en je kite krijgt meer druk.</li>' +
       '<li class="p"><b>Stroom met de wind mee kost je je sessie.</b> Je zakt af, en terugkruisen tegen stroom en wind in is zwaar werk.</li>' +
-      '<li class="p"><b>Het getal is de sterkte in knopen</b>, het woord eronder zegt of hij tegen, mee of dwars staat ten opzichte van de wind van dat uur.</li>' +
-      '<li class="p"><b>De pijl wijst waar het water heen gaat</b>, niet waar het vandaan komt. Dat is andersom dan bij de windpijl, en zo staat het ook in de bron.</li>' +
-      '<li class="m">Alleen het getij, zonder wat de wind er bovenop duwt. Die modellen zitten bij Rijkswaterstaat achter een login. Elke nacht vers opgehaald voor 35 spots.</li></ul>';
+      '<li class="p"><b>De pijl wijst waar het water heen gaat.</b> Het getal is de sterkte in knopen, het woord zegt of hij tegen, mee of dwars staat.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
 
@@ -735,11 +726,44 @@ window.KWU_READY.then(function () {
       '<ul class="redenen">' +
       '<li class="p"><b>Grote getal</b> = de maat waarmee je bij die wind lekker powered staat: 2,2 × je gewicht ÷ knopen, × 1 voor twintip en iets kleiner voor directional. Bij ' + st.kg + ' kg en 19 kn is dat ' + Math.round(ideaal(19)) + ' m.</li>' +
       '<li class="p"><b>Bereik eronder</b>: één maat kleiner (vlagen, jij wilt rustig) tot één maat groter (ondergrens van het venster, je wilt zeker de hoogte halen).</li>' +
-      '<li class="p"><b>Vlagerig</b> (vlagen ≥ 1,5× de wind): de onderkant van het bereik zakt twee maten, de vlagen dragen je.</li>' +
-      '<li class="p">Geijkt op je eigen sessies: 10 m bij 19 tot 23 kn en 8 m bij 23 tot 25 kn voelden lekker powered. Meer sessies = betere ijking.</li>' +
       '<li class="m">Schatting uit modellen die er geregeld 3 tot 5 kn naast zitten. Kijk naar het water en naar wat de anderen optuigen, en beslis zelf.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
+  /* Korte vensters: drie regels of minder, plat Nederlands, geen formules. Wie meer wil, klikt
+     door naar de lange vensters (wind, kans, meting, kite, stroming). */
+  var KORT = {
+    uur: ["Het uur", [
+      "<b>Elk kolommetje is één heel uur.</b> Klik erop en de strandkaart onderaan springt naar dat uur.",
+      "<b>De zwarte lijn eromheen is nu.</b> Alles links ervan is geweest, alles rechts moet nog komen.",
+      "<b>De tabel begint bij zon op en stopt bij zon onder.</b> In het donker ga je toch niet."]],
+    richting: ["De windpijl", [
+      "<b>De pijl wijst waar de wind naartoe gaat</b>, niet waar hij vandaan komt.",
+      "<b>Oranje betekent aflandig:</b> de wind blaast van het strand de zee op. Gaat je kite neer, dan drijf je weg van de kant.",
+      "<b>Zwart is veilig voor deze spot.</b> Welke hoeken veilig zijn komt uit de spotkennis van mijn vader."]],
+    golven: ["Golven", [
+      "<b>Het bovenste getal is de hoogte</b> in meters, van dal tot top.",
+      "<b>Het onderste is de periode</b>: hoeveel seconden tussen twee golven. Kort onder 5 is hakkerige chop, lang boven 8 zijn echte rollers.",
+      "<b>Voor kiten:</b> tot ongeveer een meter is het vlak genoeg om te leren, daarboven wordt het springen of ploegen."]],
+    weer: ["Het weer", [
+      "<b>Het icoon is het weerbeeld van dat uur</b>: zon, wolken, of een bui.",
+      "<b>Het getal is de temperatuur</b> in graden. Onder de 15 is het pak-en-handschoenenwerk.",
+      "<b>Een bui brengt vaak een windstoot</b> ervoor en een gat erna. Kijk dan ook naar de vlagen."]],
+    regen: ["Regen", [
+      "<b>Eén druppel is licht</b>, drie is 1 mm per uur, vijf is een plensbui.",
+      "<b>Het getal is millimeters per uur.</b> Droog staat er als er niets valt.",
+      "<b>Regen maakt je kite zwaarder</b> en het zicht slechter, maar hij vliegt gewoon door."]],
+    venster: ["Het venster", [
+      "<b>Een venster is een rij uren achter elkaar waarin je kunt</b>: genoeg wind, niet te hard, en uit een veilige hoek.",
+      "<b>De balk laat zien hoe lang het duurt</b> en welk oordeel er hoort bij het grootste deel van die uren.",
+      "<b>Klik erop</b> voor het cijfer van dat venster, de kitemaat en wat er mee en tegen zit."]]
+  };
+  function openKort(k) {
+    var x = KORT[k]; if (!x) return;
+    $("sheet-t").textContent = x[0];
+    $("sheet-b").innerHTML = '<ul class="redenen">' + x[1].map(function (r) { return '<li class="p">' + r + '</li>'; }).join("") + '</ul>';
+    $("sheet").hidden = false; $("sheet-x").focus();
+  }
+
   /* De vraag die twee keer is gesteld: is wind–vlagen niet hetzelfde als de spreiding? Nee.
      Vlagen = wat er binnen dat uur echt gebeurt. Spreiding = hoe oneens de modellen zijn. */
   function openVlagen() {
@@ -748,9 +772,7 @@ window.KWU_READY.then(function () {
     $("sheet-b").innerHTML = '<ul class="redenen">' +
       '<li class="p"><b>De vlaag gebeurt echt.</b> Binnen één uur waait het niet gelijkmatig: de wind zakt weg en piekt een paar seconden. Dat plusje is hoeveel knopen zo\'n piek erbovenop komt. Hier om ' + uurStr(u.t) + ': ' + u.kn + ' kn met pieken tot ' + u.vl + '.</li>' +
       '<li class="p"><b>Dat is normaal, geen waarschuwing.</b> Gemeten aan Hoek van Holland, 485 daglichturen deze zomer: een piek zit 40% boven de wind (middelste waarde), en bij negen van de tien uren tussen 20% en 67% erboven. Pas vanaf 60% erbij noemen we het vlagerig, en dan neem je een maat kleiner.</li>' +
-      '<li class="p"><b>De spreiding onder de wind is iets anders: dat is twijfel.</b> Tien rekenmodellen kijken naar dezelfde dag; ' + u.knLo + ' is de laagste die eruit komt, ' + u.knHi + ' de hoogste. Dat gaat niet gebeuren binnen een uur, dat is hoe oneens ze zijn.</li>' +
-      '<li class="p"><b>Daarom doe je er iets anders mee.</b> Een grote vlaag: kleinere kite meenemen. Een grote spreiding: morgen opnieuw kijken, want die krimpt als de dag dichterbij komt. Vandaag liggen ze een paar knopen uit elkaar, over vijf dagen tien of meer.</li>' +
-      '<li class="m">Wordt het bereik onder de wind oker, dan liggen ze meer dan 7 kn uit elkaar. Dat is geen plan maar een gokje.</li></ul>';
+      '<li class="p"><b>De spreiding onder de wind is iets anders: dat is twijfel.</b> Tien rekenmodellen kijken naar dezelfde dag; ' + u.knLo + ' is de laagste die eruit komt, ' + u.knHi + ' de hoogste. Dat gaat niet binnen een uur gebeuren, dat is hoe oneens ze zijn. Oker betekent meer dan 7 kn oneens: kijk morgen opnieuw.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
   function openModellen() {
@@ -759,10 +781,7 @@ window.KWU_READY.then(function () {
       '<ul class="redenen">' +
       '<li class="p"><b>Middelste waarde</b> van de aangevinkte modellen, het trefzekerste model weegt het zwaarst.</li>' +
       '<li class="p"><b>Fijn</b> (2 km) ziet de kust, reikt 2 dagen. <b>Grof</b> (7–15 km) reikt 7 dagen; na dag 3 lopen ze uiteen, kijk naar laagste–hoogste.</li>' +
-      '<li class="p"><b>AJK-mix</b>: fijn en grof tellen altijd 50/50. <a href="https://ajk68.com/kiteweer/" target="_blank" rel="noopener">Uitleg en gewichten op ajk68.com</a>.</li>' +
-      '<li class="p"><b>DAJK-mix</b>: fijn zolang het reikt (2,5 dag), daarna grof, geijkt op 60 dagen meting: grof +' + optelling() + ' kn aan het water, ARPEGE tot dag 4, kans uit 82 ensemble-runs. Trefkans dag 2–6 van 0,2 naar 0,5. <a href="docs/?p=dajk-mix.md" target="_blank" rel="noopener">Hoe en waarom</a>.</li>' +
-      '<li class="m">Na 2,5 dag is alles grof: indicatie, geen plan. Kijk naar de kans en laagste–hoogste.</li>' +
-      '<li class="m">Meting = Hoek van Holland, 12 km verderop. Het strand kan wat lager lezen.</li></ul>';
+      '<li class="p"><b>DAJK-mix</b>: fijn zolang het reikt, daarna grof met +' + optelling() + ' kn erbij, want de grove modellen lezen aan het water te laag. <a href="docs/?p=dajk-mix.md" target="_blank" rel="noopener">Hoe en waarom</a>.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
   function sluit() { $("sheet").hidden = true; document.body.classList.remove("modal-open"); }
@@ -840,6 +859,8 @@ window.KWU_READY.then(function () {
     if (e.target.closest("[data-info=\"zeker\"]")) return openZeker();
     if (e.target.closest("[data-info=\"stroom\"]")) return openStroom();
     if (e.target.closest("[data-info=\"vlagen\"]")) return openVlagen();
+    var kort = e.target.closest("[data-info]");
+    if (kort && KORT[kort.dataset.info]) return openKort(kort.dataset.info);
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
     var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; teken();

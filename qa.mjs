@@ -31,12 +31,14 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   if (errs.length||lek.length||breed||buiten.length||mist.length) stuk++;
 
   // 4. elk uitlegvenster openen en op lek controleren
-  for (const sel of ['[data-info="meten"]','[data-info="zeker"]','[data-info="kite"]','[data-info="stroom"]','.uurtabel [data-info="modellen"]','[data-info="vlagen"]']) {
+  const knoppen = await p.$$eval('.uurtabel th button.info', els=>els.map(e=>e.dataset.info));
+  for (const naam of knoppen) {
+    const sel = `.uurtabel th [data-info="${naam}"]`;
     if (!await p.$(sel)) { console.log('  venster', sel, ': knop ontbreekt'); continue; }
     await p.click(sel); await p.waitForTimeout(350);
     const s = await p.evaluate(()=>({t:document.getElementById('sheet-t').textContent, b:document.getElementById('sheet-b').innerText, open:!document.getElementById('sheet').hidden, past:(()=>{const r=document.querySelector('.sheet-in').getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1;})()}));
     const slecht = /function\s*\(|undefined|\[object|NaN/.test(s.b);
-    console.log('  venster', sel.slice(11,-2).padEnd(9), ':', s.open?'open':'DICHT', '| past:', s.past, '| lek:', slecht?'JA':'nee', '|', s.t);
+    console.log('  venster', naam.padEnd(9), ':', s.open?'open':'DICHT', '| past:', s.past, '| lek:', slecht?'JA':'nee', '|', s.t);
     if (!s.open||!s.past||slecht) stuk++;
     await p.click('#sheet-x'); await p.waitForTimeout(250);
   }
