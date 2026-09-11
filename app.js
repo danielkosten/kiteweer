@@ -1,7 +1,8 @@
 /* Kiteweer — vijf niveaus, één kleur per niveau, verder geen kleur.
    perfect · goed · matig · te weinig · aflandig
-   Uur-voor-uur, zon, golven uit uur.js (Open-Meteo, KNMI Harmonie eerst).
-   Stroming, spreiding en metingen uit data.js (3-uursblokken). */
+   Uur-voor-uur wind, zon en golven live uit Open-Meteo (laad.js), terugval uur.js.
+   Stroming uit stroom.js (Rijkswaterstaat, elke nacht ververst).
+   Spots en veilige windsectoren uit data.js: Arthurs curatie, die verloopt niet. */
 
 window.KWU_READY.then(function () {
   "use strict";
@@ -165,15 +166,11 @@ window.KWU_READY.then(function () {
     if (u) return u;
     var o = dagOordeel(d); u = o.v ? o.v.uren[0] : o.b; st.t = u.t; return u;
   }
-  /* Stroming bij een uur. Eerst stroom.js: dat wordt elke nacht vers bij Rijkswaterstaat opgehaald
-     (gen-stroom.mjs, zie docs/stroom.md) en dekt 35 spots. Lukt dat niet, dan de oude 3-uursblokken
-     uit data.js, de handgemaakte kopie uit Arthurs database. Zelfde vorm: { stroom: { kn, naar } }. */
-  function blokBij(t) {
-    var vers = versStroom(t); if (vers) return vers;
-    var bl = spot().blokken || [], ms = new Date(t).getTime(), beste = null;
-    bl.forEach(function (b) { var d = Math.abs(new Date(b.t).getTime() - ms); if (!beste || d < beste.d) beste = { b:b, d:d }; });
-    return beste && beste.d <= 2*3600e3 ? beste.b : null;
-  }
+  /* Stroming bij een uur, uit stroom.js: elke nacht vers bij Rijkswaterstaat opgehaald
+     (gen-stroom.mjs, zie docs/stroom.md), 35 van de 64 spots. Vorm: { stroom: { kn, naar } }.
+     De oude 3-uursblokken uit data.js zijn eruit: die liepen af op 11-09 21:00 en konden daarna
+     nooit meer iets teruggeven. */
+  function blokBij(t) { return versStroom(t); }
   /* Dichtstbijzijnde meting binnen het uur; verder weg dan een uur telt niet, dan is de reeks op. */
   function versStroom(t) {
     var K = window.KWS; if (!K || !K.spots || !K.punten) return null;

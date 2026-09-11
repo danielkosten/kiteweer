@@ -1,5 +1,5 @@
 window.KW = {
- "gegenereerd": "2026-09-06T11:12:07.960Z",
+ "gegenereerd": "2026-09-06T11:12:07.960Z (spots en veilige windsectoren; stroming zit sinds 11-09 in stroom.js)",
  "rijdbaar": 12,
  "spots": [
   {
@@ -18,872 +18,6 @@ window.KW = {
    ],
    "vorm": "schiereiland met lagune",
    "wf": "https://www.windfinder.com/weatherforecast/kijkduin_den_haag",
-   "metingen": [
-    {
-     "naam": "Hoek van Holland",
-     "km": 11.7,
-     "ts": "2026-09-06T10:40:00.000Z",
-     "wind": 11.4,
-     "vlaag": null,
-     "dir": 156,
-     "standaard": true,
-     "geldig": "onshore, ZW t/m NNW, de hele sector"
-    },
-    {
-     "naam": "Voorschoten",
-     "km": 18.6,
-     "ts": "2026-09-06T10:50:00.000Z",
-     "wind": 10,
-     "vlaag": 15.7,
-     "dir": 173,
-     "standaard": false,
-     "geldig": "aflandig, NO t/m O"
-    },
-    {
-     "naam": "Rotterdam",
-     "km": 21,
-     "ts": "2026-09-06T10:40:00.000Z",
-     "wind": 10.2,
-     "vlaag": null,
-     "dir": null,
-     "standaard": false,
-     "geldig": "aflandig, OZO t/m ZZW"
-    }
-   ],
-   "verwachtNu": 6,
-   "blokken": [
-    {
-     "t": "2026-09-06T00:00",
-     "lo": 2,
-     "mid": 3,
-     "hi": 3,
-     "vlaagLo": 5,
-     "vlaagHi": 6,
-     "dir": 167,
-     "hoek": 144,
-     "component": -81,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.38,
-      "naar": 29
-     }
-    },
-    {
-     "t": "2026-09-06T03:00",
-     "lo": 3,
-     "mid": 4,
-     "hi": 7,
-     "vlaagLo": 7,
-     "vlaagHi": 8,
-     "dir": 173,
-     "hoek": 138,
-     "component": -74,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.76,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-06T06:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 9,
-     "vlaagLo": 9,
-     "vlaagHi": 10,
-     "dir": 173,
-     "hoek": 138,
-     "component": -74,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.64,
-      "naar": 210
-     }
-    },
-    {
-     "t": "2026-09-06T09:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 10,
-     "vlaagLo": 12,
-     "vlaagHi": 14,
-     "dir": 161,
-     "hoek": 150,
-     "component": -87,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.7,
-      "naar": 35
-     }
-    },
-    {
-     "t": "2026-09-06T12:00",
-     "lo": 6,
-     "mid": 7,
-     "hi": 10,
-     "vlaagLo": 15,
-     "vlaagHi": 18,
-     "dir": 157,
-     "hoek": 154,
-     "component": -90,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.6,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-06T15:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 13,
-     "vlaagHi": 16,
-     "dir": 159,
-     "hoek": 152,
-     "component": -88,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.42,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-06T18:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 7,
-     "vlaagLo": 11,
-     "vlaagHi": 14,
-     "dir": 143,
-     "hoek": 168,
-     "component": -98,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.73,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-06T21:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 9,
-     "vlaagLo": 9,
-     "vlaagHi": 12,
-     "dir": 137,
-     "hoek": 174,
-     "component": -99,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.35,
-      "naar": 40
-     }
-    },
-    {
-     "t": "2026-09-07T00:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 8,
-     "vlaagLo": 10,
-     "vlaagHi": 11,
-     "dir": 149,
-     "hoek": 162,
-     "component": -95,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.77,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-07T03:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 8,
-     "vlaagLo": 7,
-     "vlaagHi": 11,
-     "dir": 155,
-     "hoek": 156,
-     "component": -91,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.15,
-      "naar": 217
-     }
-    },
-    {
-     "t": "2026-09-07T06:00",
-     "lo": 4,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 9,
-     "vlaagHi": 12,
-     "dir": 162,
-     "hoek": 149,
-     "component": -86,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.85,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-07T09:00",
-     "lo": 5,
-     "mid": 7,
-     "hi": 9,
-     "vlaagLo": 12,
-     "vlaagHi": 15,
-     "dir": 189,
-     "hoek": 122,
-     "component": -53,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.27,
-      "naar": 207
-     }
-    },
-    {
-     "t": "2026-09-07T12:00",
-     "lo": 8,
-     "mid": 10,
-     "hi": 13,
-     "vlaagLo": 21,
-     "vlaagHi": 27,
-     "dir": 232,
-     "hoek": 79,
-     "component": 19,
-     "aflandig": false,
-     "appPct": 3,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.9,
-      "naar": 32
-     }
-    },
-    {
-     "t": "2026-09-07T15:00",
-     "lo": 10,
-     "mid": 11,
-     "hi": 14,
-     "vlaagLo": 21,
-     "vlaagHi": 28,
-     "dir": 248,
-     "hoek": 63,
-     "component": 45,
-     "aflandig": false,
-     "appPct": 21,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.24,
-      "naar": 28
-     }
-    },
-    {
-     "t": "2026-09-07T18:00",
-     "lo": 9,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": 21,
-     "vlaagHi": 27,
-     "dir": 242,
-     "hoek": 69,
-     "component": 36,
-     "aflandig": false,
-     "appPct": 24,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.82,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-07T21:00",
-     "lo": 8,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": 21,
-     "vlaagHi": 28,
-     "dir": 229,
-     "hoek": 82,
-     "component": 14,
-     "aflandig": false,
-     "appPct": 35,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.51,
-      "naar": 209
-     }
-    },
-    {
-     "t": "2026-09-08T00:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": 24,
-     "vlaagHi": 30,
-     "dir": 227,
-     "hoek": 84,
-     "component": 10,
-     "aflandig": false,
-     "appPct": 38,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.01,
-      "naar": 33
-     }
-    },
-    {
-     "t": "2026-09-08T03:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 16,
-     "vlaagLo": 20,
-     "vlaagHi": 31,
-     "dir": 235,
-     "hoek": 76,
-     "component": 24,
-     "aflandig": false,
-     "appPct": 39,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.5,
-      "naar": 30
-     }
-    },
-    {
-     "t": "2026-09-08T06:00",
-     "lo": 6,
-     "mid": 11,
-     "hi": 16,
-     "vlaagLo": 20,
-     "vlaagHi": 30,
-     "dir": 239,
-     "hoek": 72,
-     "component": 31,
-     "aflandig": false,
-     "appPct": 27,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.81,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-08T09:00",
-     "lo": 8,
-     "mid": 11,
-     "hi": 18,
-     "vlaagLo": 16,
-     "vlaagHi": 31,
-     "dir": 241,
-     "hoek": 70,
-     "component": 34,
-     "aflandig": false,
-     "appPct": 37,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.73,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-08T12:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 17,
-     "vlaagLo": 19,
-     "vlaagHi": 29,
-     "dir": 242,
-     "hoek": 69,
-     "component": 36,
-     "aflandig": false,
-     "appPct": 46,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.78,
-      "naar": 36
-     }
-    },
-    {
-     "t": "2026-09-08T15:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 17,
-     "vlaagLo": 25,
-     "vlaagHi": 25,
-     "dir": 243,
-     "hoek": 68,
-     "component": 37,
-     "aflandig": false,
-     "appPct": 67,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.69,
-      "naar": 30
-     }
-    },
-    {
-     "t": "2026-09-08T18:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": 24,
-     "vlaagHi": 24,
-     "dir": 243,
-     "hoek": 68,
-     "component": 37,
-     "aflandig": false,
-     "appPct": 64,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.56,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-08T21:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 15,
-     "vlaagLo": 28,
-     "vlaagHi": 28,
-     "dir": 245,
-     "hoek": 66,
-     "component": 41,
-     "aflandig": false,
-     "appPct": 14,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.88,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T00:00",
-     "lo": 5,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 257,
-     "hoek": 54,
-     "component": 59,
-     "aflandig": false,
-     "appPct": 34,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.56,
-      "naar": 40
-     }
-    },
-    {
-     "t": "2026-09-09T03:00",
-     "lo": 6,
-     "mid": 10,
-     "hi": 17,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 265,
-     "hoek": 46,
-     "component": 69,
-     "aflandig": false,
-     "appPct": 40,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.87,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-09T06:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 18,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 267,
-     "hoek": 44,
-     "component": 72,
-     "aflandig": false,
-     "appPct": 43,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.44,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T09:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 19,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 275,
-     "hoek": 36,
-     "component": 81,
-     "aflandig": false,
-     "appPct": 49,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.97,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T12:00",
-     "lo": 11,
-     "mid": 13,
-     "hi": 19,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 281,
-     "hoek": 30,
-     "component": 87,
-     "aflandig": false,
-     "appPct": 52,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.08,
-      "naar": 190
-     }
-    },
-    {
-     "t": "2026-09-09T15:00",
-     "lo": 10,
-     "mid": 13,
-     "hi": 18,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 286,
-     "hoek": 25,
-     "component": 91,
-     "aflandig": false,
-     "appPct": 49,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.98,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-09T18:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 293,
-     "hoek": 18,
-     "component": 95,
-     "aflandig": true,
-     "appPct": 30,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.13,
-      "naar": 216
-     }
-    },
-    {
-     "t": "2026-09-09T21:00",
-     "lo": 4,
-     "mid": 8,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 294,
-     "hoek": 17,
-     "component": 96,
-     "aflandig": true,
-     "appPct": 18,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.07,
-      "naar": 213
-     }
-    },
-    {
-     "t": "2026-09-10T00:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 286,
-     "hoek": 25,
-     "component": 91,
-     "aflandig": false,
-     "appPct": 16,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.29,
-      "naar": 204
-     }
-    },
-    {
-     "t": "2026-09-10T03:00",
-     "lo": 2,
-     "mid": 6,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 269,
-     "hoek": 42,
-     "component": 74,
-     "aflandig": false,
-     "appPct": 18,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.15,
-      "naar": 32
-     }
-    },
-    {
-     "t": "2026-09-10T06:00",
-     "lo": 3,
-     "mid": 5,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 251,
-     "hoek": 60,
-     "component": 50,
-     "aflandig": false,
-     "appPct": 16,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.05,
-      "naar": 16
-     }
-    },
-    {
-     "t": "2026-09-10T09:00",
-     "lo": 3,
-     "mid": 7,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 244,
-     "hoek": 67,
-     "component": 39,
-     "aflandig": false,
-     "appPct": 13,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.1,
-      "naar": 213
-     }
-    },
-    {
-     "t": "2026-09-10T12:00",
-     "lo": 5,
-     "mid": 9,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 253,
-     "hoek": 58,
-     "component": 53,
-     "aflandig": false,
-     "appPct": 14,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.51,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-10T15:00",
-     "lo": 5,
-     "mid": 8,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 256,
-     "hoek": 55,
-     "component": 57,
-     "aflandig": false,
-     "appPct": 10,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-10T18:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 247,
-     "hoek": 64,
-     "component": 44,
-     "aflandig": false,
-     "appPct": 8,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-10T21:00",
-     "lo": 3,
-     "mid": 5,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 210,
-     "hoek": 101,
-     "component": -19,
-     "aflandig": false,
-     "appPct": 8,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T00:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 194,
-     "hoek": 117,
-     "component": -45,
-     "aflandig": false,
-     "appPct": 4,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T03:00",
-     "lo": 4,
-     "mid": 7,
-     "hi": 14,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 197,
-     "hoek": 114,
-     "component": -41,
-     "aflandig": false,
-     "appPct": 6,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T06:00",
-     "lo": 5,
-     "mid": 7,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 206,
-     "hoek": 105,
-     "component": -26,
-     "aflandig": false,
-     "appPct": 9,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T09:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 220,
-     "hoek": 91,
-     "component": -2,
-     "aflandig": false,
-     "appPct": 11,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T12:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 237,
-     "hoek": 74,
-     "component": 28,
-     "aflandig": false,
-     "appPct": 20,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T15:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 256,
-     "hoek": 55,
-     "component": 57,
-     "aflandig": false,
-     "appPct": 20,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T18:00",
-     "lo": 5,
-     "mid": 9,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 273,
-     "hoek": 38,
-     "component": 79,
-     "aflandig": false,
-     "appPct": 12,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T21:00",
-     "lo": 4,
-     "mid": 7,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 284,
-     "hoek": 27,
-     "component": 89,
-     "aflandig": false,
-     "appPct": 9,
-     "vlagerig": false,
-     "stroom": null
-    }
-   ],
    "lat": 52.052,
    "lon": 4.185,
    "regio": "Zuid-Holland",
@@ -901,872 +35,6 @@ window.KW = {
    ],
    "vorm": "recht strand",
    "wf": "https://www.windfinder.com/weatherforecast/kijkduin_den_haag",
-   "metingen": [
-    {
-     "naam": "Hoek van Holland",
-     "km": 11.7,
-     "ts": "2026-09-06T10:40:00.000Z",
-     "wind": 11.4,
-     "vlaag": null,
-     "dir": 156,
-     "standaard": true,
-     "geldig": "onshore, ZW t/m NNW, de hele sector"
-    },
-    {
-     "naam": "Voorschoten",
-     "km": 18.6,
-     "ts": "2026-09-06T10:50:00.000Z",
-     "wind": 10,
-     "vlaag": 15.7,
-     "dir": 173,
-     "standaard": false,
-     "geldig": "aflandig, NO t/m O"
-    },
-    {
-     "naam": "Rotterdam",
-     "km": 21,
-     "ts": "2026-09-06T10:40:00.000Z",
-     "wind": 10.2,
-     "vlaag": null,
-     "dir": null,
-     "standaard": false,
-     "geldig": "aflandig, OZO t/m ZZW"
-    }
-   ],
-   "verwachtNu": 6,
-   "blokken": [
-    {
-     "t": "2026-09-06T00:00",
-     "lo": 2,
-     "mid": 3,
-     "hi": 3,
-     "vlaagLo": 5,
-     "vlaagHi": 6,
-     "dir": 167,
-     "hoek": 144,
-     "component": -81,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.38,
-      "naar": 29
-     }
-    },
-    {
-     "t": "2026-09-06T03:00",
-     "lo": 3,
-     "mid": 4,
-     "hi": 7,
-     "vlaagLo": 7,
-     "vlaagHi": 8,
-     "dir": 173,
-     "hoek": 138,
-     "component": -74,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.76,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-06T06:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 9,
-     "vlaagLo": 9,
-     "vlaagHi": 10,
-     "dir": 173,
-     "hoek": 138,
-     "component": -74,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.64,
-      "naar": 210
-     }
-    },
-    {
-     "t": "2026-09-06T09:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 10,
-     "vlaagLo": 12,
-     "vlaagHi": 14,
-     "dir": 161,
-     "hoek": 150,
-     "component": -87,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.7,
-      "naar": 35
-     }
-    },
-    {
-     "t": "2026-09-06T12:00",
-     "lo": 6,
-     "mid": 7,
-     "hi": 10,
-     "vlaagLo": 15,
-     "vlaagHi": 18,
-     "dir": 157,
-     "hoek": 154,
-     "component": -90,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.6,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-06T15:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 13,
-     "vlaagHi": 16,
-     "dir": 159,
-     "hoek": 152,
-     "component": -88,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.42,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-06T18:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 7,
-     "vlaagLo": 11,
-     "vlaagHi": 14,
-     "dir": 143,
-     "hoek": 168,
-     "component": -98,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.73,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-06T21:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 9,
-     "vlaagLo": 9,
-     "vlaagHi": 12,
-     "dir": 137,
-     "hoek": 174,
-     "component": -99,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.35,
-      "naar": 40
-     }
-    },
-    {
-     "t": "2026-09-07T00:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 8,
-     "vlaagLo": 10,
-     "vlaagHi": 11,
-     "dir": 149,
-     "hoek": 162,
-     "component": -95,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.77,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-07T03:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 8,
-     "vlaagLo": 7,
-     "vlaagHi": 11,
-     "dir": 155,
-     "hoek": 156,
-     "component": -91,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.15,
-      "naar": 217
-     }
-    },
-    {
-     "t": "2026-09-07T06:00",
-     "lo": 4,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 9,
-     "vlaagHi": 12,
-     "dir": 162,
-     "hoek": 149,
-     "component": -86,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.85,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-07T09:00",
-     "lo": 5,
-     "mid": 7,
-     "hi": 9,
-     "vlaagLo": 12,
-     "vlaagHi": 15,
-     "dir": 189,
-     "hoek": 122,
-     "component": -53,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.27,
-      "naar": 207
-     }
-    },
-    {
-     "t": "2026-09-07T12:00",
-     "lo": 8,
-     "mid": 10,
-     "hi": 13,
-     "vlaagLo": 21,
-     "vlaagHi": 27,
-     "dir": 232,
-     "hoek": 79,
-     "component": 19,
-     "aflandig": false,
-     "appPct": 3,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.9,
-      "naar": 32
-     }
-    },
-    {
-     "t": "2026-09-07T15:00",
-     "lo": 10,
-     "mid": 11,
-     "hi": 14,
-     "vlaagLo": 21,
-     "vlaagHi": 28,
-     "dir": 248,
-     "hoek": 63,
-     "component": 45,
-     "aflandig": false,
-     "appPct": 21,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.24,
-      "naar": 28
-     }
-    },
-    {
-     "t": "2026-09-07T18:00",
-     "lo": 9,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": 21,
-     "vlaagHi": 27,
-     "dir": 242,
-     "hoek": 69,
-     "component": 36,
-     "aflandig": false,
-     "appPct": 24,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.82,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-07T21:00",
-     "lo": 8,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": 21,
-     "vlaagHi": 28,
-     "dir": 229,
-     "hoek": 82,
-     "component": 14,
-     "aflandig": false,
-     "appPct": 35,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.51,
-      "naar": 209
-     }
-    },
-    {
-     "t": "2026-09-08T00:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": 24,
-     "vlaagHi": 30,
-     "dir": 227,
-     "hoek": 84,
-     "component": 10,
-     "aflandig": false,
-     "appPct": 38,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.01,
-      "naar": 33
-     }
-    },
-    {
-     "t": "2026-09-08T03:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 16,
-     "vlaagLo": 20,
-     "vlaagHi": 31,
-     "dir": 235,
-     "hoek": 76,
-     "component": 24,
-     "aflandig": false,
-     "appPct": 39,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.5,
-      "naar": 30
-     }
-    },
-    {
-     "t": "2026-09-08T06:00",
-     "lo": 6,
-     "mid": 11,
-     "hi": 16,
-     "vlaagLo": 20,
-     "vlaagHi": 30,
-     "dir": 239,
-     "hoek": 72,
-     "component": 31,
-     "aflandig": false,
-     "appPct": 27,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.81,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-08T09:00",
-     "lo": 8,
-     "mid": 11,
-     "hi": 18,
-     "vlaagLo": 16,
-     "vlaagHi": 31,
-     "dir": 241,
-     "hoek": 70,
-     "component": 34,
-     "aflandig": false,
-     "appPct": 37,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.73,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-08T12:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 17,
-     "vlaagLo": 19,
-     "vlaagHi": 29,
-     "dir": 242,
-     "hoek": 69,
-     "component": 36,
-     "aflandig": false,
-     "appPct": 46,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.78,
-      "naar": 36
-     }
-    },
-    {
-     "t": "2026-09-08T15:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 17,
-     "vlaagLo": 25,
-     "vlaagHi": 25,
-     "dir": 243,
-     "hoek": 68,
-     "component": 37,
-     "aflandig": false,
-     "appPct": 67,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.69,
-      "naar": 30
-     }
-    },
-    {
-     "t": "2026-09-08T18:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": 24,
-     "vlaagHi": 24,
-     "dir": 243,
-     "hoek": 68,
-     "component": 37,
-     "aflandig": false,
-     "appPct": 64,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.56,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-08T21:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 15,
-     "vlaagLo": 28,
-     "vlaagHi": 28,
-     "dir": 245,
-     "hoek": 66,
-     "component": 41,
-     "aflandig": false,
-     "appPct": 14,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.88,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T00:00",
-     "lo": 5,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 257,
-     "hoek": 54,
-     "component": 59,
-     "aflandig": false,
-     "appPct": 34,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.56,
-      "naar": 40
-     }
-    },
-    {
-     "t": "2026-09-09T03:00",
-     "lo": 6,
-     "mid": 10,
-     "hi": 17,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 265,
-     "hoek": 46,
-     "component": 69,
-     "aflandig": false,
-     "appPct": 40,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.87,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-09T06:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 18,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 267,
-     "hoek": 44,
-     "component": 72,
-     "aflandig": false,
-     "appPct": 43,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.44,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T09:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 19,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 275,
-     "hoek": 36,
-     "component": 81,
-     "aflandig": false,
-     "appPct": 49,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.97,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T12:00",
-     "lo": 11,
-     "mid": 13,
-     "hi": 19,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 281,
-     "hoek": 30,
-     "component": 87,
-     "aflandig": false,
-     "appPct": 52,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.08,
-      "naar": 190
-     }
-    },
-    {
-     "t": "2026-09-09T15:00",
-     "lo": 10,
-     "mid": 13,
-     "hi": 18,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 286,
-     "hoek": 25,
-     "component": 91,
-     "aflandig": false,
-     "appPct": 49,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.98,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-09T18:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 293,
-     "hoek": 18,
-     "component": 95,
-     "aflandig": true,
-     "appPct": 30,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.13,
-      "naar": 216
-     }
-    },
-    {
-     "t": "2026-09-09T21:00",
-     "lo": 4,
-     "mid": 8,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 294,
-     "hoek": 17,
-     "component": 96,
-     "aflandig": true,
-     "appPct": 18,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.07,
-      "naar": 213
-     }
-    },
-    {
-     "t": "2026-09-10T00:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 286,
-     "hoek": 25,
-     "component": 91,
-     "aflandig": false,
-     "appPct": 16,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.29,
-      "naar": 204
-     }
-    },
-    {
-     "t": "2026-09-10T03:00",
-     "lo": 2,
-     "mid": 6,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 269,
-     "hoek": 42,
-     "component": 74,
-     "aflandig": false,
-     "appPct": 18,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.15,
-      "naar": 32
-     }
-    },
-    {
-     "t": "2026-09-10T06:00",
-     "lo": 3,
-     "mid": 5,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 251,
-     "hoek": 60,
-     "component": 50,
-     "aflandig": false,
-     "appPct": 16,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.05,
-      "naar": 16
-     }
-    },
-    {
-     "t": "2026-09-10T09:00",
-     "lo": 3,
-     "mid": 7,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 244,
-     "hoek": 67,
-     "component": 39,
-     "aflandig": false,
-     "appPct": 13,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.1,
-      "naar": 213
-     }
-    },
-    {
-     "t": "2026-09-10T12:00",
-     "lo": 5,
-     "mid": 9,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 253,
-     "hoek": 58,
-     "component": 53,
-     "aflandig": false,
-     "appPct": 14,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.51,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-10T15:00",
-     "lo": 5,
-     "mid": 8,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 256,
-     "hoek": 55,
-     "component": 57,
-     "aflandig": false,
-     "appPct": 10,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-10T18:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 247,
-     "hoek": 64,
-     "component": 44,
-     "aflandig": false,
-     "appPct": 8,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-10T21:00",
-     "lo": 3,
-     "mid": 5,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 210,
-     "hoek": 101,
-     "component": -19,
-     "aflandig": false,
-     "appPct": 8,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T00:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 194,
-     "hoek": 117,
-     "component": -45,
-     "aflandig": false,
-     "appPct": 4,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T03:00",
-     "lo": 4,
-     "mid": 7,
-     "hi": 14,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 197,
-     "hoek": 114,
-     "component": -41,
-     "aflandig": false,
-     "appPct": 6,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T06:00",
-     "lo": 5,
-     "mid": 7,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 206,
-     "hoek": 105,
-     "component": -26,
-     "aflandig": false,
-     "appPct": 9,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T09:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 220,
-     "hoek": 91,
-     "component": -2,
-     "aflandig": false,
-     "appPct": 11,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T12:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 237,
-     "hoek": 74,
-     "component": 28,
-     "aflandig": false,
-     "appPct": 20,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T15:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 16,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 256,
-     "hoek": 55,
-     "component": 57,
-     "aflandig": false,
-     "appPct": 20,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T18:00",
-     "lo": 5,
-     "mid": 9,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 273,
-     "hoek": 38,
-     "component": 79,
-     "aflandig": false,
-     "appPct": 12,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T21:00",
-     "lo": 4,
-     "mid": 7,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 284,
-     "hoek": 27,
-     "component": 89,
-     "aflandig": false,
-     "appPct": 9,
-     "vlagerig": false,
-     "stroom": null
-    }
-   ],
    "lat": 52.0581,
    "lon": 4.1983,
    "regio": "ZH-kust",
@@ -1784,882 +52,6 @@ window.KW = {
    ],
    "vorm": "recht strand",
    "wf": "https://www.windfinder.com/weatherforecast/wassenaar_wassenaarseslag",
-   "metingen": [
-    {
-     "naam": "Platform Europa",
-     "km": 27.1,
-     "ts": "2026-09-06T10:50:00.000Z",
-     "wind": 11.9,
-     "vlaag": 14,
-     "dir": 176,
-     "standaard": true,
-     "geldig": "onshore, ZW t/m NNW"
-    },
-    {
-     "naam": "Hoek van Holland",
-     "km": 27.4,
-     "ts": "2026-09-06T10:40:00.000Z",
-     "wind": 11.4,
-     "vlaag": null,
-     "dir": 156,
-     "standaard": false,
-     "geldig": "onshore, ZW t/m WZW, de side-shore kant"
-    },
-    {
-     "naam": "Voorschoten",
-     "km": 6.6,
-     "ts": "2026-09-06T10:50:00.000Z",
-     "wind": 10,
-     "vlaag": 15.7,
-     "dir": 173,
-     "standaard": false,
-     "geldig": "aflandig, ONO t/m ZO"
-    },
-    {
-     "naam": "Haarlemmermeer",
-     "km": 22.7,
-     "ts": "2026-09-06T10:50:00.000Z",
-     "wind": 8.7,
-     "vlaag": 13.6,
-     "dir": 161,
-     "standaard": false,
-     "geldig": "aflandig, NO t/m ONO"
-    }
-   ],
-   "verwachtNu": 6,
-   "blokken": [
-    {
-     "t": "2026-09-06T00:00",
-     "lo": 2,
-     "mid": 2,
-     "hi": 3,
-     "vlaagLo": 4,
-     "vlaagHi": 7,
-     "dir": 200,
-     "hoek": 107,
-     "component": -29,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.38,
-      "naar": 29
-     }
-    },
-    {
-     "t": "2026-09-06T03:00",
-     "lo": 3,
-     "mid": 4,
-     "hi": 6,
-     "vlaagLo": 6,
-     "vlaagHi": 8,
-     "dir": 178,
-     "hoek": 129,
-     "component": -63,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.76,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-06T06:00",
-     "lo": 4,
-     "mid": 6,
-     "hi": 7,
-     "vlaagLo": 8,
-     "vlaagHi": 10,
-     "dir": 175,
-     "hoek": 132,
-     "component": -67,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.64,
-      "naar": 210
-     }
-    },
-    {
-     "t": "2026-09-06T09:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 12,
-     "vlaagHi": 13,
-     "dir": 165,
-     "hoek": 142,
-     "component": -79,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.7,
-      "naar": 35
-     }
-    },
-    {
-     "t": "2026-09-06T12:00",
-     "lo": 7,
-     "mid": 8,
-     "hi": 9,
-     "vlaagLo": 14,
-     "vlaagHi": 17,
-     "dir": 158,
-     "hoek": 149,
-     "component": -86,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.6,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-06T15:00",
-     "lo": 6,
-     "mid": 7,
-     "hi": 8,
-     "vlaagLo": 12,
-     "vlaagHi": 14,
-     "dir": 157,
-     "hoek": 150,
-     "component": -87,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.42,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-06T18:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 7,
-     "vlaagLo": 8,
-     "vlaagHi": 12,
-     "dir": 140,
-     "hoek": 167,
-     "component": -97,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.73,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-06T21:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 9,
-     "vlaagHi": 11,
-     "dir": 136,
-     "hoek": 171,
-     "component": -99,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.35,
-      "naar": 40
-     }
-    },
-    {
-     "t": "2026-09-07T00:00",
-     "lo": 4,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 9,
-     "vlaagHi": 12,
-     "dir": 148,
-     "hoek": 159,
-     "component": -93,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.77,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-07T03:00",
-     "lo": 4,
-     "mid": 6,
-     "hi": 7,
-     "vlaagLo": 7,
-     "vlaagHi": 11,
-     "dir": 153,
-     "hoek": 154,
-     "component": -90,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.15,
-      "naar": 217
-     }
-    },
-    {
-     "t": "2026-09-07T06:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 9,
-     "vlaagHi": 12,
-     "dir": 157,
-     "hoek": 150,
-     "component": -87,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.85,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-07T09:00",
-     "lo": 6,
-     "mid": 7,
-     "hi": 8,
-     "vlaagLo": 11,
-     "vlaagHi": 14,
-     "dir": 181,
-     "hoek": 126,
-     "component": -59,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.27,
-      "naar": 207
-     }
-    },
-    {
-     "t": "2026-09-07T12:00",
-     "lo": 8,
-     "mid": 10,
-     "hi": 12,
-     "vlaagLo": 21,
-     "vlaagHi": 25,
-     "dir": 228,
-     "hoek": 79,
-     "component": 19,
-     "aflandig": false,
-     "appPct": 28,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.9,
-      "naar": 32
-     }
-    },
-    {
-     "t": "2026-09-07T15:00",
-     "lo": 10,
-     "mid": 12,
-     "hi": 13,
-     "vlaagLo": 20,
-     "vlaagHi": 26,
-     "dir": 248,
-     "hoek": 59,
-     "component": 52,
-     "aflandig": false,
-     "appPct": 28,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.24,
-      "naar": 28
-     }
-    },
-    {
-     "t": "2026-09-07T18:00",
-     "lo": 9,
-     "mid": 10,
-     "hi": 13,
-     "vlaagLo": 20,
-     "vlaagHi": 27,
-     "dir": 241,
-     "hoek": 66,
-     "component": 41,
-     "aflandig": false,
-     "appPct": 26,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.82,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-07T21:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 13,
-     "vlaagLo": 21,
-     "vlaagHi": 28,
-     "dir": 227,
-     "hoek": 80,
-     "component": 17,
-     "aflandig": false,
-     "appPct": 26,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.51,
-      "naar": 209
-     }
-    },
-    {
-     "t": "2026-09-08T00:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 13,
-     "vlaagLo": 23,
-     "vlaagHi": 28,
-     "dir": 225,
-     "hoek": 82,
-     "component": 14,
-     "aflandig": false,
-     "appPct": 43,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.01,
-      "naar": 33
-     }
-    },
-    {
-     "t": "2026-09-08T03:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 14,
-     "vlaagLo": 20,
-     "vlaagHi": 31,
-     "dir": 235,
-     "hoek": 72,
-     "component": 31,
-     "aflandig": false,
-     "appPct": 44,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.5,
-      "naar": 30
-     }
-    },
-    {
-     "t": "2026-09-08T06:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 14,
-     "vlaagLo": 21,
-     "vlaagHi": 29,
-     "dir": 238,
-     "hoek": 69,
-     "component": 36,
-     "aflandig": false,
-     "appPct": 33,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.81,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-08T09:00",
-     "lo": 9,
-     "mid": 11,
-     "hi": 16,
-     "vlaagLo": 16,
-     "vlaagHi": 30,
-     "dir": 241,
-     "hoek": 66,
-     "component": 41,
-     "aflandig": false,
-     "appPct": 46,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.73,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-08T12:00",
-     "lo": 10,
-     "mid": 12,
-     "hi": 16,
-     "vlaagLo": 18,
-     "vlaagHi": 29,
-     "dir": 243,
-     "hoek": 64,
-     "component": 44,
-     "aflandig": false,
-     "appPct": 15,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.78,
-      "naar": 36
-     }
-    },
-    {
-     "t": "2026-09-08T15:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 15,
-     "vlaagLo": 24,
-     "vlaagHi": 24,
-     "dir": 243,
-     "hoek": 64,
-     "component": 44,
-     "aflandig": false,
-     "appPct": 13,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.69,
-      "naar": 30
-     }
-    },
-    {
-     "t": "2026-09-08T18:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 14,
-     "vlaagLo": 22,
-     "vlaagHi": 22,
-     "dir": 243,
-     "hoek": 64,
-     "component": 44,
-     "aflandig": false,
-     "appPct": 6,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.56,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-08T21:00",
-     "lo": 6,
-     "mid": 10,
-     "hi": 13,
-     "vlaagLo": 24,
-     "vlaagHi": 24,
-     "dir": 245,
-     "hoek": 62,
-     "component": 47,
-     "aflandig": false,
-     "appPct": 5,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.88,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T00:00",
-     "lo": 6,
-     "mid": 10,
-     "hi": 14,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 256,
-     "hoek": 51,
-     "component": 63,
-     "aflandig": false,
-     "appPct": 16,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.56,
-      "naar": 40
-     }
-    },
-    {
-     "t": "2026-09-09T03:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 263,
-     "hoek": 44,
-     "component": 72,
-     "aflandig": false,
-     "appPct": 20,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.87,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-09T06:00",
-     "lo": 8,
-     "mid": 11,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 266,
-     "hoek": 41,
-     "component": 75,
-     "aflandig": false,
-     "appPct": 23,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.44,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T09:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 17,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 273,
-     "hoek": 34,
-     "component": 83,
-     "aflandig": false,
-     "appPct": 38,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.97,
-      "naar": 212
-     }
-    },
-    {
-     "t": "2026-09-09T12:00",
-     "lo": 11,
-     "mid": 14,
-     "hi": 18,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 280,
-     "hoek": 27,
-     "component": 89,
-     "aflandig": false,
-     "appPct": 48,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.08,
-      "naar": 190
-     }
-    },
-    {
-     "t": "2026-09-09T15:00",
-     "lo": 11,
-     "mid": 13,
-     "hi": 17,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 285,
-     "hoek": 22,
-     "component": 93,
-     "aflandig": false,
-     "appPct": 45,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.98,
-      "naar": 31
-     }
-    },
-    {
-     "t": "2026-09-09T18:00",
-     "lo": 8,
-     "mid": 11,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 292,
-     "hoek": 15,
-     "component": 97,
-     "aflandig": false,
-     "appPct": 17,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.13,
-      "naar": 216
-     }
-    },
-    {
-     "t": "2026-09-09T21:00",
-     "lo": 5,
-     "mid": 8,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 293,
-     "hoek": 14,
-     "component": 97,
-     "aflandig": false,
-     "appPct": 9,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.07,
-      "naar": 213
-     }
-    },
-    {
-     "t": "2026-09-10T00:00",
-     "lo": 4,
-     "mid": 7,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 287,
-     "hoek": 20,
-     "component": 94,
-     "aflandig": false,
-     "appPct": 4,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.29,
-      "naar": 204
-     }
-    },
-    {
-     "t": "2026-09-10T03:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 10,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 273,
-     "hoek": 34,
-     "component": 83,
-     "aflandig": false,
-     "appPct": 2,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.15,
-      "naar": 32
-     }
-    },
-    {
-     "t": "2026-09-10T06:00",
-     "lo": 3,
-     "mid": 5,
-     "hi": 10,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 256,
-     "hoek": 51,
-     "component": 63,
-     "aflandig": false,
-     "appPct": 3,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.05,
-      "naar": 16
-     }
-    },
-    {
-     "t": "2026-09-10T09:00",
-     "lo": 4,
-     "mid": 7,
-     "hi": 10,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 248,
-     "hoek": 59,
-     "component": 52,
-     "aflandig": false,
-     "appPct": 3,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.1,
-      "naar": 213
-     }
-    },
-    {
-     "t": "2026-09-10T12:00",
-     "lo": 5,
-     "mid": 9,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 254,
-     "hoek": 53,
-     "component": 60,
-     "aflandig": false,
-     "appPct": 7,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.51,
-      "naar": 211
-     }
-    },
-    {
-     "t": "2026-09-10T15:00",
-     "lo": 5,
-     "mid": 9,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 260,
-     "hoek": 47,
-     "component": 68,
-     "aflandig": false,
-     "appPct": 7,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-10T18:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 10,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 251,
-     "hoek": 56,
-     "component": 56,
-     "aflandig": false,
-     "appPct": 5,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-10T21:00",
-     "lo": 3,
-     "mid": 5,
-     "hi": 10,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 209,
-     "hoek": 98,
-     "component": -14,
-     "aflandig": true,
-     "appPct": 6,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T00:00",
-     "lo": 4,
-     "mid": 6,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 190,
-     "hoek": 117,
-     "component": -45,
-     "aflandig": true,
-     "appPct": 6,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T03:00",
-     "lo": 5,
-     "mid": 7,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 192,
-     "hoek": 115,
-     "component": -42,
-     "aflandig": true,
-     "appPct": 6,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T06:00",
-     "lo": 5,
-     "mid": 8,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 202,
-     "hoek": 105,
-     "component": -26,
-     "aflandig": true,
-     "appPct": 5,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T09:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 14,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 216,
-     "hoek": 91,
-     "component": -2,
-     "aflandig": true,
-     "appPct": 9,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T12:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 234,
-     "hoek": 73,
-     "component": 29,
-     "aflandig": false,
-     "appPct": 16,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T15:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 253,
-     "hoek": 54,
-     "component": 59,
-     "aflandig": false,
-     "appPct": 14,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T18:00",
-     "lo": 5,
-     "mid": 8,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 269,
-     "hoek": 38,
-     "component": 79,
-     "aflandig": false,
-     "appPct": 8,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T21:00",
-     "lo": 3,
-     "mid": 7,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 280,
-     "hoek": 27,
-     "component": 89,
-     "aflandig": false,
-     "appPct": 4,
-     "vlagerig": false,
-     "stroom": null
-    }
-   ],
    "lat": 52.1648,
    "lon": 4.3491,
    "regio": "ZH-kust",
@@ -2677,872 +69,6 @@ window.KW = {
    ],
    "vorm": "recht strand",
    "wf": "https://www.windfinder.com/weatherforecast/wijk_aan_zee_noordpier",
-   "metingen": [
-    {
-     "naam": "IJmuiden",
-     "km": 6.1,
-     "ts": "2026-09-06T10:40:00.000Z",
-     "wind": 14,
-     "vlaag": 16.6,
-     "dir": 181,
-     "standaard": true,
-     "geldig": "onshore, ZZW t/m NNO, de hele sector"
-    },
-    {
-     "naam": "IJmuiden havenhoofd",
-     "km": 5.3,
-     "ts": "2026-09-06T10:40:00.000Z",
-     "wind": 11.6,
-     "vlaag": null,
-     "dir": 173,
-     "standaard": false,
-     "geldig": "onshore, ZZW t/m NNO"
-    },
-    {
-     "naam": "Lelystad-polder",
-     "km": 9.1,
-     "ts": "2026-09-06T10:50:00.000Z",
-     "wind": 11.1,
-     "vlaag": 15.7,
-     "dir": 167,
-     "standaard": false,
-     "geldig": "aflandig, ONO t/m ZO"
-    }
-   ],
-   "verwachtNu": 7,
-   "blokken": [
-    {
-     "t": "2026-09-06T00:00",
-     "lo": 1,
-     "mid": 2,
-     "hi": 3,
-     "vlaagLo": 5,
-     "vlaagHi": 9,
-     "dir": 266,
-     "hoek": 24,
-     "component": 91,
-     "aflandig": false,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.67,
-      "naar": 8
-     }
-    },
-    {
-     "t": "2026-09-06T03:00",
-     "lo": 3,
-     "mid": 3,
-     "hi": 4,
-     "vlaagLo": 7,
-     "vlaagHi": 9,
-     "dir": 189,
-     "hoek": 101,
-     "component": -19,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.84,
-      "naar": 195
-     }
-    },
-    {
-     "t": "2026-09-06T06:00",
-     "lo": 4,
-     "mid": 5,
-     "hi": 7,
-     "vlaagLo": 9,
-     "vlaagHi": 12,
-     "dir": 176,
-     "hoek": 114,
-     "component": -41,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.8,
-      "naar": 190
-     }
-    },
-    {
-     "t": "2026-09-06T09:00",
-     "lo": 6,
-     "mid": 7,
-     "hi": 8,
-     "vlaagLo": 13,
-     "vlaagHi": 14,
-     "dir": 177,
-     "hoek": 113,
-     "component": -39,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.6,
-      "naar": 18
-     }
-    },
-    {
-     "t": "2026-09-06T12:00",
-     "lo": 6,
-     "mid": 8,
-     "hi": 9,
-     "vlaagLo": 13,
-     "vlaagHi": 17,
-     "dir": 172,
-     "hoek": 118,
-     "component": -47,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.87,
-      "naar": 9
-     }
-    },
-    {
-     "t": "2026-09-06T15:00",
-     "lo": 6,
-     "mid": 7,
-     "hi": 9,
-     "vlaagLo": 12,
-     "vlaagHi": 17,
-     "dir": 169,
-     "hoek": 121,
-     "component": -52,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.37,
-      "naar": 196
-     }
-    },
-    {
-     "t": "2026-09-06T18:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 14,
-     "vlaagHi": 14,
-     "dir": 151,
-     "hoek": 139,
-     "component": -75,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.87,
-      "naar": 192
-     }
-    },
-    {
-     "t": "2026-09-06T21:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 11,
-     "vlaagHi": 14,
-     "dir": 145,
-     "hoek": 145,
-     "component": -82,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.16,
-      "naar": 39
-     }
-    },
-    {
-     "t": "2026-09-07T00:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 12,
-     "vlaagHi": 14,
-     "dir": 154,
-     "hoek": 136,
-     "component": -72,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.03,
-      "naar": 10
-     }
-    },
-    {
-     "t": "2026-09-07T03:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 11,
-     "vlaagHi": 14,
-     "dir": 160,
-     "hoek": 130,
-     "component": -64,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.05,
-      "naar": 321
-     }
-    },
-    {
-     "t": "2026-09-07T06:00",
-     "lo": 5,
-     "mid": 6,
-     "hi": 8,
-     "vlaagLo": 12,
-     "vlaagHi": 13,
-     "dir": 161,
-     "hoek": 129,
-     "component": -63,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.97,
-      "naar": 194
-     }
-    },
-    {
-     "t": "2026-09-07T09:00",
-     "lo": 6,
-     "mid": 7,
-     "hi": 9,
-     "vlaagLo": 12,
-     "vlaagHi": 15,
-     "dir": 178,
-     "hoek": 112,
-     "component": -37,
-     "aflandig": true,
-     "appPct": 0,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.43,
-      "naar": 186
-     }
-    },
-    {
-     "t": "2026-09-07T12:00",
-     "lo": 8,
-     "mid": 9,
-     "hi": 12,
-     "vlaagLo": 21,
-     "vlaagHi": 25,
-     "dir": 222,
-     "hoek": 68,
-     "component": 37,
-     "aflandig": false,
-     "appPct": 13,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.08,
-      "naar": 12
-     }
-    },
-    {
-     "t": "2026-09-07T15:00",
-     "lo": 10,
-     "mid": 11,
-     "hi": 13,
-     "vlaagLo": 19,
-     "vlaagHi": 27,
-     "dir": 245,
-     "hoek": 45,
-     "component": 71,
-     "aflandig": false,
-     "appPct": 29,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.48,
-      "naar": 7
-     }
-    },
-    {
-     "t": "2026-09-07T18:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 12,
-     "vlaagLo": 18,
-     "vlaagHi": 23,
-     "dir": 242,
-     "hoek": 48,
-     "component": 67,
-     "aflandig": false,
-     "appPct": 15,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.9,
-      "naar": 195
-     }
-    },
-    {
-     "t": "2026-09-07T21:00",
-     "lo": 5,
-     "mid": 9,
-     "hi": 12,
-     "vlaagLo": 15,
-     "vlaagHi": 24,
-     "dir": 227,
-     "hoek": 63,
-     "component": 45,
-     "aflandig": false,
-     "appPct": 17,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.69,
-      "naar": 189
-     }
-    },
-    {
-     "t": "2026-09-08T00:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 13,
-     "vlaagLo": 21,
-     "vlaagHi": 32,
-     "dir": 225,
-     "hoek": 65,
-     "component": 42,
-     "aflandig": false,
-     "appPct": 32,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.13,
-      "naar": 13
-     }
-    },
-    {
-     "t": "2026-09-08T03:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 14,
-     "vlaagLo": 22,
-     "vlaagHi": 32,
-     "dir": 237,
-     "hoek": 53,
-     "component": 60,
-     "aflandig": false,
-     "appPct": 47,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.79,
-      "naar": 8
-     }
-    },
-    {
-     "t": "2026-09-08T06:00",
-     "lo": 7,
-     "mid": 11,
-     "hi": 16,
-     "vlaagLo": 24,
-     "vlaagHi": 32,
-     "dir": 241,
-     "hoek": 49,
-     "component": 66,
-     "aflandig": false,
-     "appPct": 51,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.86,
-      "naar": 195
-     }
-    },
-    {
-     "t": "2026-09-08T09:00",
-     "lo": 9,
-     "mid": 12,
-     "hi": 17,
-     "vlaagLo": 19,
-     "vlaagHi": 34,
-     "dir": 243,
-     "hoek": 47,
-     "component": 68,
-     "aflandig": false,
-     "appPct": 33,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.87,
-      "naar": 191
-     }
-    },
-    {
-     "t": "2026-09-08T12:00",
-     "lo": 10,
-     "mid": 13,
-     "hi": 16,
-     "vlaagLo": 22,
-     "vlaagHi": 29,
-     "dir": 244,
-     "hoek": 46,
-     "component": 69,
-     "aflandig": false,
-     "appPct": 72,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.54,
-      "naar": 21
-     }
-    },
-    {
-     "t": "2026-09-08T15:00",
-     "lo": 9,
-     "mid": 13,
-     "hi": 17,
-     "vlaagLo": 25,
-     "vlaagHi": 25,
-     "dir": 245,
-     "hoek": 45,
-     "component": 71,
-     "aflandig": false,
-     "appPct": 70,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.99,
-      "naar": 9
-     }
-    },
-    {
-     "t": "2026-09-08T18:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": 26,
-     "vlaagHi": 26,
-     "dir": 244,
-     "hoek": 46,
-     "component": 69,
-     "aflandig": false,
-     "appPct": 63,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.52,
-      "naar": 194
-     }
-    },
-    {
-     "t": "2026-09-08T21:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 13,
-     "vlaagLo": 33,
-     "vlaagHi": 33,
-     "dir": 246,
-     "hoek": 44,
-     "component": 72,
-     "aflandig": false,
-     "appPct": 59,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.01,
-      "naar": 192
-     }
-    },
-    {
-     "t": "2026-09-09T00:00",
-     "lo": 6,
-     "mid": 10,
-     "hi": 14,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 255,
-     "hoek": 35,
-     "component": 82,
-     "aflandig": false,
-     "appPct": 23,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.22,
-      "naar": 34
-     }
-    },
-    {
-     "t": "2026-09-09T03:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 261,
-     "hoek": 29,
-     "component": 87,
-     "aflandig": false,
-     "appPct": 29,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.2,
-      "naar": 9
-     }
-    },
-    {
-     "t": "2026-09-09T06:00",
-     "lo": 8,
-     "mid": 11,
-     "hi": 16,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 264,
-     "hoek": 26,
-     "component": 90,
-     "aflandig": false,
-     "appPct": 34,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.28,
-      "naar": 199
-     }
-    },
-    {
-     "t": "2026-09-09T09:00",
-     "lo": 9,
-     "mid": 13,
-     "hi": 17,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 271,
-     "hoek": 19,
-     "component": 95,
-     "aflandig": false,
-     "appPct": 44,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.09,
-      "naar": 193
-     }
-    },
-    {
-     "t": "2026-09-09T12:00",
-     "lo": 11,
-     "mid": 14,
-     "hi": 18,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 278,
-     "hoek": 12,
-     "component": 98,
-     "aflandig": false,
-     "appPct": 53,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.27,
-      "naar": 185
-     }
-    },
-    {
-     "t": "2026-09-09T15:00",
-     "lo": 11,
-     "mid": 13,
-     "hi": 17,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 285,
-     "hoek": 5,
-     "component": 100,
-     "aflandig": false,
-     "appPct": 52,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.34,
-      "naar": 9
-     }
-    },
-    {
-     "t": "2026-09-09T18:00",
-     "lo": 8,
-     "mid": 11,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 292,
-     "hoek": 2,
-     "component": 100,
-     "aflandig": false,
-     "appPct": 30,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.1,
-      "naar": 348
-     }
-    },
-    {
-     "t": "2026-09-09T21:00",
-     "lo": 5,
-     "mid": 8,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 295,
-     "hoek": 5,
-     "component": 100,
-     "aflandig": false,
-     "appPct": 18,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.15,
-      "naar": 194
-     }
-    },
-    {
-     "t": "2026-09-10T00:00",
-     "lo": 4,
-     "mid": 7,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 291,
-     "hoek": 1,
-     "component": 100,
-     "aflandig": false,
-     "appPct": 17,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.51,
-      "naar": 187
-     }
-    },
-    {
-     "t": "2026-09-10T03:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 282,
-     "hoek": 8,
-     "component": 99,
-     "aflandig": false,
-     "appPct": 17,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.52,
-      "naar": 10
-     }
-    },
-    {
-     "t": "2026-09-10T06:00",
-     "lo": 2,
-     "mid": 5,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 268,
-     "hoek": 22,
-     "component": 93,
-     "aflandig": false,
-     "appPct": 14,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.34,
-      "naar": 5
-     }
-    },
-    {
-     "t": "2026-09-10T09:00",
-     "lo": 3,
-     "mid": 7,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 257,
-     "hoek": 33,
-     "component": 84,
-     "aflandig": false,
-     "appPct": 11,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 1.19,
-      "naar": 195
-     }
-    },
-    {
-     "t": "2026-09-10T12:00",
-     "lo": 5,
-     "mid": 9,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 257,
-     "hoek": 33,
-     "component": 84,
-     "aflandig": false,
-     "appPct": 12,
-     "vlagerig": false,
-     "stroom": {
-      "kn": 0.62,
-      "naar": 191
-     }
-    },
-    {
-     "t": "2026-09-10T15:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 256,
-     "hoek": 34,
-     "component": 83,
-     "aflandig": false,
-     "appPct": 10,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-10T18:00",
-     "lo": 3,
-     "mid": 7,
-     "hi": 10,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 244,
-     "hoek": 46,
-     "component": 69,
-     "aflandig": false,
-     "appPct": 6,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-10T21:00",
-     "lo": 3,
-     "mid": 6,
-     "hi": 10,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 211,
-     "hoek": 79,
-     "component": 19,
-     "aflandig": false,
-     "appPct": 5,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T00:00",
-     "lo": 4,
-     "mid": 6,
-     "hi": 11,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 194,
-     "hoek": 96,
-     "component": -10,
-     "aflandig": true,
-     "appPct": 7,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T03:00",
-     "lo": 5,
-     "mid": 7,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 194,
-     "hoek": 96,
-     "component": -10,
-     "aflandig": true,
-     "appPct": 6,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T06:00",
-     "lo": 5,
-     "mid": 8,
-     "hi": 12,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 203,
-     "hoek": 87,
-     "component": 5,
-     "aflandig": true,
-     "appPct": 9,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T09:00",
-     "lo": 6,
-     "mid": 9,
-     "hi": 14,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 215,
-     "hoek": 75,
-     "component": 26,
-     "aflandig": false,
-     "appPct": 14,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T12:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 233,
-     "hoek": 57,
-     "component": 54,
-     "aflandig": false,
-     "appPct": 20,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T15:00",
-     "lo": 7,
-     "mid": 10,
-     "hi": 15,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 251,
-     "hoek": 39,
-     "component": 78,
-     "aflandig": false,
-     "appPct": 19,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T18:00",
-     "lo": 5,
-     "mid": 8,
-     "hi": 13,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 268,
-     "hoek": 22,
-     "component": 93,
-     "aflandig": false,
-     "appPct": 12,
-     "vlagerig": false,
-     "stroom": null
-    },
-    {
-     "t": "2026-09-11T21:00",
-     "lo": 4,
-     "mid": 7,
-     "hi": 10,
-     "vlaagLo": null,
-     "vlaagHi": null,
-     "dir": 280,
-     "hoek": 10,
-     "component": 98,
-     "aflandig": false,
-     "appPct": 4,
-     "vlagerig": false,
-     "stroom": null
-    }
-   ],
    "lat": 52.493,
    "lon": 4.593,
    "regio": "NH-kust",
@@ -3563,9 +89,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "ameland-wad",
@@ -3582,9 +106,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "amstelmeer",
@@ -3601,9 +123,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "andijk",
@@ -3620,9 +140,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "bergen-aan-zee",
@@ -3639,9 +157,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "bloemendaal",
@@ -3658,9 +174,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "brouwersdam-noordzee",
@@ -3677,9 +191,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "cadzand",
@@ -3696,9 +208,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "callantsoog",
@@ -3715,9 +225,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "camperduin",
@@ -3734,9 +242,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "castricum",
@@ -3753,9 +259,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "delfzijl",
@@ -3772,9 +276,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "den-helder",
@@ -3791,9 +293,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "domburg",
@@ -3810,9 +310,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "edam",
@@ -3829,9 +327,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "egmond",
@@ -3848,9 +344,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "enkhuizen",
@@ -3867,9 +361,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "harlingen",
@@ -3886,9 +378,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "hellevoetsluis",
@@ -3905,9 +395,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "hindeloopen",
@@ -3924,9 +412,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "hoek-van-holland",
@@ -3943,9 +429,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "lelystad-bataviastrand",
@@ -3962,9 +446,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "ijburg",
@@ -3981,9 +463,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "ijmuiden-kennemerstrand",
@@ -4000,9 +480,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "katwijk-aan-zee",
@@ -4019,9 +497,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "kornwerderzand",
@@ -4038,9 +514,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "langevelderslag",
@@ -4057,9 +531,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "lauwersmeer",
@@ -4076,9 +548,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "lauwersoog",
@@ -4095,9 +565,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "lelystad-trintelhaven",
@@ -4114,9 +582,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "lemmer",
@@ -4133,9 +599,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "maasvlakte-slufterstrand",
@@ -4152,9 +616,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "makkum-ijsselmeer",
@@ -4171,9 +633,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "medemblik",
@@ -4190,9 +650,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "mirns-ijsselmeer",
@@ -4209,9 +667,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "muiderberg",
@@ -4228,9 +684,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "neeltje-jans",
@@ -4247,9 +701,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "noordwijk",
@@ -4266,9 +718,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "oostvoorne-autostrand",
@@ -4285,9 +735,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "oostvoornse-meer",
@@ -4304,9 +752,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "ouddorp",
@@ -4323,9 +769,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "petten",
@@ -4342,9 +786,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "rockanje",
@@ -4361,9 +803,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "schellinkhout",
@@ -4380,9 +820,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "scheveningen",
@@ -4399,9 +837,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "schiermonnikoog",
@@ -4418,9 +854,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "stavoren",
@@ -4437,9 +871,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "strand-horst",
@@ -4456,9 +888,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "terschelling-groene-strand",
@@ -4475,9 +905,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "terschelling-noordzee",
@@ -4494,9 +922,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "texel-dijkmanshuizen",
@@ -4513,9 +939,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "texel-paal-17",
@@ -4532,9 +956,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "texel-paal-9",
@@ -4551,9 +973,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "texel-vuurtoren",
@@ -4570,9 +990,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "vlieland-noordzee",
@@ -4589,9 +1007,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "vrouwenpolder",
@@ -4608,9 +1024,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "westkapelle",
@@ -4627,9 +1041,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "workum-ijsselmeer",
@@ -4646,9 +1058,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "zandvoort",
@@ -4665,9 +1075,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   },
   {
    "id": "zuidlaardermeer",
@@ -4684,9 +1092,7 @@ window.KW = {
     ]
    ],
    "vorm": "strand",
-   "wf": "https://www.windfinder.com/",
-   "metingen": [],
-   "blokken": []
+   "wf": "https://www.windfinder.com/"
   }
  ],
  "aanbevolen": [
