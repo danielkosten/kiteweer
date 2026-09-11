@@ -16,6 +16,7 @@ Het script opent de pagina op 390 px en 1200 px en kijkt op allebei:
 | ruwe code in de tekst (`function (`, `undefined`, `NaN`, `[object`) | op 11-09 stond de broncode van een hulpfunctie boven de tabel, omdat hij een bestaande variabele overschreef |
 | zijwaartse schuif | de pagina hoort nooit horizontaal te schuiven, alleen de tabel zelf |
 | elementen buiten beeld | verraadt een te brede kaart of knop |
+| vaste onderdelen aanwezig en zichtbaar | week-overzichtsbalk, weekrij, uurtabel, legenda; een regel in een media-query kan iets stil laten verdwijnen |
 | elk uitlegvenster open, passend, zonder lek | vier i-knoppen, allemaal |
 
 Eindigt met `QA: alles goed` of een lijst problemen en afsluitcode 1. Screenshots komen in

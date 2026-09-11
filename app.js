@@ -577,7 +577,6 @@ window.KWU_READY.then(function () {
         /* Het gekleurde vlak zit om het getal heen, niet om de hele cel: nu elke rij even hoog is
            zou een cel-achtergrond een blok van 56 px worden. */
         return td(u, "tv", '<span class="vp">' + u.vl + '</span>', "--tint:" + tint(g) + ";--tint-v:" + tintV(g)); }) +
-      rij("", function (u) { return td(u, "tn", '<i style="background:' + knKleur(u.kn, niveau(u)) + '"></i>'); }) +
       (i === 0 && meetstation() ? rij(rijkop("gemeten", "meten", "Welk meetstation en hoe ver weg"), function (u) {
         var m = metingBij(u.t);
         if (m == null) return td(u, "tmeet", '<small>—</small>');

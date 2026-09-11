@@ -18,12 +18,17 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   const buiten = await p.evaluate(()=>[...document.querySelectorAll('body *')].filter(e=>{
     const r=e.getBoundingClientRect(); return r.width>0 && (r.right>innerWidth+2||r.left<-2) && !e.closest('.scroll,.weekstrip,.spotlijst,.dagenrij,.leaflet-container');
   }).slice(0,4).map(e=>e.tagName+'.'+(e.className||'').toString().slice(0,25)));
+  // 3b. staan de vaste onderdelen er op DEZE breedte ook echt, en zijn ze zichtbaar?
+  //     Zonder deze controle kan een regel in een media-query iets stil laten verdwijnen.
+  const mist = await p.evaluate(()=>['#weekmini','#weekstrip','.uurtabel','#legenda','.weekmini .wm']
+    .filter(s=>{const e=document.querySelector(s); if(!e) return true; const r=e.getBoundingClientRect(); return r.width<2||r.height<2;}));
   console.log(`\n== ${naam} ==`);
+  console.log('  onderdelen :', mist.length?'MIST '+mist.join(', '):'alle aanwezig');
   console.log('  fouten     :', errs.length?errs.join(' | '):'geen');
   console.log('  codelek    :', lek.length?lek.map(String).join(' '):'geen');
   console.log('  zijwaarts  :', breed?'JA (fout)':'nee');
   console.log('  buiten beeld:', buiten.length?buiten.join(', '):'geen');
-  if (errs.length||lek.length||breed||buiten.length) stuk++;
+  if (errs.length||lek.length||breed||buiten.length||mist.length) stuk++;
 
   // 4. elk uitlegvenster openen en op lek controleren
   for (const sel of ['[data-info="meten"]','[data-info="zeker"]','[data-info="kite"]','[data-info="stroom"]']) {
