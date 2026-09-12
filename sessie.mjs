@@ -40,33 +40,44 @@ const oordeel = rest.join(" ") || null;
 // Wat mat de paal in dat tijdvak? Zelfde MATROOS-deur als gen-meting.mjs, database series.
 // Spot naar meetstation: we vragen het dichtstbijzijnde op via de spotlijst in meting.js is te
 // omslachtig hier, dus we gebruiken de vaste koppeling van de drie spots die we loggen.
-const STATION = { kijkduin: "hoekvanholland", noordpier: "ijmuiden.buiten", wijkaanzee: "ijmuiden.buiten" };
-const st = STATION[spot] || "hoekvanholland";
-// Zelfde deur en zelfde vorm als gen-meting.mjs: db=series, antwoord is JSON met results[0].events.
-// De tijden gaan in als YYYYMMDDHHMM in UTC; van/tot geef je in lokale tijd, dus twee uur eraf
-// in de zomer. Vergeet je dat, dan meet je het verkeerde tijdvak en komt er een geloofwaardig
-// maar fout getal uit.
-const uurUTC = (d, hhmm, val) => {
-  const [H, M] = (hhmm || val).split(":");
-  return new Date(`${d}T${H}:${M}:00+02:00`).toISOString().slice(0, 16).replace(/[-T:]/g, "");
-};
+// Niet MATROOS maar de KNMI-uurgegevens: MATROOS bewaart alleen een kort venster, en een sessie
+// zet je vaak pas dagen later in. KNMI reikt jaren terug en is dezelfde bron waar de vier sessies
+// in ijk.mjs op geijkt zijn, dus de getallen zijn onderling vergelijkbaar.
+// FH = uurgemiddelde wind in 0,1 m/s, FX = hoogste vlaag in dat uur.
+const STATION = { kijkduin: 330, noordpier: 225, wijkaanzee: 225 };   // 330 Hoek van Holland, 225 IJmuiden
+const st = STATION[spot] || 330;
+// KNMI telt `hour` 1..24 in UTC en het uur BEGINT op hour-1. Van/tot geef je in lokale tijd op,
+// dus reken om, anders meet je het verkeerde tijdvak en komt er een geloofwaardig maar fout
+// getal uit. De zomertijdsprong vragen we aan de tijdzone zelf, nooit een vaste +2: dit script
+// wordt ook in de winter gebruikt, en het draait op een VPS die zelf op UTC staat.
+function verschilMetUTC(d) {
+  const naam = new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Amsterdam", timeZoneName: "shortOffset" })
+    .formatToParts(new Date(d + "T12:00:00Z")).find(p => p.type === "timeZoneName").value;   // "GMT+2"
+  return parseInt(naam.replace("GMT", ""), 10) || 0;
+}
+const naarUTCuur = (d, hhmm) => +hhmm.slice(0, 2) - verschilMetUTC(d);
 let kn = null, vlaag = null;
 try {
-  const q = new URLSearchParams({
-    db: "series", loc: st, source: "observed", unit: "wind_speed",
-    tstart: uurUTC(datum, van, "00:00"), tstop: uurUTC(datum, tot, "23:59"),
-    format: "dd_2.0.0", format_date_time: "iso",
+  const dd = datum.replace(/-/g, "");
+  const body = `stns=${st}&start=${dd}01&end=${dd}24&vars=FH:FX&fmt=json`;
+  const r = await fetch("https://www.daggegevens.knmi.nl/klimatologie/uurgegevens", {
+    method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" },
+    body, signal: AbortSignal.timeout(30000),
   });
-  const r = await fetch("https://noos.matroos.rws.nl/direct/get_series.php?" + q, { signal: AbortSignal.timeout(30000) });
-  const j = await r.json();
-  const waarden = (j?.results?.[0]?.events ?? [])
-    .map(e => typeof e.value === "string" ? Number(e.value) : e.value)
-    .filter(v => Number.isFinite(v) && Math.abs(v) < MISSING);
-  if (waarden.length) {
-    kn = waarden.reduce((x, y) => x + y, 0) / waarden.length * MS_NAAR_KN;
-    vlaag = Math.max(...waarden) * MS_NAAR_KN;
+  const rijen = await r.json();
+  // Welke uren vallen binnen de sessie? Het KNMI-uur `hour` dekt [hour-1, hour) UTC.
+  // Let op: de vraag levert ook de VOLGENDE dag mee, dus filter op datum, anders middel je
+  // twee dagen door elkaar. Zo kwam 07-09 er eerst uit op 10,7 kn in plaats van 17,5.
+  const u0 = van ? naarUTCuur(datum, van) : 0;
+  const u1 = tot ? naarUTCuur(datum, tot) : 23;
+  const binnen = rijen.filter(x => x.FH != null && String(x.date).slice(0, 10) === datum
+    && String(x.station_code) === String(st) && x.hour - 1 >= u0 && x.hour - 1 <= u1);
+  if (binnen.length) {
+    kn = binnen.reduce((a, x) => a + x.FH, 0) / binnen.length * 0.1 * MS_NAAR_KN;
+    const fx = binnen.filter(x => x.FX != null);
+    if (fx.length) vlaag = Math.max(...fx.map(x => x.FX)) * 0.1 * MS_NAAR_KN;
   }
-} catch (e) { console.log("paal niet bereikbaar, sessie gaat er zonder windgetal in:", e.message); }
+} catch (e) { console.log("KNMI niet bereikbaar, sessie gaat er zonder windgetal in:", e.message); }
 
 db.prepare(`insert or replace into sessie
   (datum, van, tot, spot, board, kite, kg, kn_gemeten, vlaag_gemeten, oordeel, notitie)
