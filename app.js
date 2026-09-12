@@ -462,18 +462,20 @@ window.KWU_READY.then(function () {
     } else {
       $("verdict").textContent = o.n === "aflandig" ? "Aflandig, niet gaan" : o.n === "matig" ? "Veel wind, " + o.b.kn + " kn" : "Te weinig wind";
       $("vensterlijst").innerHTML = "";
-      $("onderverdict").innerHTML = (o.n === "matig" ? "veel wind, kleine kite (" + kiteBereik(o.b.kn, o.b.kn, o.b.vl) + "), rond " + uurStr(o.b.t) : "hoogste " + o.b.kn + " kn om " + uurStr(o.b.t)) +
+      $("onderverdict").innerHTML = (o.n === "matig" ? "hard, kleine kite (" + kiteBereik(o.b.kn, o.b.kn, o.b.vl) + "), rond " + uurStr(o.b.t) : "hoogste " + o.b.kn + " kn om " + uurStr(o.b.t)) +
         (beste && besteDag !== d ? ' · <b>beste moment deze week: ' + dagLang(besteDag.uren[0].t) + " " + beste.tekst + ", " + beste.lo + "–" + beste.hi + " kn</b>" : "") +
         '<br><span class="flauw">' + zon + '</span>';
     }
   }
 
   /* ── samenvatting: welke uren het beste zijn en waarom ──
-     Per uur een score: niveau (6/7/8) + stroom tegen (+0,5) of mee (−0,5) − vlagerig (1).
+     Per uur een score: dezelfde cijfercurve als een heel venster, plus stroom tegen (+0,5) of mee
+     (−0,5) en min vlagerig (1). Stond eerst op het woord (perfect 8, goed 7, hard 6), waardoor een
+     uur van 33 kn onder een uur van 16 kn eindigde terwijl het hoger hoort (Daniel, 12-09).
      Beste uren = de uren met de hoogste score in het beste venster; de rest van het venster is "ook prima". */
   function uurScore(u) {
     var n = niveau(u); if (n === "weinig" || n === "aflandig") return null;
-    var sc = n === "perfect" ? 8 : n === "goed" ? 7 : 6, c = stroomC(blokBij(u.t), u.dir);
+    var sc = startCijfer(druk(u.kn)), c = stroomC(blokBij(u.t), u.dir);
     if (c > 0.3) sc += 0.5; else if (c < -0.5) sc -= 0.5;
     if (u.vl / u.kn >= 1.8) sc -= 1;                     // alleen echt vlagerig; 1,6 hakte een venster in losse uren
     return sc;
