@@ -443,7 +443,10 @@ main{padding-bottom:64px}
 .dsep.grof~.dagkaart{border-style:dashed}
 /* mini-overzicht van de week: zelfde balk op telefoon en op breed scherm. Per dag een staafje per
    uur, zo zie je in één blik waar de wind zit; klik springt naar die dag. */
-.wmuitleg{font-size:11.5px;color:var(--flauw);margin:-8px 0 14px;padding:0 2px}
+/* De uitleg onder de weekbalk is een venster achter de i-knop in de kop geworden. */
+.sec .info{margin-left:8px;vertical-align:2px;font-style:normal;font-size:11px;font-weight:700;width:20px;height:20px;
+  border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center}
+.sec .info:hover{border-color:var(--inkt);color:var(--inkt)}
 .weekmini{display:flex;gap:2px;margin-bottom:14px;padding:10px 10px 8px;background:var(--kaart);border:1px solid var(--lijn);border-radius:var(--r-s)}
 .wm{flex:1 1 0;min-width:0;padding:4px 4px 3px;border-radius:6px;cursor:pointer;background:none}
 .wm:hover{background:var(--lijn-2)}

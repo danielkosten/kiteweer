@@ -744,9 +744,8 @@ window.KWU_READY.then(function () {
        alles wat daarboven uitkomt is een sessie. Rechtsboven per dag de hardste wind van die dag.
        Klik op een dag springt naar de kaart en de uurtabel eronder. */
     var maxKn = Math.max(24, Math.max.apply(null, ds.map(function (d) { return top(d.uren).kn; })));
-    $("weekmini").hidden = false; $("wmuitleg").hidden = false;
+    $("weekmini").hidden = false;
     $("weekmini").style.setProperty("--grens", Math.round(genoegKn() / maxKn * 100) + "%");
-    $("wmuitleg").innerHTML = "Elk staafje is een uur. De streep staat op " + genoegKn() + " kn: daaronder trekt zelfs je grootste kite (" + GROOT() + " m) je niet op het board. Het getal rechts van de dag is de hardste wind van die dag.";
     $("weekmini").innerHTML = ds.map(function (d, i) {
       var o = dagOordeel(d), hardste = top(d.uren).kn;
       return '<button type="button" class="wm' + (i === st.dag ? " aan" : "") + (i === split ? " grof" : "") + '" data-dag="' + i + '" data-spring="1" aria-label="' + dagStr(d.uren[0].t) + ', hardste ' + hardste + ' kn" style="--tint:' + tint(o.n) + '">' +
@@ -1036,6 +1035,17 @@ window.KWU_READY.then(function () {
      Vlagen = wat er binnen dat uur echt gebeurt. Spreiding = hoe oneens de modellen zijn. */
   /* De legenda stond als uitklapper onder de tabel en was een muur tekst. Nu achter dezelfde
      i-knop als de rest (Daniel, 12-09). */
+  /* De uitleg onder de weekbalk stond als grijze regel onder de balkjes en nam ruimte in voor iets
+     wat je een keer leest (Daniel, 12-09). Nu achter dezelfde i-knop als de rest. */
+  function openWeek() {
+    $("sheet-t").textContent = "De week in balkjes";
+    $("sheet-b").innerHTML = '<ul class="redenen">' +
+      '<li class="p"><b>Elk staafje is een uur.</b> Hoe hoger het staafje, hoe harder het waait.</li>' +
+      '<li class="p"><b>De streep staat op ' + genoegKn() + ' kn.</b> Daaronder trekt zelfs je grootste kite (' + GROOT() + ' m) je niet op het board.</li>' +
+      '<li class="p"><b>Het getal rechts van de dag</b> is de hardste wind van die dag.</li>' +
+      '<li class="p"><b>De kleur volgt het oordeel van dat uur</b>, niet de vlaag. Grijs is te weinig wind, oker is net genoeg, groen is jouw band.</li></ul>';
+    $("sheet").hidden = false; $("sheet-x").focus();
+  }
   function openLegenda() {
     var g14 = genoegKn(), g19 = knBij(DRUK_PERFECT);
     var kleur = function (k, uitleg) { return '<li class="p"><i class="lgv" style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b> ' + uitleg + '</li>'; };
@@ -1147,6 +1157,7 @@ window.KWU_READY.then(function () {
     if (e.target.closest("[data-info=\"stroom\"]")) return openStroom();
     if (e.target.closest("[data-info=\"vlagen\"]")) return openVlagen();
     if (e.target.closest("[data-info=\"legenda\"]")) return openLegenda();
+    if (e.target.closest("[data-info=\"week\"]")) return openWeek();
     var kort = e.target.closest("[data-info]");
     if (kort && KORT[kort.dataset.info]) return openKort(kort.dataset.info);
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
