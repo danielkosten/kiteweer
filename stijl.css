@@ -57,6 +57,11 @@ main{padding-bottom:64px}
 .seg button{padding:7px 15px;border-radius:var(--r-pil);font-weight:700;font-size:14px;
   color:var(--zacht);transition:background var(--t),color var(--t);white-space:nowrap}
 .seg button:hover{color:var(--inkt)}
+/* Elke aanraakbare knop reageert op dezelfde manier: ingedrukt iets kleiner, en een zichtbare
+   rand voor wie met het toetsenbord werkt. Nooit een hover die de hoogte verandert, dan springt
+   de rij onder je cursor weg. */
+.seg button:active,.invoer:active,.dagkaart:active,.wm:active,.uurtabel th .info:active{transform:scale(.98)}
+:where(button,a,input,summary):focus-visible{outline:2px solid var(--inkt);outline-offset:2px}
 .seg button.on{background:var(--inkt);color:var(--papier)}
 
 /* ── nu gemeten ──────────────────────────────────── */
@@ -150,7 +155,7 @@ main{padding-bottom:64px}
 /* Absoluut tegen de rechterrand van de kop, niet achter de tekst aan: anders staat elke knop op
    een andere plek zodra het woord ervoor een letter langer is. */
 .uurtabel th .info{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-style:normal;font-size:10px;font-weight:700;width:17px;height:17px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center;background:none;cursor:pointer}
-.uurtabel th .info:hover{border-color:var(--inkt);color:var(--inkt)}
+.uurtabel th .info:hover{border-color:var(--inkt);color:var(--inkt);background:var(--lijn-2)}
 /* Rijkop met uitleg: tekst links, knop tegen de rechterrand. Alle knoppen staan zo onder elkaar. */
 .uurtabel th .rk{display:block;padding-right:23px}
 /* Kans per windsterkte in het uitlegvenster: drie kaartjes, één beslissing per kaartje. */
