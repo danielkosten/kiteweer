@@ -75,6 +75,9 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | `vensters()` | `dagOordeel()` → de hero, de dagkaartjes, de balk in de tabel, de weekbalk, de samenvatting, de beste dag van de week. Knipt sinds 12-09 ook waar de stroom omslaat (`stroomZone`, `KENTERING`), met stukken van minstens twee uur | **niets** |
 | `cijferWoord()` / `cijferNiveau()` | het woord en de kleur van een sessie: de kaartjes, de balk in de tabel, de dagkop, de tint van de hero. Volgt het cijfer, niet de wind | **niets** |
 | `besteUren()` / `golfGem()` / `stroomZin()` | de bullets op elk sessiekaartje | **niets** |
+| `feitRegel()` / `meetZin()` / `stroomRegel()` | de twee regels onder de kaartjes: liep het vandaag hoger dan het model zei, en wanneer draait de stroom | **niets** |
+| `zetUur()` | de schuif en de afspeelknop op de strandkaart. Hertekent bewust alleen `tekenScene()`, niet de hele pagina | **niets** |
+| `tekenVers()` | de regel bovenin over de modellen en de meetpaal | **niets** |
 | `vlaagKleur()` | de kleur van het vlaagplusje in de tabel, van grijs via oker naar rood | **niets** |
 | `VEEL` (30) | de band "hard" in `band()`, de 1,5x zwaardere strafposten in `cijfer()`, de zin "hard en goed powered", de legenda, de uitleg bij de sessiekans en bij het cijfer | `ijk.mjs` pint 30 vast |
 | `TEVEEL` (40) | de gate in `uren()` (te hard telt als nee), de kans uit de ensembles, de kop van de sessiekans-rij, "te hard" onder het percentage, twee uitlegvensters | `ijk.mjs` pint 40 vast |
@@ -153,5 +156,10 @@ Wat de twee toetsen echt controleren:
 - **De kaartjes zelf**: `sessieKaart()`, `topUur()`, en de grenzen daarin (een topuur moet een heel punt hoger scoren).
 - **De geometrie van de knoppen**: gelijke hoogtes, niets dat buiten beeld valt, de scrollpositie die
   blijft staan. Alle drie met de hand nagemeten, nergens vastgelegd.
+- **Het afspelen van de dag** (`startSpelen`, `zetUur`): dat de knop stopt bij een klik elders, en
+  dat `zetUur()` dezelfde staat achterlaat als een klik op een kolom, staat nergens vast.
+- **De sprong naar nu op de telefoon** (`springNaarNu`, onder 700 px): met de hand nagekeken.
+- **De verse regel bovenin** (`tekenVers`, `geleden`): de grens van 45 minuten waarboven de meetpaal
+  oker kleurt is gekozen, niet gemeten.
 - **De drie ophalers** (`gen-*.mjs`) hebben geen enkele toets; je merkt een fout pas als de pagina
   leegloopt.
