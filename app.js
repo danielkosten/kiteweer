@@ -67,8 +67,28 @@ window.KWU_READY.then(function () {
   /* groot = je grootste kite in meters. 12 is de standaard omdat dat de maat is die de meeste
      mensen als grootste hebben; Daniel heeft 13 en dat staat in zijn browser opgeslagen. */
   var st = { board:"twintip", kg:85, groot:12, spot:"kijkduin", dag:0, t:null, modellen:DAJK.slice(), mix:"dajk" };
-  try { var bewaard = JSON.parse(localStorage.getItem("kiteweer") || "{}");
+  /* Het webadres wint van de opslag. Zonder dit hield elk apparaat zijn eigen spot, gewicht en
+     kitemaat, en dat kon je nergens zien: op de telefoon stond Zandmotor en op de laptop
+     Wassenaarse Slag, 17 km verderop, en dus 16-19 kn tegen 16-17 kn. Twee verschillende stranden,
+     en het las als "de app klopt niet" (Daniel, 12-09, met twee schermafdrukken naast elkaar).
+     Nu draagt het adres alles wat de getallen bepaalt: dezelfde link geeft overal dezelfde pagina,
+     je kunt hem naar jezelf of naar papa sturen, en een harde verversing komt op hetzelfde uit.
+     Een kaal adres valt terug op de opslag, dus wie niets deelt merkt er niets van. */
+  function uitAdres() {
+    var q = {}; try { new URLSearchParams(location.search).forEach(function (v, k) { q[k] = v; }); } catch (e) {}
+    return q;
+  }
+  try { var bewaard = JSON.parse(localStorage.getItem("kiteweer") || "{}"), adres = uitAdres();
     ["board","kg","groot","spot","modellen","mix"].forEach(function (k) { if (bewaard[k] != null) st[k] = bewaard[k]; });
+    if (adres.spot) st.spot = adres.spot;
+    if (adres.kg) st.kg = parseInt(adres.kg, 10);
+    if (adres.kite) st.groot = parseInt(adres.kite, 10);
+    if (adres.board) st.board = adres.board;
+    if (adres.mix) st.mix = adres.mix;
+    if (adres.modellen) st.modellen = adres.modellen.split(",");
+    /* Een gedeelde link mag niet door de eenmalige migratie heen: die zou de meegestuurde
+       modelkeuze meteen terugzetten naar de DAJK-mix. */
+    if (adres.spot || adres.kg || adres.kite || adres.board || adres.mix || adres.modellen) bewaard.v = 3;
     if (bewaard.v !== 3) { st.mix = "dajk"; st.modellen = DAJK.slice(); }   // eenmalig: iedereen naar de nieuwe DAJK-mix
     if (!KW.spots.some(function (s) { return s.id === st.spot; })) st.spot = KW.spots[0].id;
     /* Alles wat uit de browseropslag komt eerst nakijken. Een boardnaam die we niet kennen maakte
@@ -80,7 +100,18 @@ window.KWU_READY.then(function () {
     st.modellen = st.modellen.map(function (m) { return m === "ecmwf_ifs025" ? "ecmwf_ifs" : m; });   // oude opgeslagen keuze: 25 km → 9 km
     st.modellen = st.modellen.filter(function (m) { return KWU.modellen.some(function (x) { return x.id === m; }); }); if (!st.modellen.length) st.modellen = ARTHUR.slice();
   } catch (e) {}
-  function bewaar() { try { localStorage.setItem("kiteweer", JSON.stringify({ v:3, board:st.board, kg:st.kg, groot:st.groot, spot:st.spot, modellen:st.modellen, mix:st.mix })); } catch (e) {} }
+  function bewaar() {
+    try { localStorage.setItem("kiteweer", JSON.stringify({ v:3, board:st.board, kg:st.kg, groot:st.groot, spot:st.spot, modellen:st.modellen, mix:st.mix })); } catch (e) {}
+    /* Dezelfde instellingen ook in het adres, zodat de link zichzelf uitlegt en overal hetzelfde
+       laat zien. replaceState: geen nieuwe stap in de terugknop bij elke klik. De modellenlijst
+       staat er alleen bij als hij afwijkt van de mix, anders wordt het adres onleesbaar lang. */
+    try {
+      var q = ["spot=" + st.spot, "kg=" + st.kg, "kite=" + st.groot, "board=" + st.board, "mix=" + st.mix];
+      var vast = st.mix === "dajk" ? DAJK : st.mix === "ajk" ? ARTHUR : null;
+      if (!vast || st.modellen.slice().sort().join(",") !== vast.slice().sort().join(",")) q.push("modellen=" + st.modellen.join(","));
+      history.replaceState(null, "", location.pathname + "?" + q.join("&"));
+    } catch (e) {}
+  }
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) {
     return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); };

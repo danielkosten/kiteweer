@@ -88,8 +88,10 @@ Besluiten met grond en status: `docs/adr/`.
 - **Dag 1 fijn ontbreekt AROME-HD**: die zit niet in het previous-runs-archief (jouw research 05).
 - **De ensembles zijn niet te toetsen**: het archief bewaart geen leden. De kans staat erbij als
   hint, nooit als oordeel. Twee kansen ver uiteen = de modellen zijn het niet eens.
-- **IJmuiden dag 1**: ook de fijne mix leest daar 3,8 kn te laag. Optelling op de fijne klasse voor
-  Noordpier is de volgende meting.
+- **IJmuiden dag 1**: die meting is inmiddels gedaan, zie `fijne-bias.md`. Uitkomst: er komt GEEN
+  optelling op de fijne klasse. De afwijking is niet vlak maar loopt op met de wind (min 0,3 kn
+  onder de 10 kn tot min 8 kn boven de 25), en op Hoek van Holland, het station bij de standaardspot,
+  leest de fijne mix maar 1,3 kn te laag en maakt elke correctie het slechter.
 
 ## Stations die wind leveren via daggegevens.knmi.nl
 
