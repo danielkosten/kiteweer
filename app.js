@@ -665,9 +665,17 @@ window.KWU_READY.then(function () {
     if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Te weinig wind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' + meetZin() +
       '<p class="sv flauw">' +
       (st.dag === 0 ? '<a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a>' : '') + '</p>'; return; }
-    var alle = [].concat.apply([], o.ws.map(function (w) { return w.uren; })).filter(function (u) { return uurScore(u) != null; });
+    /* Alleen de uren van de BESTE sessie, niet van alle sessies van de dag. Sinds sessies geknipt
+       worden waar de stroom draait, liep "beste uren" anders dwars door twee sessies heen: 18-21 u
+       met de stroom mee en 14-15 u met de stroom tegen in een regel, met een bullet die maar een van
+       de twee kon beschrijven (Daniel, 12-09). */
+    var alle = o.v.uren.filter(function (u) { return uurScore(u) != null; });
     var max = Math.max.apply(null, alle.map(uurScore));
     var beste = alle.filter(function (u) { return uurScore(u) >= max - 0.25; }), rest = alle.filter(function (u) { return uurScore(u) < max - 0.25; });
+    /* De andere sessies van de dag horen bij "ook prima", niet bij "niet": het is wel kitebaar,
+       alleen minder goed dan de beste sessie. */
+    rest = rest.concat([].concat.apply([], o.ws.slice(1).map(function (w) { return w.uren; })))
+      .sort(function (a, b) { return a.t < b.t ? -1 : 1; });
     laatsteBeste = beste;
     var rb = runs(beste), rr = runs(rest), lo = Math.min.apply(null, beste.map(function (u) { return u.kn; })), hi = Math.max.apply(null, beste.map(function (u) { return u.kn; }));
     var html = '<div class="sv beste" style="--tint:' + tint(niveau(top(beste))) + '">' +

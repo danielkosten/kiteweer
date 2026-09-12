@@ -23,12 +23,19 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   const mist = await p.evaluate(()=>['#weekmini','#weekstrip','.uurtabel','.legenda-knop','.weekmini .wm','.stap','#groot']
     .filter(s=>{const e=document.querySelector(s); if(!e) return true; const r=e.getBoundingClientRect(); return r.width<2||r.height<2;}));
   console.log(`\n== ${naam} ==`);
+  // 3c. stopt er ergens vet midden in een tijd of een getal? Zo stond er "stroom draait rond 09"
+  //     vet en daarna ":00" gewoon, omdat de dubbele punt van een tijd als scheiding gold.
+  const kapotVet = await p.evaluate(()=>[...document.querySelectorAll('b,strong')]
+    .filter(e=>{const na=(e.nextSibling&&e.nextSibling.textContent)||''; 
+      return /\d$/.test(e.textContent.trim()) && /^[:.,]\d/.test(na);})
+    .slice(0,3).map(e=>e.textContent.trim().slice(-24)));
   console.log('  onderdelen :', mist.length?'MIST '+mist.join(', '):'alle aanwezig');
+  console.log('  vet kapot  :', kapotVet.length?kapotVet.join(' | '):'nee');
   console.log('  fouten     :', errs.length?errs.join(' | '):'geen');
   console.log('  codelek    :', lek.length?lek.map(String).join(' '):'geen');
   console.log('  zijwaarts  :', breed?'JA (fout)':'nee');
   console.log('  buiten beeld:', buiten.length?buiten.join(', '):'geen');
-  if (errs.length||lek.length||breed||buiten.length||mist.length) stuk++;
+  if (errs.length||lek.length||breed||buiten.length||mist.length||kapotVet.length) stuk++;
 
   // 4. elk uitlegvenster openen en op lek controleren
   //    Loopt over ELKE i-knop op de pagina, niet alleen die in de tabel: zo valt een nieuwe knop
