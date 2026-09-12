@@ -21,6 +21,11 @@ elke handmatige wijziging is de volgende run weg.
 | `qa.mjs` | zet een echte browser op de pagina en kijkt of er niets stuk is | met de hand |
 | `verifieer.mjs`, `toets-horizon.mjs` | eenmalige metingen: hoe goed elk weermodel het deed. Draaien niet in de keten | met de hand |
 | `ververs.sh` | de klok op de VPS: haalt de metingen op en pusht ze. Draait elke 10 minuten als `/opt/kiteweer/ververs.sh`, wat dezelfde map is als deze repo | met de hand |
+
+De map `/opt/kiteweer` op de VPS is niet alleen de klok, hij wordt ook rechtstreeks geserveerd op
+https://danielskiing.cloud/kiteweer/. Omdat `ververs.sh` elke tien minuten met `git pull` begint,
+werkt die pagina zichzelf vanzelf bij zodra er iets naar `main` gaat. De routering staat in
+`~/Code/personal/DanielsBrewhouse/ops/danielskiing-hub/`. GitHub Pages blijft daarnaast gewoon staan.
 | `.github/workflows/meting.yml`, `stroom.yml` | opdrachten die op GitHub kunnen draaien, zie hieronder | met de hand |
 | `qa-*.png` | schermafdrukken die `qa.mjs` bij elke run overschrijft | **door de machine** |
 | `docs/adr/*.md`, `docs/dajk-mix.md`, `docs/stroom.md` | waarom een keuze zo is gemaakt | met de hand |

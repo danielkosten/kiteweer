@@ -1,6 +1,6 @@
 # Kiteweer, de ADHD-view
 
-Live: https://danielkosten.github.io/kiteweer/
+Live: https://danielskiing.cloud/kiteweer/ (ook nog https://danielkosten.github.io/kiteweer/)
 
 Eén dag, één tabel, kleur voor goed en slecht, en een luchtfoto met pijlen. Gebouwd op het werk van
 Arthur Kosten: modellen, meetstations, stroming en spotkennis uit
