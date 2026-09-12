@@ -230,6 +230,21 @@ window.KWU_READY.then(function () {
       var n = niveau(u);
       if (n === "perfect" || n === "goed" || n === "matig") { if (!nu) { nu = []; alle.push(nu); } nu.push(u); } else nu = null;
     });
+    /* Knip een sessie door zodra de stroom draait. Zonder dit werd 14:00 tot 20:00 één sessie met
+       één cijfer, en dat cijfer nam het gemiddelde van de stroom over die zes uur. De stroom draaide
+       om 16:00, dus de eerste helft met gratis hoogte en de tweede helft waarin je afzakt vielen
+       tegen elkaar weg en er kwam één braaf getal uit (Daniel, 12-09: "dus vandaag is het helemaal
+       niet ideaal tussen 16 en 19?"). Nu krijgt elk stuk zijn eigen cijfer. */
+    alle = alle.reduce(function (uit, v) {
+      var stuk = [v[0]], vorige = stroomZone(v[0]);
+      for (var i = 1; i < v.length; i++) {
+        var z = stroomZone(v[i]);
+        if (z !== vorige && stuk.length) { uit.push(stuk); stuk = []; vorige = z; }
+        stuk.push(v[i]);
+      }
+      if (stuk.length) uit.push(stuk);
+      return uit;
+    }, []);
     return alle.map(function (v) {
       var kns = v.map(function (u) { return u.kn; }), vls = v.map(function (u) { return u.vl; });
       var tel = { perfect:0, goed:0, matig:0 }; v.forEach(function (u) { tel[niveau(u)]++; });
@@ -241,6 +256,9 @@ window.KWU_READY.then(function () {
          waaien is geen mindere dag, het vraagt een kleinere kite (Daniel, 12-09). */
     }).sort(function (a,b) { return scoreVan(b) - scoreVan(a) || b.uren.length - a.uren.length; });
   }
+  /* In welke stroomstand een uur valt: mee, tegen of dwars. Zelfde grens als de kentering, want het
+     is dezelfde vraag: loopt de stroom een kant op of niet. */
+  function stroomZone(u) { var c = stroomC(blokBij(u.t), u.dir); return c > KENTERING ? "tegen" : c < -KENTERING ? "mee" : "dwars"; }
   function top(us) { return us.reduce(function (a,u) { return u.kn > a.kn ? u : a; }); }
   function dagOordeel(d) {
     var ws = vensters(d.uren, d.zon), b = ws.length ? top(ws[0].uren) : top(d.uren);
@@ -602,8 +620,19 @@ window.KWU_READY.then(function () {
       if (vorige && z !== vorige && z !== "dwars" && vorige !== "dwars") out.push({ t:u.t, van:vorige, naar:z }); if (z !== "dwars") vorige = z; });
     return out;
   }
-  /* Eerste zinsdeel vet (tot de eerste komma of dubbele punt), zodat een lijstje in één blik te scannen is. */
-  function vet(p) { var m = /^([^,:]{3,48})([,:])(.+)$/.exec(p); return m ? "<b>" + m[1] + "</b>" + m[2] + m[3] : p; }
+  /* Eerste zinsdeel vet (tot de eerste komma of dubbele punt), zodat een lijstje in één blik te
+     scannen is. De dubbele punt in een tijd telt niet mee: op "stroom draait rond 09:00 van mee naar
+     tegen" stopte het vet midden in de tijd, bij "rond 09" (Daniel, 12-09). */
+  function vet(p) {
+    for (var i = 3; i < p.length && i <= 48; i++) {
+      var c = p[i];
+      if (c !== "," && c !== ":") continue;
+      if (c === ":" && /\d/.test(p[i-1] || "") && /\d/.test(p[i+1] || "")) continue;   // 09:00 is een tijd, geen scheiding
+      if (i + 1 >= p.length) break;
+      return "<b>" + p.slice(0, i) + "</b>" + p.slice(i);
+    }
+    return p;
+  }
   function kenteringTekst(us) { var k = kenteringen(us); return k.length ? "stroom draait " + k.map(function (x) { return "rond " + uurStr(x.t) + " van " + x.van + " naar " + x.naar; }).join(", ") : ""; }
 
   /* Eén zin: liep vandaag hoger of lager dan het model zei? Alleen op de dag van vandaag, en
