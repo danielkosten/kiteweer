@@ -71,7 +71,9 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | `CURVE` / `startCijfer()` | `cijfer()` (venstercijfer) én `uurDelen()` (uurcijfer), en daarmee de volgorde van de vensters, de keuze van de beste dag en de beste uren | `ijk.mjs`: acht punten op de curve, de eis dat hij stijgt naar Daniels band, dat 33 kn hoger scoort dan 16 kn, en dat een 10 net niet uit de wind alleen komt |
 | `cijfer()` | het getal op elke vensterknop, `scoreVan()` → de sortering van de vensters en de beste dag van de week, het venster-uitlegvenster | alleen het startcijfer via `ijk.mjs`. De optelposten zelf: **niets** |
 | `uurScore()` / `uurDelen()` | welke uren "beste uren" heten, het cijfer boven de samenvatting, de opbouw in het cijfer-venster | **niets** |
-| `vensters()` | `dagOordeel()` → de hero, de dagkaarten, de weekbalk, de samenvatting, de beste dag van de week | **niets** |
+| `vensters()` | `dagOordeel()` → de hero, de dagkaartjes, de balk in de tabel, de weekbalk, de samenvatting, de beste dag van de week. Knipt sinds 12-09 ook waar de stroom omslaat (`stroomZone`, `KENTERING`), met stukken van minstens twee uur | **niets** |
+| `cijferWoord()` / `cijferNiveau()` | het woord en de kleur van een sessie: de kaartjes, de balk in de tabel, de dagkop, de tint van de hero. Volgt het cijfer, niet de wind | **niets** |
+| `vlaagKleur()` | de kleur van het vlaagplusje in de tabel, van grijs via oker naar rood | **niets** |
 | `VEEL` (30) | de band "hard" in `band()`, de 1,5x zwaardere strafposten in `cijfer()`, de zin "hard en goed powered", de legenda, de uitleg bij de sessiekans en bij het cijfer | `ijk.mjs` pint 30 vast |
 | `TEVEEL` (40) | de gate in `uren()` (te hard telt als nee), de kans uit de ensembles, de kop van de sessiekans-rij, "te hard" onder het percentage, twee uitlegvensters | `ijk.mjs` pint 40 vast |
 | `DRUK_GOED` (0,97) | `band()` en `genoegKn()`, dus de hele ondergrens van de pagina | `ijk.mjs`: moet 14 kn geven bij 85 kg en 13 m |
@@ -130,7 +132,7 @@ Wat de twee toetsen echt controleren:
 |---|---|
 | `node dubbel.mjs` | dat de zeven geijkte getallen (2,2 · 1,8 · 1,34 · 1,6 · 0,97 · 1,32 en de rest) elk maar een keer in `app.js` staan, dat elke naam ook echt gebruikt wordt, en dat de stroomsterkte alleen in `stroomPost()` tot een oordeel leidt |
 |---|---|
-| `node qa.mjs <url>` | op 390 en 1200 px breed: lekt er ruwe code of "undefined" de pagina in, schuift de pagina zijwaarts, steekt er iets buiten het scherm, staan zeven vaste onderdelen er echt en zijn ze zichtbaar, zijn er fouten in de browser, en gaat élke i-knop open, past het venster in beeld en lekt er niets in. Schrijft `qa-mobiel.png` en `qa-breed.png` |
+| `node qa.mjs <url>` | op 390 en 1200 px breed: stopt er ergens vet midden in een tijd of getal, lekt er ruwe code of "undefined" de pagina in, schuift de pagina zijwaarts, steekt er iets buiten het scherm, staan zeven vaste onderdelen er echt en zijn ze zichtbaar, zijn er fouten in de browser, en gaat élke i-knop open, past het venster in beeld en lekt er niets in. Schrijft `qa-mobiel.png` en `qa-breed.png` |
 
 ## 6. Wat nergens door getest wordt
 
