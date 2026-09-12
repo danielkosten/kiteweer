@@ -506,7 +506,7 @@ window.KWU_READY.then(function () {
     /* Duur kan alleen punten OPLEVEREN, nooit kosten: een uur is een sessie, daar hoort geen straf
        bij (Daniel, 12-09). En het is plat, niet oplopend: boven twee uur een half punt en daarna
        houdt het op, want Daniel gaat vaak toch hooguit twee uur. */
-    if (n > 2) tel(0.5, n + " uur lang, ruim de tijd", n + " uur");
+    if (n > 2) tel(0.5, n + " uur lang, ruim de tijd", ">2 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     var st0 = getal(start);
     return { score:score, plus:pl, min:mn, start:st0, delen:som, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
