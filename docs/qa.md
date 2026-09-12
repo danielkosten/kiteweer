@@ -1,6 +1,14 @@
 # QA: altijd draaien na een deploy
 
 ```bash
+node ijk.mjs                                    # rekengrenzen: duurt een seconde, geen browser nodig
+```
+
+`ijk.mjs` toetst of de grenzen nog Daniels geijkte waarden geven (14 en 19 kn bij 85 kg met een
+13 m) en of ze meebewegen met een andere kitemaat. Dat vangt een fout die in de browser niet te
+zien is: een drempel die half hard-coded blijft staan.
+
+```bash
 node qa.mjs                                     # tegen de lokale server
 node qa.mjs https://danielkosten.github.io/kiteweer/   # tegen de echte site
 ```
