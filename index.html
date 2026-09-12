@@ -2,6 +2,14 @@
 <html lang="nl">
 <head>
 <meta charset="utf-8">
+<script>
+// Deze pagina hoort thuis op danielskiing.cloud/kiteweer/. Op github.io staat hij alleen nog als
+// reservekopie voor als die server plat ligt: daar sturen we je meteen door naar het echte adres.
+// Wil je expres op de reservekopie blijven, zet dan ?blijf=1 achter het adres.
+if (location.hostname.endsWith("github.io") && location.search.indexOf("blijf=1") === -1) {
+  location.replace("https://danielskiing.cloud/kiteweer/" + location.search + location.hash);
+}
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Kiteweer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
