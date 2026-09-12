@@ -672,10 +672,6 @@ window.KWU_READY.then(function () {
     var alle = o.v.uren.filter(function (u) { return uurScore(u) != null; });
     var max = Math.max.apply(null, alle.map(uurScore));
     var beste = alle.filter(function (u) { return uurScore(u) >= max - 0.25; }), rest = alle.filter(function (u) { return uurScore(u) < max - 0.25; });
-    /* De andere sessies van de dag horen bij "ook prima", niet bij "niet": het is wel kitebaar,
-       alleen minder goed dan de beste sessie. */
-    rest = rest.concat([].concat.apply([], o.ws.slice(1).map(function (w) { return w.uren; })))
-      .sort(function (a, b) { return a.t < b.t ? -1 : 1; });
     laatsteBeste = beste;
     var rb = runs(beste), rr = runs(rest), lo = Math.min.apply(null, beste.map(function (u) { return u.kn; })), hi = Math.max.apply(null, beste.map(function (u) { return u.kn; }));
     var html = '<div class="sv beste" style="--tint:' + tint(niveau(top(beste))) + '">' +
@@ -687,6 +683,12 @@ window.KWU_READY.then(function () {
       '<li><b>kite ' + kiteBereik(lo, hi, vlMax(beste)) + '</b></li></ul></div>';
     if (rest.length) { var lo2 = Math.min.apply(null, rest.map(function (u) { return u.kn; })), hi2 = Math.max.apply(null, rest.map(function (u) { return u.kn; }));
       html += '<p class="sv"><b>Ook prima ' + rr.map(runTekst).join(", ") + '</b><br><span class="flauw">' + (lo2 === hi2 ? lo2 : lo2 + "\u2013" + hi2) + ' kn \u00b7 ' + waarom(rest) + '</span></p>'; }
+    /* Elke andere sessie van de dag krijgt zijn eigen regel met zijn eigen cijfer. Ze samenvoegen
+       middelt de stroom weer weg, en dat is precies waarom sessies geknipt worden (Daniel, 12-09). */
+    o.ws.slice(1).forEach(function (w) {
+      html += '<p class="sv"><b>' + getal(scoreVan(w)) + ' \u00b7 ' + w.tekst + '</b><br><span class="flauw">' +
+        (w.lo === w.hi ? w.lo : w.lo + "\u2013" + w.hi) + ' kn \u00b7 ' + waarom(w.uren) + ' \u00b7 kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span></p>';
+    });
     var niet = d.uren.filter(function (u) { return uurScore(u) == null; });
     if (niet.length) html += '<p class="sv flauw">Niet: ' + runs(niet).map(runTekst).join(", ") + ' · ' + (niet.some(function (u) { return niveau(u) === "aflandig"; }) ? "aflandig of " : "") + 'te weinig wind</p>';
     html += meetZin();
