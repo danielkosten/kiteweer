@@ -906,7 +906,8 @@ window.KWU_READY.then(function () {
         (druk(kn) < 1.05 ? "net" : druk(kn) < 1.39 ? "prettig" : druk(kn) < 2.10 ? "lekker" : "hard") +
         '. Het hoogste dat de wind alleen kan halen is een 9, en dat is tussen ' + knBij(1.60) + ' en ' + VEEL + ' kn: jouw band.</li>' +
       d0.posten.map(function (x) { return '<li class="p"><b>' + x[0] + '</b> ' + x[1] + '</li>'; }).join("") +
-      '<li class="p"><b>Samen ' + getal(sc) + '.</b> Alles wordt op een half punt afgerond, want nauwkeuriger dan dat is het niet.</li>' +
+      (d0.posten.length ? '<li class="p"><b>Samen ' + getal(sc) + '.</b> Alles wordt op een half punt afgerond, want nauwkeuriger dan dat is het niet.</li>'
+        : '<li class="p"><b>Verder niets erbij of eraf.</b> De stroom staat dwars, de vlagen zijn normaal: dit uur is puur de wind. Afgerond op een half punt, want nauwkeuriger is het niet.</li>') +
       '<li class="p"><b>Voor een 10 moet er meer goed staan</b> dan alleen wind: rustige wind zonder grote vlagen, stroom tegen de wind in, en een venster van vier uur of langer. Dat cijfer van het hele venster zie je als je op de balk klikt.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
