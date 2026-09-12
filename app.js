@@ -304,7 +304,9 @@ window.KWU_READY.then(function () {
       '<span class="vc">' + getal(score) + '</span><span class="vt">' + tijd + (merk ? '<small>' + merk + '</small>' : '') + '</span>' +
       '<i class="info" aria-hidden="true">i</i>' +
       '<ul class="vlijst">' + punten.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>' +
-      '<span class="vsom"><b>' + c.start + '</b> wind ' + c.delen.map(function (x) { return esc(x); }).join(" ") + ' <b>= ' + getal(score) + '</b></span></button>';
+      '<span class="vsom"><b>' + c.start + '</b> wind ' +
+        c.delen.map(function (x) { return '<span class="' + (x.charAt(0) === "+" ? "op" : "af") + '">' + esc(x) + '</span>'; }).join(" ") +
+        ' <b>= ' + getal(score) + '</b></span></button>';
   }
   function golfWoord(m) { return m < 0.5 ? "vlak water" : m < 1 ? "beetje hobbelig" : m < 1.5 ? "hobbelig" : "flinke golven"; }
   /* Een zin over de stroom, met dezelfde grenzen als het cijfer. */
