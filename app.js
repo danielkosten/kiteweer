@@ -15,6 +15,8 @@ window.KWU_READY.then(function () {
      sessie, jij kite tot 40 met een kleine kite (Daniel, 11-09-2026). TEVEEL = 40: daarboven telt
      een doorrekening niet meer als "je kunt kiten", anders zegt de pagina 100% bij 45 kn storm. */
   var VEEL = 30, TEVEEL = 40;
+  /* De twee drukgrenzen tussen de oordelen. Stonden los in band() en nog eens in de legenda. */
+  var DRUK_GOED = 0.97, DRUK_PERFECT = 1.32;
   var DAGL = ["zondag","maandag","dinsdag","woensdag","donderdag","vrijdag","zaterdag"];
   var DAGK = ["zo","ma","di","wo","do","vr","za"];
   var KOMPAS = ["N","NNO","NO","ONO","O","OZO","ZO","ZZO","Z","ZZW","ZW","WZW","W","WNW","NW","NNW"];
@@ -50,6 +52,12 @@ window.KWU_READY.then(function () {
     ["board","kg","groot","spot","modellen","mix"].forEach(function (k) { if (bewaard[k] != null) st[k] = bewaard[k]; });
     if (bewaard.v !== 3) { st.mix = "dajk"; st.modellen = DAJK.slice(); }   // eenmalig: iedereen naar de nieuwe DAJK-mix
     if (!KW.spots.some(function (s) { return s.id === st.spot; })) st.spot = KW.spots[0].id;
+    /* Alles wat uit de browseropslag komt eerst nakijken. Een boardnaam die we niet kennen maakte
+       KLEINER[st.board] leeg, en dan wordt elke som op de pagina stil "geen getal": geen foutmelding,
+       alleen lege vakjes. Gewicht en kitemaat vielen al terug, het board niet. */
+    if (!KLEINER.hasOwnProperty(st.board)) st.board = "twintip";
+    if (!(st.kg >= 30 && st.kg <= 150)) st.kg = 85;
+    if (!(st.groot >= 4 && st.groot <= 15)) st.groot = 12;
     st.modellen = st.modellen.map(function (m) { return m === "ecmwf_ifs025" ? "ecmwf_ifs" : m; });   // oude opgeslagen keuze: 25 km → 9 km
     st.modellen = st.modellen.filter(function (m) { return KWU.modellen.some(function (x) { return x.id === m; }); }); if (!st.modellen.length) st.modellen = ARTHUR.slice();
   } catch (e) {}
@@ -83,10 +91,17 @@ window.KWU_READY.then(function () {
   function band(kn) {
     var r = druk(kn);
     if (kn > VEEL) return "matig";
-    return r < 0.97 ? "weinig" : r < 1.32 ? "goed" : "perfect";
+    return r < DRUK_GOED ? "weinig" : r < DRUK_PERFECT ? "goed" : "perfect";
   }
-  /* Bij welke wind een bepaalde druk hoort: voor de legenda en de uitleg. */
-  function knBij(r) { return Math.round(2.2 * st.kg / (GROOT() / r + KLEINER[st.board])); }
+  /* Bij welke wind een bepaalde druk hoort: voor de legenda en de uitleg. Dit is de omgekeerde som
+     van ideaal(), en die kapt onderaan af op 3 m: kleiner dan een 3 m bestaat niet. Voorbij dat punt
+     bestaat de gevraagde druk dus helemaal niet, en zonder deze rem gaf de legenda daar een getal dat
+     niet klopte met het oordeel ernaast. Merkbaar bij een lichte rijder op een kleine kite, niet bij
+     Daniel: bij 85 kg met een 13 m ligt dat punt op 62 kn. */
+  function knBij(r) {
+    var rMax = GROOT() / 3;
+    return Math.round(2.2 * st.kg / (GROOT() / Math.min(r, rMax) + KLEINER[st.board]));
+  }
   /* Doorlopende kleur voor staaf en vlagen: geel (12) → groen (19) → donkergroen (24). Labels blijven vijf. */
   function knKleur(kn, n) {
     if (n === "weinig" || n === "aflandig") return KLEUR[n];
@@ -95,7 +110,10 @@ window.KWU_READY.then(function () {
     var h = 42 + t * 115, sat = 62 - t * 10, l = 44 - t * 16;        // 42 = oker, 157 = groen
     return "hsl(" + h.toFixed(0) + " " + sat.toFixed(0) + "% " + l.toFixed(0) + "%)";
   }
-  function niveau(u) { if (!u) return "weinig"; if (!veilig(spot(), u.dir) && u.kn >= genoegKn()) return "aflandig"; return band(u.kn); }
+  /* Aflandig telt alleen als er genoeg wind staat om te gaan, en "genoeg" is hier precies hetzelfde
+     als in band(): het oordeel zelf. Eerst stond hier de afgeronde genoegKn(), zodat een uur op de
+     grens tegelijk "aflandig" (dus wind genoeg) en "te weinig wind" kon heten. */
+  function niveau(u) { if (!u) return "weinig"; var b = band(u.kn); if (!veilig(spot(), u.dir) && b !== "weinig") return "aflandig"; return b; }
   /* "matig" heet op de pagina "hard": het is de band boven 30 kn. Hard is geen slechte dag, het is
      een andere dag, met een kleine kite (Daniel, 12-09). De interne naam blijft matig, want die
      staat in de kleuren en in de sorteervolgorde van de labels. */
@@ -281,7 +299,7 @@ window.KWU_READY.then(function () {
   /* Wind waarbij je grootste kite net trekt: 2,2 x gewicht / die maat. Bij 85 kg twintip met een
      13 m is dat 14 kn; met een 17 m 11 kn. Daaronder sta je stil, ook met alles uitgerold. Dit is
      de streep in de weekbalk, het punt waar de kleur begint, en de ondergrens van de sessiekans. */
-  function genoegKn() { return knBij(0.97); }
+  function genoegKn() { return knBij(DRUK_GOED); }
   function staat(maat, kn) {
     var r = maat / ideaal(kn);
     // Geijkt op Daniels sessies: 10 m bij 23 kn (ratio 1,23) voelde "lekker powered", niet over.
@@ -732,7 +750,7 @@ window.KWU_READY.then(function () {
       vak.scrollLeft = doel.offsetLeft - (vak.clientWidth - doel.offsetWidth) / 2;
     })();
     $("legenda").innerHTML = ["perfect","goed","matig","weinig","aflandig"].map(function (k) {
-      var g14 = genoegKn(), g19 = knBij(1.32);
+      var g14 = genoegKn(), g19 = knBij(DRUK_PERFECT);
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' +
         (k === "perfect" ? " " + g19 + "–" + VEEL : k === "goed" ? " " + g14 + "–" + g19 : k === "matig" ? " boven " + VEEL + ", kleine kite" : k === "weinig" ? " &lt;" + g14 + ", je " + GROOT() + " m trekt niet" : "") + '</span>'; }).join("") +
       '<span class="lg"><b>vlagen 25 +9</b> de piek binnen dat uur, en hoeveel knopen dat boven de wind is. 40% erbij is normaal; kleurt het plusje oker, dan is het gusty en neem je een maat kleiner</span>' +
@@ -989,7 +1007,6 @@ window.KWU_READY.then(function () {
   $("groot").addEventListener("change", function (e) { st.groot = parseInt(e.target.value, 10); bewaar(); teken(); });
 
   $("legenda-box").open = window.matchMedia("(min-width:601px)").matches;
-  if (st.groot < 4 || st.groot > 15) st.groot = 12;          // oude opgeslagen maat buiten de lijst
   $("kglabel").textContent = st.kg + " kg";
   document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
   if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";

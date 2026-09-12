@@ -17,8 +17,8 @@ const TEVEEL  = pak("TEVEEL", /TEVEEL = (\d+)/);
 // die standaard is 12 m voor nieuwe bezoekers en mag veranderen zonder de ijking te breken.
 const GROOT = 13;
 const STANDAARD = pak("standaardmaat", /groot:(\d+)/);
-const ONDER   = pak("ondergrens-druk", /r < ([\d.]+) \? "weinig"/);
-const PERFECT = pak("perfect-druk", /r < ([\d.]+) \? "goed"/);
+const ONDER   = pak("ondergrens-druk", /DRUK_GOED = ([\d.]+)/);
+const PERFECT = pak("perfect-druk", /DRUK_PERFECT = ([\d.]+)/);
 const FACTOR  = pak("kitefactor", /Math\.max\(3, ([\d.]+) \* st\.kg/);
 const KLEINER_D = pak("directional maten kleiner", /KLEINER = \{ twintip:0, directional:([\d.]+) \}/);
 const VLAGERIG = pak("vlagerig", /var VLAGERIG = ([\d.]+)/);
@@ -130,6 +130,24 @@ for (const S of SESSIES) {
     + "maat: " + hoe.padEnd(15) + "vlagen " + vh.toFixed(2) + "x " + (gusty ? "VLAGERIG" : "rustig").padEnd(9) + " cijfer " + cijf
     + "   (voelde: " + S.gevoel + ")");
 }
+
+// knBij() is de omgekeerde som van ideaal(). ideaal() kapt af op 3 m, dus voorbij die grens bestaat
+// de gevraagde druk niet meer. Zonder rem gaf de legenda daar een wind die niet klopte met het oordeel.
+// Merkbaar bij een lichte rijder op een kleine kite, dus juist bij iemand anders dan Daniel.
+const knBijRem = (druk, kg, kleiner, groot) => Math.round(FACTOR * kg / (groot / Math.min(druk, groot / 3) + kleiner));
+let heenTerug = 0;
+for (const [kg, kleiner, groot] of [[85,0,13], [85,KLEINER_D,13], [45,0,6], [45,KLEINER_D,5], [120,0,15]]) {
+  for (const r of [ONDER, PERFECT, 1.8, 2.5]) {
+    const kn = knBijRem(r, kg, kleiner, groot);
+    const terug = groot / ideaal(kn, kg, kleiner);
+    // Of de druk komt er weer uit, of we zitten tegen de afkapgrens aan: iets anders mag niet.
+    const ok = Math.abs(terug - r) < 0.08 || r > groot / 3 - 0.01;
+    if (!ok) heenTerug++;
+  }
+}
+if (heenTerug) stuk++;
+console.log("\n" + (heenTerug ? "FOUT" : "goed") + "  heen en terug rekenen klopt".padEnd(46)
+  + "20 combinaties van gewicht, board en kitemaat, " + heenTerug + " mis");
 
 console.log(stuk ? "\nIJKING: " + stuk + " PROBLEMEN" : "\nIJKING: alles goed");
 process.exit(stuk ? 1 : 0);
