@@ -74,7 +74,7 @@ async function windBij(datum, van, minuten) {
 
 const zet = uit.prepare(`insert or replace into sessie
   (datum, van, tot, spot, board, kite, kg, kn_gemeten, vlaag_gemeten, oordeel, notitie, bron, bevestigd, garmin_id, duur_min)
-  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+  values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
 const alBevestigd = new Set(uit.prepare("select garmin_id from sessie where bevestigd is not null and garmin_id is not null").all().map(r => r.garmin_id));
 
 console.log(`${rijen.length} activiteiten van ${MIN_MINUTEN} minuten of langer bekeken\n`);
