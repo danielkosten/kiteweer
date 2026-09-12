@@ -54,7 +54,7 @@ console.log("  " + (beweegt ? "goed" : "FOUT") + "  ondergrens beweegt mee met d
 const drukVan = (kn, kg = 85, kleiner = 0, groot = GROOT) => groot / ideaal(kn, kg, kleiner);
 const mC = app.match(/var CURVE = (\[\[[^;]+\]\]);/);
 if (!mC) { console.error("FOUT: CURVE niet gevonden in app.js"); process.exit(1); }
-const CURVE = JSON.parse(mC[1]);
+const CURVE = JSON.parse(mC[1].replace(/DRUK_GOED/g, String(ONDER)));
 const startBij = (kn, kleiner = 0) => {
   const r = drukVan(kn, 85, kleiner);
   if (r <= CURVE[0][0]) return CURVE[0][1];

@@ -242,11 +242,12 @@ main{padding-bottom:64px}
 .uurtabel .tw .staaf{display:block;width:100%;border-radius:3px 3px 0 0;min-height:3px}
 .uurtabel .tw small{display:block;font-size:10.5px;color:var(--flauw);line-height:1.1;white-space:nowrap}
 .uurtabel .tw small.onzeker{color:var(--matig)}
-/* Het plusje staat dicht onder de piek, en gusty zegt niets extra in woorden: het plusje kleurt
-   oker. Het woord stond in elke tweede cel en dat was ruis (Daniel, 12-09). De legenda en het
-   i-venster leggen de kleur uit. */
+/* Het plusje staat dicht onder de piek. De kleur komt uit app.js en loopt van grijs via oker naar
+   rood, zodat je ziet aankomen dat het vlagerig wordt in plaats van dat het ineens omslaat. */
 .uurtabel .tv small{display:block;font-size:10.5px;color:var(--flauw);font-weight:600;margin-top:1px;white-space:nowrap}
-.uurtabel .tv small.gusty{color:var(--matig);font-weight:700}
+/* De vlaagkleur komt nu uit app.js en loopt van grijs via oker naar rood, want een schakelaar
+   liet je niet zien dat het erger werd. Hier staat alleen nog de rustige stand. */
+.uurtabel .tv small{transition:color var(--t)}
 .uurtabel .tv .vp{display:inline-block;min-width:34px;background:var(--tint-v);color:var(--tint);font-weight:700;padding:5px 8px;border-radius:6px}
 .uurtabel .wijzer{width:16px;height:16px}
 

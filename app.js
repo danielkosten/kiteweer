@@ -40,7 +40,10 @@ window.KWU_READY.then(function () {
      dat noemde hij zijn beste dag, met sprongen van 10 m. Bij 1,6 kreeg die dag straf.
      Klopt ook met de meting: over 485 daglichturen aan Hoek van Holland zit een piek 1,4x de wind
      (middelste waarde) en negen van de tien uren tussen 1,2 en 1,67. 1,8 is dus echt uitzonderlijk. */
-  var VLAGERIG = 1.8, STABIEL = 1.35, MAATJE_KLEINER = 1.6;
+  var VLAGERIG = 1.8, STABIEL = 1.34, MAATJE_KLEINER = 1.6;
+  /* Wanneer een kite te groot is voor de wind. Heeft niets met vlagen te maken, maar had per ongeluk
+     hetzelfde getal, en dan lijkt het of de twee samenhangen. */
+  var OVERPOWERED = 1.35;
   /* Wat vlagerig kost, en wat gelijkmatige wind oplevert. Kostte 1,5 punt in het cijfer van een
      sessie en 1 punt in dat van de beste uren, zelfde regel, twee getallen. */
   var STRAF_VLAGERIG = 1, BONUS_STABIEL = 0.5;
@@ -114,6 +117,23 @@ window.KWU_READY.then(function () {
     return Math.round(KITEFACTOR * st.kg / (GROOT() / Math.min(r, rMax) + KLEINER[st.board]));
   }
   /* Doorlopende kleur voor staaf en vlagen: geel (12) → groen (19) → donkergroen (24). Labels blijven vijf. */
+  /* Het woord en de kleur van een sessie volgen het cijfer, niet alleen de wind. Daniel (12-09):
+     de balk zei "goed" terwijl de stroom met de wind mee liep, en dat is dan geen goede sessie.
+     De wind bepaalt nog steeds de tabelkleuren per uur; dit gaat alleen over de sessie als geheel. */
+  var CIJFERWOORD = [[8.5, "top", "perfect"], [7, "goed", "perfect"], [5.5, "prima", "goed"],
+    [4, "matig", "matig"], [0, "mager", "weinig"]];
+  function cijferRij(score) { return CIJFERWOORD.filter(function (x) { return score >= x[0]; })[0]; }
+  function cijferWoord(score) { return cijferRij(score)[1]; }
+  function cijferNiveau(score) { return cijferRij(score)[2]; }
+  /* Hoe vlagerig, in kleur. Was een schakelaar: onder 1,8 grijs, daarboven oker, en niets ertussen.
+     Daniel (12-09) wil het zien aankomen. Loopt van 1,4 (normaal, gewoon grijs) via oker naar rood
+     bij 2,0 en hoger. De grens waar het straf kost blijft VLAGERIG, dit is alleen de kleur. */
+  function vlaagKleur(vh) {
+    if (vh < 1.4) return null;                                       // normaal: geen kleur, geen ruis
+    var t = Math.max(0, Math.min(1, (vh - 1.4) / 0.6));              // 1,4 -> 0, 2,0 -> 1
+    var h = 42 - t * 42, sat = 62 + t * 18, l = 44 - t * 6;          // 42 = oker, 0 = rood
+    return "hsl(" + h.toFixed(0) + " " + sat.toFixed(0) + "% " + l.toFixed(0) + "%)";
+  }
   function knKleur(kn, n) {
     if (n === "weinig" || n === "aflandig") return KLEUR[n];
     var g = genoegKn();
@@ -287,6 +307,9 @@ window.KWU_READY.then(function () {
     if (c <= -0.3) return [-0.5, "stroom mee met de wind, je zakt af"];
     return null;
   }
+  /* Vanaf welke sterkte de stroom een kant op heet te lopen. Dit is een andere vraag dan wat de
+     stroom je kost: hier gaat het om wanneer hij draait, niet om hoe erg het is. */
+  var KENTERING = 0.15;
   function stroomC(b, dir) {
     if (!b || !b.stroom || b.stroom.kn < 0.08) return 0;
     return b.stroom.kn * Math.cos(hoekTussen(b.stroom.naar, dir) * Math.PI / 180);
@@ -296,9 +319,10 @@ window.KWU_READY.then(function () {
     if (!b || !b.stroom) return { niveau:"weinig", kop:"Stroming onbekend", punten:["geen stroombron voor dit uur"] };
     var kn = b.stroom.kn, m = Math.round(Math.abs(c) * 1852);
     if (Math.abs(c) < 0.15) return { niveau:"goed", kop:"Stroom dwars of stil, " + kn.toFixed(1) + " kn", punten:["maakt voor je hoogte weinig uit", "je blijft ongeveer waar je bent"] };
-    if (c > 0) return { niveau: c > 2 ? "matig" : "perfect", kop:"Stroom tegen de wind in, +" + c.toFixed(1) + " kn",
+    var post = stroomPost(c), pt = post ? post[0] : 0;   // hetzelfde oordeel als het cijfer gebruikt
+    if (c > 0) return { niveau: pt >= 0.5 ? "perfect" : "matig", kop:"Stroom tegen de wind in, +" + c.toFixed(1) + " kn",
       punten:["gratis hoogte: het water draagt je " + m + " m per uur bovenwinds", "+" + c.toFixed(1) + " kn extra druk in je kite" + (u.kn < 20 ? ", precies wat je bij " + u.kn + " kn wilt" : ""), "wel wat steiler, hakkeriger water" + (c > 2 ? "; boven 2 kn lastig terugkomen" : "")] };
-    return { niveau: c < -1.5 ? "aflandig" : c < -0.5 ? "matig" : "goed", kop:"Stroom mee met de wind, " + c.toFixed(1) + " kn",
+    return { niveau: pt <= -1.5 ? "aflandig" : pt <= -1 ? "matig" : "goed", kop:"Stroom mee met de wind, " + c.toFixed(1) + " kn",
       punten:["haalt " + Math.abs(c).toFixed(1) + " kn druk uit je kite", "je zakt " + m + " m per uur af, dus terugkruisen", "wel vlakker water"] };
   }
   /* ── golven in gewone woorden ── */
@@ -327,7 +351,7 @@ window.KWU_READY.then(function () {
   function staat(maat, kn) {
     var r = maat / ideaal(kn);
     // Geijkt op Daniels sessies: 10 m bij 23 kn (ratio 1,23) voelde "lekker powered", niet over.
-    return r > 1.35 ? "over" : r > 1.15 ? "lekker powered" : r < 0.80 ? "te klein" : r < 0.90 ? "iets under" : "goed";
+    return r > OVERPOWERED ? "over" : r > 1.15 ? "lekker powered" : r < 0.80 ? "te klein" : r < 0.90 ? "iets under" : "goed";
   }
   /* Welke maat past bij een windbereik: afgerond op hele meters, hoog naar laag. */
   /* Maat op de gemiddelde wind. Trekkracht groeit met wind², dus bij vlaag/wind ≥ 1,5 één maat kleiner.
@@ -357,7 +381,9 @@ window.KWU_READY.then(function () {
      (12-09), 14 kn is net trekken, boven de 35 kn is het overleven. Tussen twee punten loopt het
      cijfer vloeiend door, zodat een knoop verschil nooit een heel punt scheelt.
      GEEN sessielog: dit is geijkt op gesprek en twee sessies, niet op ingevulde cijfers. */
-  var CURVE = [[0.80, 2], [0.97, 4.5], [1.15, 6], [1.39, 8], [1.60, 9], [2.09, 9], [2.40, 7.5], [2.78, 6]];
+  /* De tweede knik staat op DRUK_GOED: precies de wind waarbij je grootste kite begint te trekken.
+     Dat is geen toeval en moet meebewegen als die grens ooit verschuift. */
+  var CURVE = [[0.80, 2], [DRUK_GOED, 4.5], [1.15, 6], [1.39, 8], [1.60, 9], [2.09, 9], [2.40, 7.5], [2.78, 6]];
   function startCijfer(r) {
     if (r <= CURVE[0][0]) return CURVE[0][1];
     for (var i = 1; i < CURVE.length; i++) {
@@ -505,14 +531,15 @@ window.KWU_READY.then(function () {
     var beste = null, besteDag = null;
     ds.forEach(function (x) { var ox = dagOordeel(x);
       if (ox.v && (!beste || scoreVan(ox.v) > scoreVan(beste) || (scoreVan(ox.v) === scoreVan(beste) && ox.v.uren.length > beste.uren.length))) { beste = ox.v; besteDag = x; } });
-    $("hero").style.setProperty("--tint", tint(o.n));
+    $("hero").style.setProperty("--tint", tint(o.v ? cijferNiveau(scoreVan(o.v)) : o.n));
     $("kicker").textContent = s.naam + " · klik een kolom, de strandkaart volgt";
     var zon = "zon op " + d.zon.op + ", onder " + d.zon.onder;
     if (o.v) {
-      $("verdict").textContent = (o.ws.length === 1 ? "kitebaar" : o.ws.length + " keer kitebaar") + " · " + WOORD[o.n];
+      $("verdict").textContent = (o.ws.length === 1 ? "kitebaar" : o.ws.length + " keer kitebaar") + " · " + cijferWoord(scoreVan(o.v));
       $("vensterlijst").innerHTML = o.ws.map(function (w, j) {
         var c = cijfer(w);
-        return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' +
+        var cn = cijferNiveau(c.score);                 // kleur van de balk volgt het cijfer, niet alleen de wind
+        return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(cn) + ';--tint-v:' + tintV(cn) + '">' +
           '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn <small>vlagen ' + w.vlLo + "–" + w.vlHi + '</small></span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span>' +
           '<span class="vc">' + getal(c.score) + '</span><span class="veen">' + c.een + '</span><i class="info" aria-hidden="true">i</i></button>';
       }).join("");
@@ -571,7 +598,7 @@ window.KWU_READY.then(function () {
      dus "rond" en niet "om". */
   function kenteringen(us) {
     var out = [], vorige = null;
-    us.forEach(function (u) { var c = stroomC(blokBij(u.t), u.dir), z = c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars";
+    us.forEach(function (u) { var c = stroomC(blokBij(u.t), u.dir), z = c > KENTERING ? "tegen" : c < -KENTERING ? "mee" : "dwars";
       if (vorige && z !== vorige && z !== "dwars" && vorige !== "dwars") out.push({ t:u.t, van:vorige, naar:z }); if (z !== "dwars") vorige = z; });
     return out;
   }
@@ -718,7 +745,7 @@ window.KWU_READY.then(function () {
     var ds = dagen(), i = Math.min(st.dag, ds.length - 1), d = ds[i], o = dagOordeel(d);
 
     var kop = '<div class="dagkop" style="--tint:' + tint(o.n) + '"><b>' + (i === 0 ? "vandaag, " : "") + dagLang(d.uren[0].t) + '</b>' +
-      '<span class="dagv">' + (o.v ? (o.ws.length === 1 ? "kitebaar" : o.ws.length + "x kitebaar") + " · " + WOORD[o.n] : WOORD[o.n]) + '</span>' +
+      '<span class="dagv">' + (o.v ? (o.ws.length === 1 ? "kitebaar" : o.ws.length + "x kitebaar") + " · " + cijferWoord(scoreVan(o.v)) : WOORD[o.n]) + '</span>' +
       '<span class="ind">zon op ' + d.zon.op + ', onder ' + d.zon.onder + indicatieTekst(i, d) + '</span></div>';
     var nu = uurNu();
     /* Elke rijkop met uitleg krijgt dezelfde vorm: tekst links, de i-knop rechts tegen de rand.
@@ -755,15 +782,16 @@ window.KWU_READY.then(function () {
            zou een cel-achtergrond een blok van 56 px worden. */
         /* Gemeten aan Hoek van Holland, 485 daglichturen 1 aug t/m 10 sep: een vlaag is 1,4x de
            wind (mediaan), p90 1,63. Onder de 12 kn is de mediaan al 1,50, dus daar zegt "vlagerig"
-           niets. Het woord "gusty" valt daarom pas vanaf 1,6x en alleen als er genoeg wind staat om te gaan.
+           niets. Het plusje kleurt daarom geleidelijk mee vanaf 1,4x, en alleen als er genoeg wind staat om te gaan.
            De kleur volgt het oordeel van dat uur, niet de vlaag: anders kleurt 9 kn wind groen
            omdat de vlaag 16 haalt. */
         var extra = Math.max(0, Math.round(u.vl - u.kn)), verhouding = u.kn ? u.vl / u.kn : 0;
         var vlagerig = u.kn >= genoegKn() && verhouding >= VLAGERIG;
         /* Sommige grove modellen leveren geen vlagen: dan is vlaag = wind en zou er "+0" staan.
            Een streepje is eerlijker dan een nul die op windstil lijkt. */
+        var vk = u.kn >= genoegKn() ? vlaagKleur(verhouding) : null;
         return td(u, "tv", '<span class="vp">' + u.vl + '</span>' +
-          '<small' + (vlagerig ? ' class="gusty" title="gusty: de vlagen zitten meer dan 60% boven de wind"' : '') + '>' + (extra > 0 ? "+" + extra : "—") + '</small>',
+          '<small' + (vk ? ' style="color:' + vk + ';font-weight:700" title="vlagen ' + Math.round((verhouding - 1) * 100) + '% boven de wind' + (vlagerig ? ', dat is gusty: neem een maat kleiner' : '') + '"' : '') + '>' + (extra > 0 ? "+" + extra : "—") + '</small>',
           "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       (i === 0 && meetstation() ? rij(rijkop("gemeten", "meten", "Welk meetstation en hoe ver weg"), function (u) {
         var m = metingBij(u.t);
@@ -969,7 +997,7 @@ window.KWU_READY.then(function () {
     $("sheet-t").textContent = "Vlagen en spreiding zijn twee dingen";
     $("sheet-b").innerHTML = '<ul class="redenen">' +
       '<li class="p"><b>De vlaag gebeurt echt.</b> Binnen één uur waait het niet gelijkmatig: de wind zakt weg en piekt een paar seconden. Dat plusje is hoeveel knopen zo\'n piek erbovenop komt. Hier om ' + uurStr(u.t) + ': ' + u.kn + ' kn met pieken tot ' + u.vl + '.</li>' +
-      '<li class="p"><b>Dat is normaal, geen waarschuwing.</b> Gemeten aan Hoek van Holland, 485 daglichturen deze zomer: een piek zit 40% boven de wind (middelste waarde), en bij negen van de tien uren tussen 20% en 67% erboven. Pas vanaf 60% erbij noemen we het gusty, en dan neem je een maat kleiner.</li>' +
+      '<li class="p"><b>Dat is normaal, geen waarschuwing.</b> Gemeten aan Hoek van Holland, 485 daglichturen deze zomer: een piek zit 40% boven de wind (middelste waarde), en bij negen van de tien uren tussen 20% en 67% erboven. Het plusje kleurt vanaf 40% erbij mee, van oker naar rood, zodat je het ziet aankomen. Vanaf 80% erbij kost het een punt en neem je een maat kleiner.</li>' +
       '<li class="p"><b>De spreiding onder de wind is iets anders: dat is twijfel.</b> Tien rekenmodellen kijken naar dezelfde dag; ' + u.knLo + ' is de laagste die eruit komt, ' + u.knHi + ' de hoogste. Dat gaat niet binnen een uur gebeuren, dat is hoe oneens ze zijn. Oker betekent meer dan 7 kn oneens: kijk morgen opnieuw.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
