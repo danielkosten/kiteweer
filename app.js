@@ -61,7 +61,12 @@ window.KWU_READY.then(function () {
   /* Mixen: "dajk" = de DAJK-mix van docs/dajk-mix.md (fijn zolang het reikt, dan grof met optelling, ARPEGE, kans uit ensembles);
      "ajk" = Arthurs 50/50; "dajk-oud" = de oude DAJK zonder optelling, alleen nog in code (localStorage kiteweer.mix) voor vergelijking. */
   /* Spot-optelling voor de grove modellen in de DAJK-mix: aan het water lezen ze 3–4 kn te laag,
-     op een landmast niet (De Kooy). Gemeten 60 dagen op Hoek van Holland (+3) en IJmuiden (+4), docs/dajk-mix.md. */
+     op een landmast niet (De Kooy). Gemeten 60 dagen op Hoek van Holland (+3) en IJmuiden (+4), docs/dajk-mix.md.
+     De optelling gaat bewust OOK bij de vlaag, zie uren(). Dat leek een fout maar is nagemeten over
+     31.848 uren Hoek van Holland, 2023 t/m 2026: de grove middelste waarde leest de vlaag 3,3 kn te
+     laag en de wind 2,8 kn. De vlaag verdient de optelling dus eerder meer dan minder. Niet weghalen
+     zonder opnieuw te meten. Let op: dit geldt voor de GROVE modellen. De fijne mix leest de vlaag
+     wel ongeveer goed (x1,05 tot x1,09) en krijgt daarom nergens een optelling, docs/fijne-bias-lang.md. */
   var OPTELLING = { standaard: 3, noordpier: 4, zuidpier: 4, wijkaanzee: 4 };
   function optelling() { return OPTELLING[st.spot] != null ? OPTELLING[st.spot] : OPTELLING.standaard; }
   /* groot = je grootste kite in meters. 12 is de standaard omdat dat de maat is die de meeste
