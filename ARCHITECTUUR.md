@@ -73,6 +73,7 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | `uurScore()` / `uurDelen()` | welke uren "beste uren" heten, het cijfer boven de samenvatting, de opbouw in het cijfer-venster | **niets** |
 | `vensters()` | `dagOordeel()` → de hero, de dagkaartjes, de balk in de tabel, de weekbalk, de samenvatting, de beste dag van de week. Knipt sinds 12-09 ook waar de stroom omslaat (`stroomZone`, `KENTERING`), met stukken van minstens twee uur | **niets** |
 | `cijferWoord()` / `cijferNiveau()` | het woord en de kleur van een sessie: de kaartjes, de balk in de tabel, de dagkop, de tint van de hero. Volgt het cijfer, niet de wind | **niets** |
+| `besteUren()` / `golfGem()` / `stroomZin()` | de bullets op elk sessiekaartje | **niets** |
 | `vlaagKleur()` | de kleur van het vlaagplusje in de tabel, van grijs via oker naar rood | **niets** |
 | `VEEL` (30) | de band "hard" in `band()`, de 1,5x zwaardere strafposten in `cijfer()`, de zin "hard en goed powered", de legenda, de uitleg bij de sessiekans en bij het cijfer | `ijk.mjs` pint 30 vast |
 | `TEVEEL` (40) | de gate in `uren()` (te hard telt als nee), de kans uit de ensembles, de kop van de sessiekans-rij, "te hard" onder het percentage, twee uitlegvensters | `ijk.mjs` pint 40 vast |
