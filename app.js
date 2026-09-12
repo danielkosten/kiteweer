@@ -310,9 +310,9 @@ window.KWU_READY.then(function () {
       '<span class="vc">' + getal(score) + '</span><span class="vt">' + tijd + (merk ? '<small>' + merk + '</small>' : '') + '</span>' +
       '<i class="info" aria-hidden="true">i</i>' +
       '<ul class="vlijst">' + punten.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>' +
-      '<span class="vsom"><b>' + c.start + '</b> wind ' +
-        c.delen.map(function (x) { return '<span class="' + (x.charAt(0) === "+" ? "op" : "af") + '">' + esc(x) + '</span>'; }).join(" ") +
-        ' <b>= ' + getal(score) + '</b></span></button>';
+      '<span class="vsom"><span class="r"><b>' + c.start + '</b> wind</span>' +
+        c.delen.map(function (x) { return '<span class="r ' + (x.charAt(0) === "+" ? "op" : "af") + '">' + esc(x) + '</span>'; }).join("") +
+        '<span class="r tot"><b>= ' + getal(score) + '</b></span></span></button>';
   }
   function golfWoord(m) { return m < 0.5 ? "vlak water" : m < 1 ? "beetje hobbelig" : m < 1.5 ? "hobbelig" : "flinke golven"; }
   /* Een zin over de stroom, met dezelfde grenzen als het cijfer. */
@@ -503,10 +503,11 @@ window.KWU_READY.then(function () {
     if (gm != null && gm < 0.5) pl.push("vlak water");
     var mm = us.reduce(function (a,u) { return a + (u.mm||0); }, 0);
     if (mm >= 2) tel(-0.5, "regen, " + komma(mm) + " mm in die uren", "regen");
-    /* Duur telde eerst hoogstens een punt, terwijl een uur rijden met op- en afbouwen voor één uur
-       water een andere dag is dan een middag staan (Daniel, 12-09). */
-    if (n >= 6) tel(1, n + " uur lang, een hele sessie", n + " uur"); else if (n >= 4) tel(0.5, n + " uur lang", n + " uur");
-    else if (n <= 1) tel(-1.5, "slechts 1 uur, dat is opbouwen en weer afbouwen", "1 uur"); else if (n === 2) tel(-0.5, "kort, 2 uur", "2 uur");
+    /* Duur is plat, niet oplopend: meer dan twee uur is een halve punt waard en daarna houdt het op.
+       Daniel gaat vaak toch hooguit twee uur, dus zes uur is niet twee keer zo goed als drie. En een
+       uur kostte anderhalve punt, en dat was flink overdreven (Daniel, 12-09). */
+    if (n > 2) tel(0.5, n + " uur lang, ruim de tijd", n + " uur");
+    else if (n <= 1) tel(-0.5, "slechts 1 uur, dat is opbouwen en weer afbouwen", "1 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     var st0 = getal(start);
     return { score:score, plus:pl, min:mn, start:st0, delen:som, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
