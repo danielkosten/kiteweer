@@ -581,8 +581,7 @@ window.KWU_READY.then(function () {
     if (niet.length) html += '<p class="sv flauw">Niet: ' + runs(niet).map(runTekst).join(", ") + ' · ' + (niet.some(function (u) { return niveau(u) === "aflandig"; }) ? "aflandig of " : "") + 'te weinig wind</p>';
     html += meetZin();
     var kt = kenteringTekst(d.uren); if (kt) html += '<p class="sv"><b>Stroming:</b> ' + kt + ' (bron per 3 uur, dus ongeveer)</p>';
-    html += '<p class="sv flauw"><button type="button" class="link" data-venster="0">hoe het cijfer ontstaat</button>' +
-      (st.dag === 0 ? ' · <a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a>' : '') + '</p>';
+    if (st.dag === 0) html += '<p class="sv flauw"><a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a></p>';
     el.innerHTML = html;
   }
 
