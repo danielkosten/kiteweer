@@ -838,8 +838,10 @@ window.KWU_READY.then(function () {
         /* De balk draagt het cijfer van die sessie, niet het woord van de wind. Twee sessies op een
            dag kunnen dezelfde wind hebben en toch een heel ander cijfer, want de stroom draait
            ertussen (Daniel, 12-09). */
+        /* Alleen het cijfer. De tijd stond erbij, maar de balk hangt al boven precies die
+           uurkolommen, dus die tijd zei twee keer hetzelfde (Daniel, 12-09). */
         if (w) { var sc = getal(scoreVan(w)), wn = cijferNiveau(scoreVan(w));
-          var lbl = w.uren.length >= 4 ? sc + " · " + w.tekst : w.uren.length >= 2 ? sc : "";
+          var lbl = w.uren.length >= 4 ? sc + " · " + cijferWoord(scoreVan(w)) : sc;
           cells += '<td colspan="' + w.uren.length + '"><span class="vpil" title="' + w.tekst + " · " + sc + " · " + cijferWoord(scoreVan(w)) + '" style="--tint:' + tint(wn) + ';--tint-v:' + tintV(wn) + '">' + lbl + '</span></td>'; k += w.uren.length; }
         else { cells += '<td></td>'; k++; }
       }
