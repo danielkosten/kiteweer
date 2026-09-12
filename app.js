@@ -29,6 +29,10 @@ window.KWU_READY.then(function () {
      Op precies 2 hier kwam zijn eigen sessie van 04-09 uit op "overpowered", terwijl hij hem
      "nicely powered" noemde. Zijn logboek wint van het ronde getal. */
   var KLEINER = { twintip:0, directional:1.5 };
+  /* De vuistregel achter de kitemaat: ideale maat = 2,2 x je gewicht gedeeld door de wind. Stond
+     los in ideaal() en nog eens in de omgekeerde som knBij(), en twee kopieën van één getal lopen
+     vroeg of laat uit elkaar. */
+  var KITEFACTOR = 2.2;
   /* Vlagerig: ÉÉN definitie, in verhouding en niet in knopen, want 10 kn erbij is bij 15 kn wind
      iets heel anders dan bij 30 kn. Er stonden er vijf door elkaar (1,5 · 1,6 · 1,8 · +10 kn · +6 kn),
      in twee verschillende eenheden, dus de pagina kon een uur tegelijk "stabiel" en "gusty" noemen.
@@ -37,6 +41,9 @@ window.KWU_READY.then(function () {
      Klopt ook met de meting: over 485 daglichturen aan Hoek van Holland zit een piek 1,4x de wind
      (middelste waarde) en negen van de tien uren tussen 1,2 en 1,67. 1,8 is dus echt uitzonderlijk. */
   var VLAGERIG = 1.8, STABIEL = 1.35, MAATJE_KLEINER = 1.6;
+  /* Wat vlagerig kost, en wat gelijkmatige wind oplevert. Kostte 1,5 punt in het cijfer van een
+     sessie en 1 punt in dat van de beste uren, zelfde regel, twee getallen. */
+  var STRAF_VLAGERIG = 1, BONUS_STABIEL = 0.5;
   /* Elk cijfer op de pagina is een half punt, nooit meer. Zonder dit stond er 6,265151515151515
      boven de beste uren (Daniel, 12-09). Rond af waar je het toont, niet waar je rekent. */
   function half(x) { return Math.round(x * 2) / 2; }
@@ -104,7 +111,7 @@ window.KWU_READY.then(function () {
      Daniel: bij 85 kg met een 13 m ligt dat punt op 62 kn. */
   function knBij(r) {
     var rMax = GROOT() / 3;
-    return Math.round(2.2 * st.kg / (GROOT() / Math.min(r, rMax) + KLEINER[st.board]));
+    return Math.round(KITEFACTOR * st.kg / (GROOT() / Math.min(r, rMax) + KLEINER[st.board]));
   }
   /* Doorlopende kleur voor staaf en vlagen: geel (12) → groen (19) → donkergroen (24). Labels blijven vijf. */
   function knKleur(kn, n) {
@@ -312,7 +319,7 @@ window.KWU_READY.then(function () {
 
   /* ── kitemaat ──────────────────────────────────────
      ideaal = 2,2 x kg / knopen x boardfactor. Per kite uit JOUW quiver zeggen we hoe hij staat. */
-  function ideaal(kn) { return Math.max(3, 2.2 * st.kg / kn - KLEINER[st.board]); }
+  function ideaal(kn) { return Math.max(3, KITEFACTOR * st.kg / kn - KLEINER[st.board]); }
   /* Wind waarbij je grootste kite net trekt: 2,2 x gewicht / die maat. Bij 85 kg twintip met een
      13 m is dat 14 kn; met een 17 m 11 kn. Daaronder sta je stil, ook met alles uitgerold. Dit is
      de streep in de weekbalk, het punt waar de kleur begint, en de ondergrens van de sessiekans. */
@@ -362,10 +369,10 @@ window.KWU_READY.then(function () {
     return 5;                                                      // boven 40 kn-druk: alleen nog survival
   }
   /* Hetzelfde in woorden, zodat de uitleg en het cijfer nooit uit elkaar lopen. */
-  function drukWoord(r) {
-    return r < 1.05 ? "wind waarbij je kite net trekt" : r < 1.20 ? "je gaat vooruit, niet meer"
-      : r < 1.39 ? "prettige wind" : r < 2.10 ? "lekker powered, jouw band" : "veel druk, maat kleiner";
-  }
+  var DRUK_WOORDEN = [[1.05, "wind waarbij je kite net trekt", "net"], [1.20, "je gaat vooruit, niet meer", "maar net"],
+    [1.39, "prettige wind", "prettig"], [2.10, "lekker powered, jouw band", "lekker"], [99, "veel druk, maat kleiner", "hard"]];
+  function drukWoord(r) { return DRUK_WOORDEN.filter(function (x) { return r < x[0]; })[0][1]; }
+  function drukKort(r) { return DRUK_WOORDEN.filter(function (x) { return r < x[0]; })[0][2]; }
   /* ── cijfer voor een venster: wind, stabiliteit, stroming, golven, lengte ── */
   function cijfer(v) {
     var us = v.uren, n = us.length, pl = [], mn = [], som = [];
@@ -384,7 +391,7 @@ window.KWU_READY.then(function () {
       score += d; som.push((d > 0 ? "+ " : "− ") + Math.abs(d).toString().replace(".", ",") + " " + tekst); (d > 0 ? pl : mn).push(tekst); };
     var vl = us.reduce(function (a,u) { return a + (u.vl - u.kn); }, 0) / n;
     var vh = us.reduce(function (a,u) { return a + (u.kn ? u.vl / u.kn : 1); }, 0) / n;
-    if (vh >= VLAGERIG) tel(-1.5, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vh < STABIEL) tel(0.5, "stabiele wind");
+    if (vh >= VLAGERIG) tel(-STRAF_VLAGERIG, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vh < STABIEL) tel(BONUS_STABIEL, "gelijkmatige wind, weinig vlagen");
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
     var sp = stroomPost(c); if (sp) tel(sp[0], sp[1]);
     var g = us.filter(function (u) { return u.golf; }); var gm = g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null;
@@ -398,7 +405,7 @@ window.KWU_READY.then(function () {
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     var st0 = getal(start);
     return { score:score, plus:pl, min:mn, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
-      een: (knGem > VEEL ? "Hard en goed powered, kleine kite" : rGem < 1.05 ? "Je kite trekt net, marginaal" : rGem < 1.20 ? "Je gaat vooruit, niet meer" : rGem < 1.39 ? "Prettige wind" : rGem < 2.10 ? "Lekker powered" : "Veel druk, maat kleiner") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
+      een: (knGem > VEEL ? "Hard en goed powered, kleine kite" : drukWoord(rGem).charAt(0).toUpperCase() + drukWoord(rGem).slice(1)) + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
   }
 
   /* weercode -> icoon + woord */
@@ -537,7 +544,7 @@ window.KWU_READY.then(function () {
     var start = startCijfer(rGem), sc = start, posten = [];
     var sp = stroomPost(c);
     if (sp) { sc += sp[0]; posten.push([(sp[0] > 0 ? "+ " : "\u2212 ") + Math.abs(sp[0]).toString().replace(".", ","), sp[1]]); }
-    if (vh >= VLAGERIG) { sc -= 1; posten.push(["\u2212 1", "vlagerig: de pieken zijn meer dan " + VLAGERIG.toString().replace(".", ",") + " keer de wind"]); }
+    if (vh >= VLAGERIG) { sc -= STRAF_VLAGERIG; posten.push(["\u2212 " + getal(STRAF_VLAGERIG), "vlagerig: de pieken zijn meer dan " + VLAGERIG.toString().replace(".", ",") + " keer de wind"]); }
     return { score:sc, start:start, posten:posten, kn:Math.round(kn) };
   }
   /* Hetzelfde cijfer, maar opgeknipt in zijn stukken, zodat de i-knop kan laten zien waar het
@@ -547,7 +554,7 @@ window.KWU_READY.then(function () {
     var start = startCijfer(druk(u.kn)), sc = start, posten = [];
     var c = stroomC(blokBij(u.t), u.dir), sp = stroomPost(c);
     if (sp) { sc += sp[0]; posten.push([(sp[0] > 0 ? "+ " : "\u2212 ") + Math.abs(sp[0]).toString().replace(".", ","), sp[1]]); }
-    if (u.vl / u.kn >= VLAGERIG) { sc -= 1; posten.push(["\u2212 1", "vlagerig: de pieken zijn meer dan " + VLAGERIG.toString().replace(".", ",") + " keer de wind"]); }
+    if (u.vl / u.kn >= VLAGERIG) { sc -= STRAF_VLAGERIG; posten.push(["\u2212 " + getal(STRAF_VLAGERIG), "vlagerig: de pieken zijn meer dan " + VLAGERIG.toString().replace(".", ",") + " keer de wind"]); }
     return { score:sc, start:start, posten:posten };
   }
   function runs(us) { var out = [], nu = null; us.forEach(function (u) { if (!nu || +u.t.slice(11,13) !== +nu[nu.length-1].t.slice(11,13) + 1) { nu = [u]; out.push(nu); } else nu.push(u); }); return out; }
@@ -555,7 +562,8 @@ window.KWU_READY.then(function () {
   function waarom(us) {
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / us.length, vl = us.reduce(function (a,u) { return a + u.vl/u.kn; }, 0) / us.length;
     var p = [];
-    p.push(c > 0.3 ? "stroom tegen de wind, gratis hoogte" : c < -0.5 ? "stroom mee, je zakt af" : "stroom dwars");
+    var sp = stroomPost(c);                              // dezelfde grenzen als in het cijfer, anders spreken de twee elkaar tegen
+    p.push(sp ? sp[1] : "stroom dwars");
     if (vl >= VLAGERIG) p.push("vlagerig");
     return p.join(", ");
   }
@@ -928,7 +936,7 @@ window.KWU_READY.then(function () {
     $("sheet-t").textContent = "Hoe dit cijfer is opgebouwd";
     $("sheet-b").innerHTML = '<ul class="redenen">' +
       '<li class="p"><b>' + getal(d0.start) + ' voor de wind zelf.</b> Bij ' + kn + ' kn trekt je ' + GROOT() + ' m ' +
-        (druk(kn) < 1.05 ? "net" : druk(kn) < 1.39 ? "prettig" : druk(kn) < 2.10 ? "lekker" : "hard") +
+        drukKort(druk(kn)) +
         '.</li>' +
       d0.posten.map(function (x) { return '<li class="p"><b>' + x[0] + '</b> ' + x[1] + '</li>'; }).join("") +
       (d0.posten.length ? '<li class="p"><b>Samen ' + getal(sc) + '.</b> Alles wordt op een half punt afgerond, want nauwkeuriger dan dat is het niet.</li>'

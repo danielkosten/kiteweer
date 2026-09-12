@@ -19,7 +19,7 @@ const GROOT = 13;
 const STANDAARD = pak("standaardmaat", /groot:(\d+)/);
 const ONDER   = pak("ondergrens-druk", /DRUK_GOED = ([\d.]+)/);
 const PERFECT = pak("perfect-druk", /DRUK_PERFECT = ([\d.]+)/);
-const FACTOR  = pak("kitefactor", /Math\.max\(3, ([\d.]+) \* st\.kg/);
+const FACTOR  = pak("kitefactor", /var KITEFACTOR = ([\d.]+)/);
 const KLEINER_D = pak("directional maten kleiner", /KLEINER = \{ twintip:0, directional:([\d.]+) \}/);
 const VLAGERIG = pak("vlagerig", /var VLAGERIG = ([\d.]+)/);
 const STABIEL  = pak("stabiel", /STABIEL = ([\d.]+)/);
