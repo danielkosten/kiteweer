@@ -79,7 +79,10 @@ async function windBij(datum, van, minuten) {
 const zet = uit.prepare(`insert or replace into sessie
   (datum, van, tot, spot, board, kite, kg, kn_gemeten, vlaag_gemeten, oordeel, notitie, bron, bevestigd, garmin_id, duur_min)
   values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-const alBevestigd = new Set(uit.prepare("select garmin_id from sessie where bevestigd is not null and garmin_id is not null").all().map(r => r.garmin_id));
+// Sleutel op datum en begintijd, NIET op het Garmin-nummer: dat is voor deze rijen leeg, en dan
+// overschreef een tweede ronde alles wat je net bevestigd had. Wat je een keer beoordeeld hebt
+// (ja of nee) blijft staan, want dat oordeel kan geen enkele import terughalen.
+const alBeoordeeld = new Set(uit.prepare("select datum, van from sessie where bevestigd = 1").all().map(r => r.datum + " " + r.van));
 
 console.log(`${rijen.length} activiteiten van ${MIN_MINUTEN} minuten of langer bekeken\n`);
 console.log("datum        van    duur   wind   vlaag   kandidaat");
@@ -91,9 +94,9 @@ for (const r of rijen) {
   const kandidaat = kn >= MIN_KN;
   if (!kandidaat) continue;
   n++;
-  const bevestigd = alBevestigd.has(r.garmin_activity_id) ? null : 0;
-  console.log(`${r.date}   ${van}  ${String(r.duration_min).padStart(4)}m  ${kn.toFixed(1).padStart(5)}  ${(vlaag ?? 0).toFixed(1).padStart(6)}   ${r.type}`);
-  if (SCHRIJF && bevestigd !== null) {
+  const alGedaan = alBeoordeeld.has(r.date + " " + van);
+  console.log(`${r.date}   ${van}  ${String(r.duration_min).padStart(4)}m  ${kn.toFixed(1).padStart(5)}  ${(vlaag ?? 0).toFixed(1).padStart(6)}   ${r.type}${alGedaan ? "  (al beoordeeld, blijft staan)" : ""}`);
+  if (SCHRIJF && !alGedaan) {
     const eind = new Date(new Date(`${r.date}T${van}:00Z`).getTime() + r.duration_min * 60000).toISOString().slice(11, 16);
     zet.run(r.date, van, eind, "kijkduin", null, null, 85, kn, vlaag, null,
       `uit Garmin, type ${r.type}${r.title ? ", " + r.title : ""}`, "garmin", 0, r.garmin_activity_id, r.duration_min);
