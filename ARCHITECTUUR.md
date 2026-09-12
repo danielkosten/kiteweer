@@ -17,6 +17,7 @@ elke handmatige wijziging is de volgende run weg.
 | `meting.js` | wat de meetpalen vandaag echt gemeten hebben | **door de machine** (`gen-meting.mjs`) |
 | `gen-uur.mjs`, `gen-stroom.mjs`, `gen-meting.mjs` | de drie ophalers die die drie bestanden schrijven | met de hand |
 | `ijk.mjs` | rekentoets zonder browser: kloppen de grenzen en de cijfercurve nog | met de hand |
+| `dubbel.mjs` | kijkt of elk geijkt getal nog maar op EEN plek staat, en of de stroming maar op een plek beoordeeld wordt | met de hand |
 | `qa.mjs` | zet een echte browser op de pagina en kijkt of er niets stuk is | met de hand |
 | `verifieer.mjs`, `toets-horizon.mjs` | eenmalige metingen: hoe goed elk weermodel het deed. Draaien niet in de keten | met de hand |
 | `.github/workflows/meting.yml`, `stroom.yml` | opdrachten die op GitHub kunnen draaien, zie hieronder | met de hand |
@@ -98,6 +99,7 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 ```
 cd /Users/danielunravel/Code/personal/kiteweer
 node ijk.mjs                                          # rekentoets, 1 seconde, geen browser
+node dubbel.mjs                                       # staat elke regel nog maar op een plek
 node qa.mjs http://localhost:8899/                     # of tegen de live URL, zie hieronder
 git pull --rebase && git commit -am "..." && git push
 # wacht tot GitHub Pages de nieuwe pagina serveert (ongeveer een minuut)
@@ -126,10 +128,14 @@ Wat de twee toetsen echt controleren:
 
 | `node ijk.mjs` | de vier windgrenzen bij 85 kg met een 13 m (14 · 19 · 30 · 40 kn), dat de standaardmaat binnen de keuzelijst 4 tot 15 m valt, dat de ondergrens meebeweegt met een andere kitemaat, acht punten van de cijfercurve, dat de curve stijgt naar Daniels band, dat 33 kn hoger scoort dan 16 kn, dat een 10 bestaat maar niet uit de wind alleen, dat zijn drie echte sessies goed beoordeeld worden, en 20 heen-en-terug-sommen |
 |---|---|
+| `node dubbel.mjs` | dat de zeven geijkte getallen (2,2 · 1,8 · 1,34 · 1,6 · 0,97 · 1,32 en de rest) elk maar een keer in `app.js` staan, dat elke naam ook echt gebruikt wordt, en dat de stroomsterkte alleen in `stroomPost()` tot een oordeel leidt |
+|---|---|
 | `node qa.mjs <url>` | op 390 en 1200 px breed: lekt er ruwe code of "undefined" de pagina in, schuift de pagina zijwaarts, steekt er iets buiten het scherm, staan zeven vaste onderdelen er echt en zijn ze zichtbaar, zijn er fouten in de browser, en gaat élke i-knop open, past het venster in beeld en lekt er niets in. Schrijft `qa-mobiel.png` en `qa-breed.png` |
 
 ## 6. Wat nergens door getest wordt
 
+- **Het woord en de kleur van een sessie** (`cijferWoord`, `cijferNiveau`) en de vlaagkleur
+  (`vlaagKleur`): de grenzen 8,5 / 7 / 5,5 / 4 en 1,4 tot 2,0 zijn gekozen, niet gemeten.
 - **De optelposten van het cijfer.** −1 vlagerig, de stroomposten (+0,5 tegen, −0,5 tot −1,5 mee), −0,5 golven, −0,5 regen, de
   duurposten, en de 1,5x zwaardere straf boven 30 kn: allemaal geraden gewichten, door niets getoetst.
 - **Het uurcijfer** (`uurDelen`, `urenDelen`) helemaal. Het gebruikt dezelfde curve en dezelfde
