@@ -617,7 +617,7 @@ window.KWU_READY.then(function () {
            zou een cel-achtergrond een blok van 56 px worden. */
         /* Gemeten aan Hoek van Holland, 485 daglichturen 1 aug t/m 10 sep: een vlaag is 1,4x de
            wind (mediaan), p90 1,63. Onder de 12 kn is de mediaan al 1,50, dus daar zegt "vlagerig"
-           niets. Het woord valt daarom pas vanaf 1,6x en alleen als er genoeg wind staat om te gaan.
+           niets. Het woord "gusty" valt daarom pas vanaf 1,6x en alleen als er genoeg wind staat om te gaan.
            De kleur volgt het oordeel van dat uur, niet de vlaag: anders kleurt 9 kn wind groen
            omdat de vlaag 16 haalt. */
         var extra = Math.max(0, Math.round(u.vl - u.kn)), verhouding = u.kn ? u.vl / u.kn : 0;
@@ -625,7 +625,7 @@ window.KWU_READY.then(function () {
         /* Sommige grove modellen leveren geen vlagen: dan is vlaag = wind en zou er "+0" staan.
            Een streepje is eerlijker dan een nul die op windstil lijkt. */
         return td(u, "tv", '<span class="vp">' + u.vl + '</span>' +
-          '<small' + (vlagerig ? ' class="vlagerig"' : '') + '>' + (extra > 0 ? "+" + extra : "—") + (vlagerig ? " vlagerig" : "") + '</small>',
+          '<small>' + (extra > 0 ? "+" + extra : "—") + (vlagerig ? ' <em>gusty</em>' : '') + '</small>',
           "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       (i === 0 && meetstation() ? rij(rijkop("gemeten", "meten", "Welk meetstation en hoe ver weg"), function (u) {
         var m = metingBij(u.t);
@@ -666,7 +666,7 @@ window.KWU_READY.then(function () {
       var g14 = genoegKn(), g19 = knBij(1.32);
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' +
         (k === "perfect" ? " " + g19 + "–" + VEEL : k === "goed" ? " " + g14 + "–" + g19 : k === "matig" ? " boven " + VEEL + ", kleine kite" : k === "weinig" ? " &lt;" + g14 + ", je " + GROOT() + " m trekt niet" : "") + '</span>'; }).join("") +
-      '<span class="lg"><b>vlagen 25 +9</b> wat er binnen dat uur echt gebeurt: de piek, en hoeveel knopen dat boven de wind is. 40% erbij is normaal</span>' +
+      '<span class="lg"><b>vlagen 25 +9</b> wat er binnen dat uur echt gebeurt: de piek, en hoeveel knopen dat boven de wind is. 40% erbij is normaal, vanaf 60% staat er gusty</span>' +
       '<span class="lg"><b>8–22 onder de wind</b> geen wind maar twijfel: de laagste en hoogste van de tien modellen. Oker = meer dan 7 kn oneens</span>' +
       '<span class="lg"><b>pijl</b> waar de wind of de stroom heen gaat</span>' +
       '<span class="lg"><b>regen</b> 1 druppel is licht, 3 is 1 mm per uur, 5 is een plensbui</span>' +
@@ -802,7 +802,7 @@ window.KWU_READY.then(function () {
     $("sheet-t").textContent = "Vlagen en spreiding zijn twee dingen";
     $("sheet-b").innerHTML = '<ul class="redenen">' +
       '<li class="p"><b>De vlaag gebeurt echt.</b> Binnen één uur waait het niet gelijkmatig: de wind zakt weg en piekt een paar seconden. Dat plusje is hoeveel knopen zo\'n piek erbovenop komt. Hier om ' + uurStr(u.t) + ': ' + u.kn + ' kn met pieken tot ' + u.vl + '.</li>' +
-      '<li class="p"><b>Dat is normaal, geen waarschuwing.</b> Gemeten aan Hoek van Holland, 485 daglichturen deze zomer: een piek zit 40% boven de wind (middelste waarde), en bij negen van de tien uren tussen 20% en 67% erboven. Pas vanaf 60% erbij noemen we het vlagerig, en dan neem je een maat kleiner.</li>' +
+      '<li class="p"><b>Dat is normaal, geen waarschuwing.</b> Gemeten aan Hoek van Holland, 485 daglichturen deze zomer: een piek zit 40% boven de wind (middelste waarde), en bij negen van de tien uren tussen 20% en 67% erboven. Pas vanaf 60% erbij noemen we het gusty, en dan neem je een maat kleiner.</li>' +
       '<li class="p"><b>De spreiding onder de wind is iets anders: dat is twijfel.</b> Tien rekenmodellen kijken naar dezelfde dag; ' + u.knLo + ' is de laagste die eruit komt, ' + u.knHi + ' de hoogste. Dat gaat niet binnen een uur gebeuren, dat is hoe oneens ze zijn. Oker betekent meer dan 7 kn oneens: kijk morgen opnieuw.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }

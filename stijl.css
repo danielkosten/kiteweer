@@ -237,8 +237,9 @@ main{padding-bottom:64px}
 .uurtabel .tw .staaf{display:block;width:100%;border-radius:3px 3px 0 0;min-height:3px}
 .uurtabel .tw small{display:block;font-size:10.5px;color:var(--flauw);line-height:1.1;white-space:nowrap}
 .uurtabel .tw small.onzeker{color:var(--matig)}
-.uurtabel .tv small{display:block;font-size:10px;color:var(--flauw);font-weight:700;margin-top:1px;white-space:nowrap}
-.uurtabel .tv small.vlagerig{color:var(--matig)}
+.uurtabel .tv small{display:block;font-size:10px;color:var(--flauw);font-weight:600;margin-top:2px;white-space:nowrap}
+/* "gusty" is een waarschuwing, geen getal: eigen pil, zodat de +N-kolom rustig blijft. */
+.uurtabel .tv small em{font-style:normal;font-weight:700;color:var(--matig);background:var(--matig-v);border-radius:4px;padding:1px 4px;margin-left:3px}
 .uurtabel .tv .vp{display:inline-block;min-width:34px;background:var(--tint-v);color:var(--tint);font-weight:700;padding:5px 8px;border-radius:6px}
 .uurtabel .wijzer{width:16px;height:16px}
 
@@ -298,8 +299,11 @@ main{padding-bottom:64px}
 .dagkaart .dn{font-size:11.5px}
 
 /* rider in de kop */
-.rider{display:flex;align-items:center;gap:8px}
-.seg.klein button{padding:5px 11px;font-size:13px}
+.rider{display:flex;align-items:stretch;gap:8px}
+.rider .invoer{min-height:44px}
+.rider .invoer b{white-space:nowrap}
+.rider .seg{min-height:44px;align-items:stretch}
+.seg.klein button{padding:5px 13px;font-size:13px;white-space:nowrap}
 .rider .invoer{padding:5px 12px}
 .rider .invoer input{width:46px;font-size:16px}
 /* vensters onder elkaar */
@@ -344,7 +348,12 @@ main{padding-bottom:64px}
 @media(max-width:600px){
   .top{gap:10px}
   .merk{width:100%}
-  .rider{margin-left:auto}
+  /* Twee even brede pillen op de eerste regel, het bord eronder over de volle breedte:
+     alles begint op dezelfde lijn en niets wrapt binnen een pil. */
+  .rider{width:100%;flex-wrap:wrap;margin-left:0}
+  .rider .invoer{flex:1 1 calc(50% - 4px);min-width:0;justify-content:space-between}
+  .rider .seg{flex:1 1 100%}
+  .rider .seg button{flex:1 1 0}
   .seg button{padding:6px 11px;font-size:13px}
   .hero{padding:18px 16px}
   .verdict{font-size:28px}
@@ -424,10 +433,17 @@ details.modellen>div{margin-top:12px}
 [hidden]{display:none!important}
 .seg{flex-wrap:wrap}
 
-.filter{display:inline-flex;flex-direction:column;align-items:flex-start;border:1px solid var(--lijn);border-radius:var(--r-pil);padding:4px 14px;background:var(--kaart);line-height:1.15}
+/* Kopknoppen: één maat, één hoogte, en tekst die te lang is krijgt puntjes in plaats van over de
+   rand te lopen. Op een telefoon liep "10 van 10 modellen" buiten zijn pil en was de kite-pil twee
+   keer zo hoog als de kg-pil (gemeten op 402 px, iPhone 17 Pro-breedte). */
+.filter{display:inline-flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  border:1px solid var(--lijn);border-radius:var(--r-pil);padding:6px 14px;background:var(--kaart);
+  line-height:1.2;min-height:44px;overflow:hidden}
+.filter b,.filter span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .filter b{font-size:13px}
 .filter span{font-size:11px;color:var(--zacht)}
 .filter:hover{border-color:var(--inkt)}
+.filter:active{transform:scale(.98)}
 .mixen{display:grid;gap:8px;margin-bottom:14px}
 .mixknop{text-align:left;border:1.5px solid var(--lijn);border-radius:var(--r-s);padding:10px 12px;display:flex;flex-direction:column;gap:2px}
 .mixknop.aan{border-color:var(--perfect);background:var(--perfect-v)}
@@ -445,7 +461,7 @@ details.modellen>div{margin-top:12px}
 .spotkeus.aan{border-color:var(--perfect);background:var(--perfect-v)}
 .spotkeus b{font-size:14px}
 .spotkeus span{font-size:11.5px;color:var(--zacht)}
-@media(max-width:600px){.filters{margin-left:0;width:100%}.filter{flex:1}}
+@media(max-width:600px){.filters{margin-left:0;width:100%;flex-wrap:nowrap}.filter{flex:1 1 0;min-width:0}}
 
 /* label boven de kaart, niet erover */
 .scene-label{position:static;background:var(--kaart);border-radius:0;padding:12px 18px 10px;flex-direction:row;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--lijn-2)}
