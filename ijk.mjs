@@ -45,16 +45,40 @@ const beweegt = met9 > knBij(ONDER) && met17 < knBij(ONDER);
 if (!beweegt) stuk++;
 console.log("  " + (beweegt ? "goed" : "FOUT") + "  ondergrens beweegt mee met de kitemaat    9 m: " + met9 + " kn, 17 m: " + met17 + " kn");
 
-// Het startcijfer van een sessie moet met de druk meelopen: net trekken is geen 8.
+// Het startcijfer moet met de druk meelopen en pieken waar Daniel lekker staat: 20 tot 30 kn bij
+// 85 kg met een 13 m. Daarboven kan het nog, maar dan beslissen de omstandigheden, niet de wind.
 const drukVan = (kn, kg = 85, board = 1, groot = GROOT) => groot / (2.2 * kg / kn * board);
-const grens = (naam, re) => { const m = app.match(re); if (!m) { console.error("FOUT: " + naam + " niet gevonden"); process.exit(1); } return parseFloat(m[1]); };
-const G = [grens("net trekt", /rGem < ([\d.]+) \? 5/), grens("vooruit", /rGem < ([\d.]+) \? 6/), grens("prettig", /rGem < ([\d.]+) \? 7/), grens("powered", /rGem < ([\d.]+) \? 8/)];
-const startBij = (kn) => { const r = drukVan(kn); return kn > VEEL ? 6 : r < G[0] ? 5 : r < G[1] ? 6 : r < G[2] ? 7 : r < G[3] ? 8 : 7; };
-console.log("\nstartcijfer van een sessie (85 kg, 13 m):");
-for (const [kn, hoort, waarom] of [[14, 5, "kite trekt net"], [18, 7, "prettig"], [22, 8, "lekker powered"], [33, 6, "te veel wind"]]) {
-  const echt = startBij(kn), ok = echt === hoort;
+const mC = app.match(/var CURVE = (\[\[[^;]+\]\]);/);
+if (!mC) { console.error("FOUT: CURVE niet gevonden in app.js"); process.exit(1); }
+const CURVE = JSON.parse(mC[1]);
+const startBij = (kn) => {
+  const r = drukVan(kn);
+  if (r <= CURVE[0][0]) return CURVE[0][1];
+  for (let i = 1; i < CURVE.length; i++) {
+    if (r <= CURVE[i][0]) { const a = CURVE[i-1], b = CURVE[i]; return a[1] + (b[1]-a[1]) * (r-a[0]) / (b[0]-a[0]); }
+  }
+  return 5;
+};
+console.log("\nstartcijfer van een sessie (85 kg, 13 m), voor de optelposten:");
+// [wind, minimaal, maximaal, waarom]
+for (const [kn, lo, hi, waarom] of [
+  [12, 1, 4.5, "te weinig wind"],
+  [14, 4, 5.5, "kite trekt net"],
+  [18, 6.5, 7.8, "prettig"],
+  [20, 7.7, 8.5, "onderkant van zijn band"],
+  [25, 8.6, 9.0, "midden in zijn band"],
+  [30, 8.6, 9.0, "bovenkant van zijn band"],
+  [35, 6.0, 7.6, "hard, omstandigheden beslissen"],
+  [42, 4.5, 6.0, "te hard"],
+]) {
+  const echt = Math.round(startBij(kn) * 10) / 10, ok = echt >= lo && echt <= hi;
   if (!ok) stuk++;
-  console.log("  " + (ok ? "goed" : "FOUT") + "  " + (kn + " kn, " + waarom).padEnd(40) + echt + " (hoort " + hoort + ")");
+  console.log("  " + (ok ? "goed" : "FOUT") + "  " + (kn + " kn, " + waarom).padEnd(40) + echt + " (hoort " + lo + "\u2013" + hi + ")");
 }
+// De curve mag nooit dalen binnen zijn band: 25 kn hoort niet lager te zijn dan 20 kn.
+const stijgt = startBij(25) >= startBij(20) && startBij(20) > startBij(16);
+if (!stijgt) stuk++;
+console.log("  " + (stijgt ? "goed" : "FOUT") + "  cijfer stijgt naar zijn band toe".padEnd(46) + [16,20,25].map(k => Math.round(startBij(k)*10)/10).join(" \u2192 "));
+
 console.log(stuk ? "\nIJKING: " + stuk + " PROBLEMEN" : "\nIJKING: alles goed");
 process.exit(stuk ? 1 : 0);

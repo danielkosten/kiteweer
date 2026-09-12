@@ -283,6 +283,31 @@ window.KWU_READY.then(function () {
   }
   function vlMax(us) { return Math.max.apply(null, us.map(function (u) { return u.vl; })); }
 
+  /* ── de cijfercurve ───────────────────────────────
+     Het startcijfer hangt aan de druk (jouw grootste kite gedeeld door de maat die bij die wind
+     hoort), niet aan vaste knopen. Zo verschuift de hele curve mee als je zwaarder wordt of een
+     andere kite koopt: bij meer gewicht heb je meer wind nodig voor dezelfde druk, en dus schuift
+     je tien mee naar rechts. Daarom zit gewicht al in het cijfer; er is geen aparte gewichtspost.
+     De punten hieronder zijn Daniels eigen band: bij 85 kg met een 13 m is 20 tot 30 kn ideaal
+     (12-09), 14 kn is net trekken, boven de 35 kn is het overleven. Tussen twee punten loopt het
+     cijfer vloeiend door, zodat een knoop verschil nooit een heel punt scheelt.
+     GEEN sessielog: dit is geijkt op gesprek en twee sessies, niet op ingevulde cijfers. */
+  var CURVE = [[0.80, 2], [0.97, 4.5], [1.15, 6], [1.39, 8], [1.60, 9], [2.09, 9], [2.40, 7.5], [2.78, 6]];
+  function startCijfer(r) {
+    if (r <= CURVE[0][0]) return CURVE[0][1];
+    for (var i = 1; i < CURVE.length; i++) {
+      if (r <= CURVE[i][0]) {
+        var a = CURVE[i-1], b = CURVE[i];
+        return a[1] + (b[1] - a[1]) * (r - a[0]) / (b[0] - a[0]);
+      }
+    }
+    return 5;                                                      // boven 40 kn-druk: alleen nog survival
+  }
+  /* Hetzelfde in woorden, zodat de uitleg en het cijfer nooit uit elkaar lopen. */
+  function drukWoord(r) {
+    return r < 1.05 ? "wind waarbij je kite net trekt" : r < 1.20 ? "je gaat vooruit, niet meer"
+      : r < 1.39 ? "prettige wind" : r < 2.10 ? "lekker powered, jouw band" : "veel druk, maat kleiner";
+  }
   /* ── cijfer voor een venster: wind, stabiliteit, stroming, golven, lengte ── */
   function cijfer(v) {
     var us = v.uren, n = us.length, pl = [], mn = [], som = [];
@@ -292,14 +317,13 @@ window.KWU_READY.then(function () {
        piekt het waar je lekker powered staat. */
     var rGem = us.reduce(function (a, u) { return a + druk(u.kn); }, 0) / n;
     var knGem = us.reduce(function (a, u) { return a + u.kn; }, 0) / n;
-    var start = knGem > VEEL ? 6              // boven 30 kn: kan, maar survival
-      : rGem < 1.05 ? 5                       // je kite trekt net
-      : rGem < 1.20 ? 6                       // je gaat vooruit, niet meer
-      : rGem < 1.35 ? 7                       // prettig
-      : rGem < 1.80 ? 8                       // lekker powered, de beste band
-      : 7;                                    // veel druk, kleinere kite nodig
+    var start = startCijfer(rGem);
+    /* Boven 30 kn is het nog steeds kiten, maar dan beslissen de omstandigheden en niet de wind:
+       vlagen, stroom en golven tellen daar anderhalf keer zo zwaar mee (Daniel, 12-09). */
+    var zwaar = knGem > VEEL ? 1.5 : 1;
     var score = start;
-    var tel = function (d, tekst) { score += d; som.push((d > 0 ? "+ " : "− ") + Math.abs(d).toString().replace(".", ",") + " " + tekst); (d > 0 ? pl : mn).push(tekst); };
+    var tel = function (d, tekst) { if (d < 0) d = Math.round(d * zwaar * 2) / 2;
+      score += d; som.push((d > 0 ? "+ " : "− ") + Math.abs(d).toString().replace(".", ",") + " " + tekst); (d > 0 ? pl : mn).push(tekst); };
     var vl = us.reduce(function (a,u) { return a + (u.vl - u.kn); }, 0) / n;
     if (vl >= 10) tel(-1.5, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vl < 6) tel(0.5, "stabiele wind");
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
@@ -308,10 +332,14 @@ window.KWU_READY.then(function () {
     if (gm != null) { if (gm > 1.5) tel(-0.5, "flinke golven " + gm.toFixed(1) + " m"); else if (gm < 0.5) pl.push("vlak water"); }
     var mm = us.reduce(function (a,u) { return a + (u.mm||0); }, 0);
     if (mm >= 2) tel(-0.5, "regen, " + mm.toFixed(1) + " mm in het venster");
-    if (n >= 4) pl.push(n + " uur lang"); else if (n <= 1) tel(-1, "slechts 1 uur");
+    /* Duur telde eerst hoogstens een punt, terwijl een uur rijden met op- en afbouwen voor één uur
+       water een andere dag is dan een middag staan (Daniel, 12-09). */
+    if (n >= 6) tel(1, n + " uur lang, een hele sessie"); else if (n >= 4) tel(0.5, n + " uur lang");
+    else if (n <= 1) tel(-1.5, "slechts 1 uur, dat is opbouwen en weer afbouwen"); else if (n === 2) tel(-0.5, "kort, 2 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
-    return { score:score, plus:pl, min:mn, som: start + " voor " + (rGem < 1.05 ? "wind waarbij je kite net trekt" : rGem < 1.35 ? "prettige wind" : rGem < 1.80 ? "lekker powered" : "veel druk") + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
-      een: (knGem > VEEL ? "Veel wind, kleine kite" : rGem < 1.05 ? "Je kite trekt net, marginaal" : rGem < 1.20 ? "Je gaat vooruit, niet meer" : rGem < 1.35 ? "Prettige wind" : rGem < 1.80 ? "Lekker powered" : "Veel druk, maat kleiner") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
+    var st0 = (Math.round(start * 2) / 2).toString().replace(".", ",");
+    return { score:score, plus:pl, min:mn, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
+      een: (knGem > VEEL ? "Veel wind, kleine kite" : rGem < 1.05 ? "Je kite trekt net, marginaal" : rGem < 1.20 ? "Je gaat vooruit, niet meer" : rGem < 1.39 ? "Prettige wind" : rGem < 2.10 ? "Lekker powered" : "Veel druk, maat kleiner") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
   }
 
   /* weercode -> icoon + woord */

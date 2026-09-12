@@ -1,7 +1,10 @@
 name: metingen verversen
 
-# Haalt elk kwartier op wat de meetstations van Rijkswaterstaat echt meten en commit meting.js.
+# Haalt op wat de meetstations van Rijkswaterstaat echt meten en commit meting.js.
 # Daarmee staat er in de tabel naast de voorspelling wat er werkelijk stond.
+# Let op: de klok van GitHub is gratis en dus traag. We vragen elk kwartier, maar in de praktijk
+# start er ongeveer elke 2 tot 5 uur één run (gemeten 11 en 12-09). Vaker echt nodig? Dan hoort
+# dit op de VPS met zijn eigen klok, niet hier.
 on:
   schedule:
     - cron: "*/15 * * * *"
