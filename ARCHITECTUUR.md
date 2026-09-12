@@ -190,25 +190,39 @@ De pagina leest deze tabel NIET; hij verandert niets aan wat de site rekent of t
 | `sessie` | een sessie die je echt gereden hebt, met de wind die KNMI toen mat | met de hand, via `node sessie.mjs` |
 
 Sessies komen er vanzelf in, uit Garmin. Op dezelfde VPS schrijft fithub elke activiteit al weg in
-`/home/ubuntu/context/db/personal.sqlite`; `sessie-garmin.mjs` pakt daar de buitensessies uit waarbij
-wind stond en zet de KNMI-wind van dat tijdvak erbij. Draait een keer per dag, op een datumstempel
+`/home/ubuntu/context/db/personal.sqlite`. Garmin WEET dat het kiten was: de sport staat in
+`activity_metrics` (`wind_kite_surfing` en `kiteboarding_v2`, twee namen voor hetzelfde, een
+hernoeming door Garmin) en anders in de titel ("The Hague Kiteboarding"). `sessie-garmin.mjs` pakt
+die eruit en zet de KNMI-wind van dat tijdvak erbij. Draait een keer per dag, op een datumstempel
 in `/var/lib/kiteweer-garmin-dag`.
 
-Het enige wat jij doet is per sessie ja of nee zeggen, want een uur hardlopen bij 20 kn ziet er in
-de gegevens hetzelfde uit als een uur kiten bij 20 kn:
+Alleen vanaf 2026. Garmin heeft 46 kitesessies terug tot oktober 2020, maar bij een sessie van vijf
+jaar terug weet niemand meer welke kite eraan hing of hoe het reed, en zonder dat oordeel voegt de
+rij niets toe aan de ijking.
+
+**Wat Garmin NIET weet: de kitemaat en het board.** Dat is het enige dat je zelf zegt:
 
 ```
-node sessie-bevestig.mjs                                        wat wacht er nog
-node sessie-bevestig.mjs 2026-09-09 ja twintip 10 "lekker powered"
-node sessie-bevestig.mjs 2026-09-02 nee                         was geen kiten
+node sessie-bevestig.mjs                                        wat is nog leeg
+node sessie-bevestig.mjs 2026-08-05 ja twintip 10 "lekker powered"
+node sessie-bevestig.mjs 2026-07-20 nee                         geen echte sessie
 ```
+
+**Springhoogte staat er niet in.** Gezocht op 12-09: `activity_metrics` heeft geen enkele kolom voor
+sprongen, en er is geen enkele rij met Surfr als bron. Wat er wel staat is `elevation_gain_m`, en dat
+is op vlak water grotendeels GPS-ruis (een sessie van 2021 staat op 4207 hoogtemeters). Wil je echte
+springhoogte, dan moet Surfr eerst zelf naar Garmin Connect of hierheen schrijven.
 
 Met de hand kan ook, voor een sessie die Garmin niet heeft:
 `node sessie.mjs 2026-09-12 15:00 18:00 kijkduin twintip 10 "top"`. Lijst: `node sessie.mjs --lijst`.
 
 Getoetst op 12-09: de vier sessies waarop `ijk.mjs` geijkt is komen er alle vier uit met het juiste
-windgetal (18,5 tegen 19 · 23,3 tegen 23 · 25,3 tegen 24 · 17,5 tegen 17), en er kwamen er vier bij
-die `ijk.mjs` niet had. Een import overschrijft nooit een oordeel dat je al gegeven hebt.
+windgetal (18,5 tegen 19 · 23,3 tegen 23 · 25,3 tegen 24 · 17,5 tegen 17), en er kwamen er twee bij
+die `ijk.mjs` niet had (04-06 en 05-08). Een import overschrijft nooit een oordeel dat je al gaf.
+
+De val die hier eerst in zat: de eerste versie raadde op "buiten, lang genoeg, en er stond wind" in
+plaats van de sport te lezen die er gewoon stond. Die haalde twee potjes tennis en een sportschoolles
+binnen als kitesessie. Raad nooit iets wat de bron zelf weet.
 
 **Waarom `sessie` de belangrijkste van de drie is.** De hele pagina is geijkt op vier sessies in
 `ijk.mjs`, allemaal augustus en september, allemaal tussen 17 en 24 kn, terwijl er grenzen op 30 en
