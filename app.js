@@ -892,7 +892,7 @@ window.KWU_READY.then(function () {
         return td(u, "tm", '<span class="kans" style="--tint:' + tint(kl) + ';--tint-v:' + tintV(kl) + '">' + k + '%</span>' + (waarom ? '<small>' + waarom + '</small>' : '')); }) +
       rij(rijkop("stroming", "stroom", "Wat de stroming met je doet"), function (u) { var b = blokBij(u.t), c = stroomC(b, u.dir);
         return td(u, "ts", b && b.stroom ? pijl(b.stroom.naar + 180, c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '<small>' + b.stroom.kn.toFixed(1) + ' kn</small><small style="color:' + (c > 0.15 ? KLEUR.perfect : c < -0.15 ? KLEUR.matig : "#41607A") + '">' + (c > 0.15 ? "tegen" : c < -0.15 ? "mee" : "dwars") + '</small>' : '<small>—</small>'); }) +
-      rij(rijkop("golven", "golven", "Wat de golfhoogte en de periode betekenen"), function (u) { return td(u, "tg", u.golf ? '<span>' + u.golf.m.toFixed(1) + ' m</span><small>' + u.golf.s + ' s</small>' : '<small>—</small>'); }) +
+      rij(rijkop("golven", "golven", "Wat de golfhoogte en de periode betekenen"), function (u) { return td(u, "tg", u.golf ? '<span>' + komma(u.golf.m) + ' m</span><small>' + komma(u.golf.s) + ' s</small>' : '<small>—</small>'); }) +
       rij(rijkop("weer", "weer", "Wat het weericoon betekent"), function (u) { var w = weer(u.wx); return td(u, "tx", '<span>' + w[0] + '</span><small>' + u.temp + '°</small>'); }) +
       rij(rijkop("regen", "regen", "Wat de druppels betekenen", "mm per uur"), function (u) { var d = druppels(u.mm); return td(u, "tr", d ? '<span class="drup">' + "💧".repeat(d) + '</span><small>' + u.mm + '</small>' : '<small class="droog">droog</small>'); }) +
       '</tbody></table>';

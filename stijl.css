@@ -291,7 +291,10 @@ main{padding-bottom:64px}
 .uurtabel td:hover{background:var(--lijn-2)}
 .uurtabel .tb small,.uurtabel .tg small,.uurtabel .tk small{display:block;font-size:11px;color:var(--zacht);font-weight:700;line-height:1.25}
 .uurtabel .tb .eens{background:linear-gradient(90deg,var(--goed) var(--p),var(--lijn) var(--p));background-size:100% 3px;background-repeat:no-repeat;background-position:bottom;padding-bottom:4px}
-.uurtabel .tg span{font-weight:700;display:block}
+/* Elk getal in de tabel blijft op EEN regel. "0,8 m" brak af naar twee regels terwijl "0,7 m"
+   ernaast op een regel paste, en dan staan de rijen niet meer op dezelfde hoogte (Daniel, 12-09). */
+.uurtabel .tg span{font-weight:700;display:block;white-space:nowrap}
+.uurtabel td{white-space:nowrap}
 .uurtabel .tk{background:var(--tint-v);color:var(--tint);border-radius:4px;padding:5px 0}
 .uurtabel .tk small{color:var(--tint);font-size:10.5px}
 .dagkaart .dn{font-size:11.5px}

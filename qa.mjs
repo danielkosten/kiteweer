@@ -44,11 +44,30 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
     return uit;
   });
   console.log('  uit de pil :', uitPil.length?uitPil.join(' | '):'nee');
+  // 3e. staan de cellen binnen een rij op dezelfde hoogte, EN mag er uberhaupt iets afbreken?
+  //     "0,8 m" brak op Daniels iPhone naar twee regels terwijl "0,7 m" ernaast op een regel paste.
+  //     In deze testbrowser gebeurt dat op geen enkele breedte: Safari meet letters net iets breder.
+  //     Daarom kijken we ook naar de REGEL zelf, niet alleen naar het plaatje: een cel in de uurtabel
+  //     hoort nooit te mogen afbreken, want dan lopen de rijen scheef (12-09).
+  const scheveRij = await p.evaluate(()=>{
+    const uit=[];
+    for (const tr of document.querySelectorAll('.uurtabel tr')) {
+      const h=[...tr.querySelectorAll('td')].map(td=>Math.round(td.getBoundingClientRect().height)).filter(x=>x>0);
+      if (h.length<2) continue;
+      const lo=Math.min(...h), hi=Math.max(...h);
+      if (hi-lo>2) uit.push((tr.querySelector('th')||{}).innerText?.trim().split('\n')[0]+': '+lo+' tot '+hi+' px');
+    }
+    for (const td of document.querySelectorAll('.uurtabel td')) {
+      if (getComputedStyle(td).whiteSpace.indexOf('nowrap')<0) { uit.push('een cel in de uurtabel mag afbreken'); break; }
+    }
+    return uit.slice(0,4);
+  });
+  console.log('  rij scheef :', scheveRij.length?scheveRij.join(' | '):'nee');
   console.log('  fouten     :', errs.length?errs.join(' | '):'geen');
   console.log('  codelek    :', lek.length?lek.map(String).join(' '):'geen');
   console.log('  zijwaarts  :', breed?'JA (fout)':'nee');
   console.log('  buiten beeld:', buiten.length?buiten.join(', '):'geen');
-  if (errs.length||lek.length||breed||buiten.length||mist.length||kapotVet.length||uitPil.length) stuk++;
+  if (errs.length||lek.length||breed||buiten.length||mist.length||kapotVet.length||uitPil.length||scheveRij.length) stuk++;
 
   // 4. elk uitlegvenster openen en op lek controleren
   //    Loopt over ELKE i-knop op de pagina, niet alleen die in de tabel: zo valt een nieuwe knop
