@@ -43,6 +43,8 @@ const MAX_VENSTER_MIN = 360;
 // een sessie van vijf jaar terug weet niemand nog welke kite eraan hing of hoe het reed, en zonder
 // dat oordeel voegt de rij niets toe aan de ijking (12-09, zijn eigen keuze).
 const VANAF = "2026-01-01";
+// Een sessie van een minuut is een verkeerd gestart horloge, geen sessie.
+const MIN_MINUTEN = 15;
 
 const uit = new DatabaseSync(DB);
 uit.exec(`create table if not exists sessie (
@@ -114,6 +116,7 @@ let n = 0;
 for (const r of rijen) {
   const datum = String(r.date).slice(0, 10);
   const van = String(r.time || "12:00").slice(0, 5);
+  if ((r.duration_min || 0) < MIN_MINUTEN) continue;
   const venster = Math.min(r.duration_min || 60, MAX_VENSTER_MIN);
   const [kn, vlaag] = await windBij(datum, van, venster);
   n++;
