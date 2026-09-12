@@ -2,7 +2,7 @@
 
 **kiteweer** — Live: https://danielkosten.github.io/kiteweer/
 
-Stack: JS · 41 tracked files · last commit 2026-09-12 · regenerate with `code-map repo --write`
+Stack: JS · 44 tracked files · last commit 2026-09-12 · regenerate with `code-map repo --write`
 
 ## Start here
 
@@ -12,11 +12,11 @@ This repo declares no entry point — no `bin`, no boot script, no `__main__.py`
 
 | Dir | Files | Mostly |
 |---|---|---|
-| `docs/` | 11 | `.md` |
+| `docs/` | 14 | `.md` |
 
 ## Docs
 
-Live docs (6) — current, gated by `docs-truth check`:
+Live docs (9) — current, gated by `docs-truth check`:
 
 | Doc |
 |---|
@@ -24,6 +24,9 @@ Live docs (6) — current, gated by `docs-truth check`:
 | `CLAUDE.md` |
 | `README.md` |
 | `docs/dajk-mix.md` |
+| `docs/fijne-bias.md` |
+| `docs/literatuur-fijne-bias.md` |
+| `docs/meetgegevens-audit.md` |
 | `docs/qa.md` |
 | `docs/stroom.md` |
 

@@ -742,7 +742,10 @@ window.KWU_READY.then(function () {
         '<span class="dv">' + (o.v ? o.v.lo + "–" + o.v.hi : o.b.kn) + ' <em>kn</em></span>' +
         '<span class="dvl">vlagen ' + (o.v ? o.v.vlLo + "–" + o.v.vlHi : o.b.vl) + '</span>' +
         '<span class="dn">' + (o.v ? o.ws.map(function (w) { return w.tekst; }).join("<br>") : WOORD[o.n]) + '</span>' +
-        '<span class="ind">' + d.uren[Math.floor(d.uren.length/2)].nModellen + ' modellen' + (fijnBij(d) ? ", " + fijnBij(d) + " fijn" : (o.b.knLo != null ? " · " + o.b.knLo + "–" + o.b.knHi + " kn uiteen" : "")) + '</span>' +
+        /* Hier stond "10 modellen, 4 fijn" en "6 modellen · 10–14 kn uiteen" op elke kaart. Dat is
+           boekhouding over de voorspelling, niet de voorspelling zelf, en het stond zeven keer onder
+           elkaar (Daniel, 12-09). Hoe fijn de modellen zijn staat al in de kop boven de rij
+           ("Nauwkeurig" tegen "Indicatie") en in het modellenvenster. */
         (!fijnBij(d) && kansTekst(dagKans(d)) ? '<span class="ind kans-ens">sessiekans ' + kansTekst(dagKans(d)) + '</span>' : '') + '</button>';
     });
     var nauw = ds.map(fijnBij), split = nauw.findIndex(function (n) { return n === 0; });
@@ -1270,19 +1273,30 @@ window.KWU_READY.then(function () {
      oude scrollhoogte terug en land je middenin de pagina (gemeten 12-09: 2601px). */
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
 
-  /* Een pagina die uren openstaat (telefoon in je zak op het strand) wees anders nog naar het uur
-     waarop je hem opende, en na middernacht naar de verkeerde dag. Elke minuut kijken of het uur
-     is verschoven; is dat zo, opnieuw tekenen. Is de dag verschoven, dan eerst verse data halen,
-     want de dagenlijst zelf klopt dan niet meer. */
+  /* Een pagina die openstaat haalde NOOIT nieuwe gegevens op. De wind, de metingen en de stroming
+     worden een keer bij het laden binnengehaald; de klok hieronder tekende daarna alleen opnieuw
+     met diezelfde cijfers. Een telefoon die de hele ochtend in je zak zit laat dus de ochtend zien,
+     terwijl een laptop die je net opent het nu laat zien: dezelfde pagina, heel andere getallen
+     (Daniel, 12-09, en dit was de hele verklaring).
+
+     Daarom: is wat je ziet ouder dan 10 minuten, dan halen we het opnieuw op zodra je de pagina
+     weer voor je neus hebt, en anders op het hele uur. Opnieuw laden in plaats van de losse
+     bestanden bijwerken, want meting.js en stroom.js zijn gewone scripts: die kun je niet
+     vervangen zonder de pagina opnieuw op te bouwen. */
   (function () {
-    var laatsteUur = uurNu();
+    var geladenOp = Date.now(), OUD = 10 * 60e3, laatsteUur = uurNu();
+    function versOf(herteken) {
+      if (Date.now() - geladenOp > OUD) { location.reload(); return; }
+      if (herteken) teken();
+    }
+    document.addEventListener("visibilitychange", function () { if (!document.hidden) versOf(false); });
     setInterval(function () {
       var nu = uurNu();
       if (nu === laatsteUur) return;
       var andereDag = nu.slice(0, 10) !== laatsteUur.slice(0, 10);
       laatsteUur = nu;
-      if (andereDag) { location.reload(); return; }
-      teken();
+      if (andereDag) { location.reload(); return; }   // de dagenlijst zelf klopt dan niet meer
+      versOf(true);
     }, 60e3);
   })();
 });
