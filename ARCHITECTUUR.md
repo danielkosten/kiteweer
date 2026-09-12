@@ -189,8 +189,26 @@ De pagina leest deze tabel NIET; hij verandert niets aan wat de site rekent of t
 | `meting` | wat de palen maten, uit `meting.js` | elke ronde, dus elke 10 minuten |
 | `sessie` | een sessie die je echt gereden hebt, met de wind die KNMI toen mat | met de hand, via `node sessie.mjs` |
 
-Wat je erin zet: `node sessie.mjs 2026-09-12 15:00 18:00 kijkduin twintip 10 "top, lekker powered"`.
-Wat erin staat: `node sessie.mjs --lijst`.
+Sessies komen er vanzelf in, uit Garmin. Op dezelfde VPS schrijft fithub elke activiteit al weg in
+`/home/ubuntu/context/db/personal.sqlite`; `sessie-garmin.mjs` pakt daar de buitensessies uit waarbij
+wind stond en zet de KNMI-wind van dat tijdvak erbij. Draait een keer per dag, op een datumstempel
+in `/var/lib/kiteweer-garmin-dag`.
+
+Het enige wat jij doet is per sessie ja of nee zeggen, want een uur hardlopen bij 20 kn ziet er in
+de gegevens hetzelfde uit als een uur kiten bij 20 kn:
+
+```
+node sessie-bevestig.mjs                                        wat wacht er nog
+node sessie-bevestig.mjs 2026-09-09 ja twintip 10 "lekker powered"
+node sessie-bevestig.mjs 2026-09-02 nee                         was geen kiten
+```
+
+Met de hand kan ook, voor een sessie die Garmin niet heeft:
+`node sessie.mjs 2026-09-12 15:00 18:00 kijkduin twintip 10 "top"`. Lijst: `node sessie.mjs --lijst`.
+
+Getoetst op 12-09: de vier sessies waarop `ijk.mjs` geijkt is komen er alle vier uit met het juiste
+windgetal (18,5 tegen 19 · 23,3 tegen 23 · 25,3 tegen 24 · 17,5 tegen 17), en er kwamen er vier bij
+die `ijk.mjs` niet had. Een import overschrijft nooit een oordeel dat je al gegeven hebt.
 
 **Waarom `sessie` de belangrijkste van de drie is.** De hele pagina is geijkt op vier sessies in
 `ijk.mjs`, allemaal augustus en september, allemaal tussen 17 en 24 kn, terwijl er grenzen op 30 en
