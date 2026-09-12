@@ -19,7 +19,9 @@ elke handmatige wijziging is de volgende run weg.
 | `ijk.mjs` | rekentoets zonder browser: kloppen de grenzen en de cijfercurve nog | met de hand |
 | `dubbel.mjs` | kijkt of elk geijkt getal nog maar op EEN plek staat, en of de stroming maar op een plek beoordeeld wordt | met de hand |
 | `qa.mjs` | zet een echte browser op de pagina en kijkt of er niets stuk is | met de hand |
-| `verifieer.mjs`, `toets-horizon.mjs` | eenmalige metingen: hoe goed elk weermodel het deed. Draaien niet in de keten | met de hand |
+| `verifieer.mjs`, `toets-horizon.mjs`, `toets-fijn.mjs`, `toets-lang.mjs` | eenmalige metingen: hoe goed elk weermodel het deed. Draaien niet in de keten | met de hand |
+| `log-db.mjs` | schrijft elke ronde weg wat de tien modellen zeggen en wat de palen maten, in een SQLite-tabel op de VPS | met de hand |
+| `sessie.mjs` | zet een sessie die je echt gereden hebt in diezelfde tabel, met de wind die KNMI toen mat | met de hand |
 | `ververs.sh` | de klok op de VPS: haalt de metingen op en pusht ze. Draait elke 10 minuten als `/opt/kiteweer/ververs.sh`, wat dezelfde map is als deze repo | met de hand |
 
 De map `/opt/kiteweer` op de VPS is niet alleen de klok, hij wordt ook rechtstreeks geserveerd op
@@ -27,6 +29,7 @@ https://danielskiing.cloud/kiteweer/. Omdat `ververs.sh` elke tien minuten met `
 werkt die pagina zichzelf vanzelf bij zodra er iets naar `main` gaat. De routering staat in
 `~/Code/personal/DanielsBrewhouse/ops/danielskiing-hub/`. GitHub Pages blijft daarnaast gewoon staan.
 | `.github/workflows/meting.yml`, `stroom.yml` | opdrachten die op GitHub kunnen draaien, zie hieronder | met de hand |
+| `ververs.sh` | wat de klok op de VPS elke 10 minuten draait: metingen ophalen, de tabel bijwerken, committen | met de hand |
 | `qa-*.png` | schermafdrukken die `qa.mjs` bij elke run overschrijft | **door de machine** |
 | `docs/adr/*.md`, `docs/dajk-mix.md`, `docs/stroom.md` | waarom een keuze zo is gemaakt | met de hand |
 
@@ -173,3 +176,29 @@ Wat de twee toetsen echt controleren:
   `meta.json` hebben staat als `meta: true` in `laad.js`; valt er een weg, dan merk je dat niet.
 - **De drie ophalers** (`gen-*.mjs`) hebben geen enkele toets; je merkt een fout pas als de pagina
   leegloopt.
+
+## 7. De tabel op de VPS
+
+Sinds 12-09-2026 schrijft elke ververs-ronde ook weg wat er gezegd en gemeten is, in
+`/opt/kiteweer-log/kiteweer.db` op srv1410799. SQLite zit in node zelf, er is niets geinstalleerd.
+De pagina leest deze tabel NIET; hij verandert niets aan wat de site rekent of toont.
+
+| tabel | wat erin gaat | hoe vaak |
+|---|---|---|
+| `voorspelling` | 10 modellen x 3 spots, wind, vlaag en richting per uur | elk uur de eerstvolgende 12 uur, om 06:00 UTC de hele horizon van 7 dagen |
+| `meting` | wat de palen maten, uit `meting.js` | elke ronde, dus elke 10 minuten |
+| `sessie` | een sessie die je echt gereden hebt, met de wind die KNMI toen mat | met de hand, via `node sessie.mjs` |
+
+Wat je erin zet: `node sessie.mjs 2026-09-12 15:00 18:00 kijkduin twintip 10 "top, lekker powered"`.
+Wat erin staat: `node sessie.mjs --lijst`.
+
+**Waarom `sessie` de belangrijkste van de drie is.** De hele pagina is geijkt op vier sessies in
+`ijk.mjs`, allemaal augustus en september, allemaal tussen 17 en 24 kn, terwijl er grenzen op 30 en
+40 kn staan. Wat de modellen zeiden en wat de palen maten kun je altijd nog uit het archief halen
+(`toets-lang.mjs` doet 3,5 jaar in een paar minuten). Of een sessie lekker was weet alleen Daniel,
+en dat is precies het gat.
+
+**De valkuil die bij deze tabel hoort.** Hoe meer je bewaart, hoe zekerder je later een patroon
+vindt dat er niet is. Op 12-09 leek elke modelcombinatie zonder KNMI Harmonie beter op Hoek van
+Holland; op de twee andere stations was het weg. Een vondst telt pas als hij standhoudt op een
+station of spot die je NIET gebruikt hebt om hem te vinden. Zie `docs/fijne-bias-lang.md`.
