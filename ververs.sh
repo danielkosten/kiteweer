@@ -11,6 +11,10 @@ flock -n 9 || exit 0
 # Nooit iets weggooien hier, want deze map is ook de enige kopie van een mislukte push.
 git pull --rebase --autostash -q origin main || { git rebase --abort 2>/dev/null; exit 0; }
 node gen-meting.mjs || exit 0
+# Wegschrijven naar de tabel gebeurt HIER, voor de exits hieronder: staat er geen nieuwe meting,
+# dan stopt dit script, en dan zou er ook nooit een voorspelling in de tabel belanden.
+# Mislukt het loggen, dan gaat de rest gewoon door: de pagina is belangrijker dan het archief.
+node log-db.mjs || echo "log-db mislukt, verder met de rest"
 git add meting.js
 git diff --staged --quiet && exit 0
 git commit -q -m "Metingen ververst"
