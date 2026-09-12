@@ -15,6 +15,9 @@ node gen-meting.mjs || exit 0
 # dan stopt dit script, en dan zou er ook nooit een voorspelling in de tabel belanden.
 # Mislukt het loggen, dan gaat de rest gewoon door: de pagina is belangrijker dan het archief.
 node log-db.mjs || echo "log-db mislukt, verder met de rest"
+# Een keer per dag kijken of er nieuwe sessies in Garmin staan. Niet elke 10 minuten: Garmin
+# levert met dagen vertraging, en KNMI hoeft niet 144 keer per dag dezelfde dag te geven.
+[ "$(date -u +%H%M)" = "0620" ] && { node sessie-garmin.mjs --schrijf || echo "sessie-garmin mislukt"; }
 git add meting.js
 git diff --staged --quiet && exit 0
 git commit -q -m "Metingen ververst"
