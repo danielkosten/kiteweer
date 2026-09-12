@@ -26,10 +26,22 @@ for (const [naam, st] of COMBIS) {
   const p = await b.newPage({ viewport: { width: 402, height: 1000 } });
   const fouten = [];
   p.on("pageerror", e => fouten.push(String(e).slice(0, 80)));
-  p.on("console", m => { if (m.type() === "error") fouten.push(m.text().slice(0, 80)); });
+  /* Alleen echte fouten in de code tellen. Zes keer achter elkaar dezelfde spots bij Open-Meteo
+     ophalen loopt tegen hun limiet aan, en dan schrijft de browser "Failed to load resource" in de
+     console. Dat is geen fout in de pagina: die valt dan juist netjes terug op uur.js, en dat is
+     precies het gedrag dat deze toets hoort goed te keuren. Deze poort stond daardoor een keer op
+     3 PROBLEMEN en twee minuten later op alles goed (12-09), en een poort die knippert leer je
+     negeren. */
+  p.on("console", m => { const t = m.text();
+    if (m.type() === "error" && !/Failed to load resource|net::ERR|429|50\d \(/.test(t)) fouten.push(t.slice(0, 80)); });
   await p.addInitScript((s) => localStorage.setItem("kiteweer", JSON.stringify(Object.assign({ v:3, mix:"dajk" }, s))), st);
   await p.goto(URL + "?v=" + Date.now(), { waitUntil: "domcontentloaded", timeout: 60000 });
-  await p.waitForTimeout(3500);
+  /* Wachten op wat er moet staan, niet op de klok: 3,5 seconde is genoeg op een rustige laptop en
+     te kort vlak na een andere browsertoets. */
+  await p.waitForFunction(() => {
+    const k = document.querySelector(".dagkop b");
+    return k && k.textContent.trim().length > 3 && document.querySelectorAll(".dagkaart").length > 0;
+  }, null, { timeout: 45000 }).catch(() => {});
   const r = await p.evaluate(() => {
     const t = document.body.innerText;
     return {
@@ -47,6 +59,7 @@ for (const [naam, st] of COMBIS) {
     (r.sessies + " sessies").padEnd(12) + r.kop.slice(0, 26).padEnd(28) +
     (fouten.length ? "FOUT IN DE BROWSER: " + fouten[0] : r.rommel ? "NaN of undefined op de pagina" : r.leeg ? "pagina bleef leeg" : ""));
   await p.close();
+  await new Promise(r => setTimeout(r, 800));   // even lucht laten voor de volgende zes-op-een-rij
 }
 await b.close();
 console.log(stuk ? "\nINSTELLINGEN: " + stuk + " PROBLEMEN" : "\nINSTELLINGEN: alles goed");
