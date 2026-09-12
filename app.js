@@ -803,8 +803,12 @@ window.KWU_READY.then(function () {
       var cells = "", k = 0;
       while (k < d.uren.length) {
         var w = o.ws.filter(function (w) { return w.uren[0].t === d.uren[k].t; })[0];
-        if (w) { var lbl = w.uren.length >= 4 ? w.tekst + " · " + WOORD[w.n] : w.uren.length >= 2 ? w.tekst.replace(/:00/g, "") : "";
-          cells += '<td colspan="' + w.uren.length + '"><span class="vpil" title="' + w.tekst + " · " + WOORD[w.n] + '" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' + lbl + '</span></td>'; k += w.uren.length; }
+        /* De balk draagt het cijfer van die sessie, niet het woord van de wind. Twee sessies op een
+           dag kunnen dezelfde wind hebben en toch een heel ander cijfer, want de stroom draait
+           ertussen (Daniel, 12-09). */
+        if (w) { var sc = getal(scoreVan(w)), wn = cijferNiveau(scoreVan(w));
+          var lbl = w.uren.length >= 4 ? sc + " · " + w.tekst : w.uren.length >= 2 ? sc : "";
+          cells += '<td colspan="' + w.uren.length + '"><span class="vpil" title="' + w.tekst + " · " + sc + " · " + cijferWoord(scoreVan(w)) + '" style="--tint:' + tint(wn) + ';--tint-v:' + tintV(wn) + '">' + lbl + '</span></td>'; k += w.uren.length; }
         else { cells += '<td></td>'; k++; }
       }
       return '<tr class="vrij"><th scope="row">' + rijkop("sessie", "venster", "Wat een sessie is") + '</th>' + cells + '</tr>';
