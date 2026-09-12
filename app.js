@@ -46,7 +46,10 @@ window.KWU_READY.then(function () {
   var OVERPOWERED = 1.35;
   /* Wat vlagerig kost, en wat gelijkmatige wind oplevert. Kostte 1,5 punt in het cijfer van een
      sessie en 1 punt in dat van de beste uren, zelfde regel, twee getallen. */
-  var STRAF_VLAGERIG = 1, BONUS_STABIEL = 0.5;
+  /* Vlagerig kost een half punt, geen heel punt. Daniel rijdt graag in vlagen, en hoe vlagerig een
+     uur heet hangt sterk af van hoe je meet: zijn beste dag (30-08, 19 kn met pieken tot 31) zat op
+     1,63x. Een half punt zegt "let op" zonder de dag kapot te rekenen (12-09). */
+  var STRAF_VLAGERIG = 0.5, BONUS_STABIEL = 0.5;
   /* Elk cijfer op de pagina is een half punt, nooit meer. Zonder dit stond er 6,265151515151515
      boven de beste uren (Daniel, 12-09). Rond af waar je het toont, niet waar je rekent. */
   function half(x) { return Math.round(x * 2) / 2; }
@@ -283,11 +286,29 @@ window.KWU_READY.then(function () {
     var b = us.filter(function (u) { return uurScore(u) >= max - 0.25; });
     return b.length === us.length ? null : runs(b).map(runTekst).join(", ");
   }
+  /* Het beste uur binnen een sessie, maar alleen als het er echt bovenuit steekt: minstens een heel
+     punt hoger dan de sessie als geheel. Anders krijg je vier kaartjes die hetzelfde zeggen. */
+  var TOPUUR_VERSCHIL = 1;
+  function topUur(w) {
+    if (w.uren.length < 2) return null;
+    var basis = scoreVan(w), beste = null, bs = -99;
+    w.uren.forEach(function (u) { var sc = uurScore(u); if (sc != null && sc > bs) { bs = sc; beste = u; } });
+    if (!beste || bs < basis + TOPUUR_VERSCHIL) return null;
+    return { uur:beste, score:bs };
+  }
   function golfGem(us) { var g = us.filter(function (u) { return u.golf; }); return g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null; }
+  /* Eén vorm voor elk kaartje, of het nu een hele sessie is of het beste uur erbinnen. */
+  function kaart(j, score, cn, tijd, punten, c, merk) {
+    return '<button type="button" class="venster' + (merk ? " topuur" : "") + '" data-venster="' + j + '" style="--tint:' + tint(cn) + ';--tint-v:' + tintV(cn) + '">' +
+      '<span class="vc">' + getal(score) + '</span><span class="vt">' + tijd + (merk ? '<small>' + merk + '</small>' : '') + '</span>' +
+      '<i class="info" aria-hidden="true">i</i>' +
+      '<ul class="vlijst">' + punten.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>' +
+      '<span class="vsom"><b>' + c.start + '</b> wind ' + c.delen.map(function (x) { return esc(x); }).join(" ") + ' <b>= ' + getal(score) + '</b></span></button>';
+  }
   function golfWoord(m) { return m < 0.5 ? "vlak water" : m < 1 ? "beetje hobbelig" : m < 1.5 ? "hobbelig" : "flinke golven"; }
   /* Een zin over de stroom, met dezelfde grenzen als het cijfer. */
   function stroomZin(us) { var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / us.length;
-    var sp = stroomPost(c); return sp ? sp[1] : "stroom dwars of stil"; }
+    var sp = stroomPost(c); return sp ? sp[2] : "stroom dwars of stil"; }
   function dagOordeel(d) {
     var ws = vensters(d.uren, d.zon), b = ws.length ? top(ws[0].uren) : top(d.uren);
     return { ws:ws, v:ws[0] || null, b:b, n:ws.length ? ws[0].n : niveau(b) };
@@ -346,11 +367,10 @@ window.KWU_READY.then(function () {
      Mee kost meer dan tegen oplevert, want tegen krijg je hoogte cadeau maar wordt het water ook
      steiler: boven 2 kn kom je er moeilijk terug. */
   function stroomPost(c) {
-    if (c >= 0.3) return c > 2 ? [0.25, "stroom tegen de wind, gratis hoogte, maar steil water: boven 2 kn kom je er lastig terug"]
-                               : [0.5, "stroom tegen de wind, gratis hoogte"];
-    if (c <= -2) return [-1.5, "stroom hard mee met de wind, " + komma(Math.abs(c)) + " kn: je zakt flink af en je kite trekt minder"];
-    if (c <= -1) return [-1, "stroom mee met de wind, " + komma(Math.abs(c)) + " kn: je zakt af, neem een maat groter"];
-    if (c <= -0.3) return [-0.5, "stroom mee met de wind, je zakt af"];
+    if (c >= 0.3) return [0.5, "stroom tegen", "stroom tegen de wind, gratis hoogte en makkelijker bodydraggen"];
+    if (c <= -2) return [-1.5, "stroom hard mee", "stroom hard mee met de wind, " + komma(Math.abs(c)) + " kn: die knopen haal je uit je kite en je zakt af"];
+    if (c <= -1) return [-1, "stroom mee", "stroom mee met de wind, " + komma(Math.abs(c)) + " kn: die knopen haal je uit je kite, neem een maat groter"];
+    if (c <= -0.3) return [-0.5, "stroom mee", "stroom mee met de wind, je zakt af"];
     return null;
   }
   /* Vanaf welke sterkte de stroom een kant op heet te lopen. Dit is een andere vraag dan wat de
@@ -459,21 +479,25 @@ window.KWU_READY.then(function () {
        vlagen, stroom en golven tellen daar anderhalf keer zo zwaar mee (Daniel, 12-09). */
     var zwaar = knGem > VEEL ? 1.5 : 1;
     var score = start;
-    var tel = function (d, tekst) { if (d < 0) d = Math.round(d * zwaar * 2) / 2;
-      score += d; som.push((d > 0 ? "+ " : "− ") + Math.abs(d).toString().replace(".", ",") + " " + tekst); (d > 0 ? pl : mn).push(tekst); };
+    /* kort = wat in de som past, tekst = de volle uitleg in de bullets en achter de i-knop. */
+    var tel = function (d, tekst, kort) { if (d < 0) d = Math.round(d * zwaar * 2) / 2;
+      score += d; som.push((d > 0 ? "+" : "−") + getal(Math.abs(d)) + " " + (kort || tekst)); (d > 0 ? pl : mn).push(tekst); };
     var vl = us.reduce(function (a,u) { return a + (u.vl - u.kn); }, 0) / n;
     var vh = us.reduce(function (a,u) { return a + (u.kn ? u.vl / u.kn : 1); }, 0) / n;
-    if (vh >= VLAGERIG) tel(-STRAF_VLAGERIG, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vh < STABIEL) tel(BONUS_STABIEL, "gelijkmatige wind, weinig vlagen");
+    if (vh >= VLAGERIG) tel(-STRAF_VLAGERIG, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind", "vlagerig"); else if (vh < STABIEL) tel(BONUS_STABIEL, "gelijkmatige wind, weinig vlagen", "gelijkmatig");
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
-    var sp = stroomPost(c); if (sp) tel(sp[0], sp[1]);
-    var g = us.filter(function (u) { return u.golf; }); var gm = g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null;
-    if (gm != null) { if (gm > 1.5) tel(-0.5, "flinke golven " + komma(gm) + " m"); else if (gm < 0.5) pl.push("vlak water"); }
+    var sp = stroomPost(c); if (sp) tel(sp[0], sp[2], sp[1]);
+    /* Golven kosten geen punten. Daniel rijdt alles, en wat hobbelig water is hangt zo aan de dag en
+       aan het board dat een aftrek er alleen maar naast zat (12-09). Ze staan wel op het kaartje,
+       zodat je weet wat je aantreft. */
+    var gm = golfGem(us);
+    if (gm != null && gm < 0.5) pl.push("vlak water");
     var mm = us.reduce(function (a,u) { return a + (u.mm||0); }, 0);
-    if (mm >= 2) tel(-0.5, "regen, " + komma(mm) + " mm in die uren");
+    if (mm >= 2) tel(-0.5, "regen, " + komma(mm) + " mm in die uren", "regen");
     /* Duur telde eerst hoogstens een punt, terwijl een uur rijden met op- en afbouwen voor één uur
        water een andere dag is dan een middag staan (Daniel, 12-09). */
-    if (n >= 6) tel(1, n + " uur lang, een hele sessie"); else if (n >= 4) tel(0.5, n + " uur lang");
-    else if (n <= 1) tel(-1.5, "slechts 1 uur, dat is opbouwen en weer afbouwen"); else if (n === 2) tel(-0.5, "kort, 2 uur");
+    if (n >= 6) tel(1, n + " uur lang, een hele sessie", n + " uur"); else if (n >= 4) tel(0.5, n + " uur lang", n + " uur");
+    else if (n <= 1) tel(-1.5, "slechts 1 uur, dat is opbouwen en weer afbouwen", "1 uur"); else if (n === 2) tel(-0.5, "kort, 2 uur", "2 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     var st0 = getal(start);
     return { score:score, plus:pl, min:mn, start:st0, delen:som, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
@@ -582,25 +606,29 @@ window.KWU_READY.then(function () {
     var zon = "zon op " + d.zon.op + ", onder " + d.zon.onder;
     if (o.v) {
       $("verdict").textContent = (o.ws.length === 1 ? "kitebaar" : o.ws.length + " keer kitebaar") + " · " + cijferWoord(scoreVan(o.v));
-      $("vensterlijst").innerHTML = o.ws.map(function (w, j) {
-        var c = cijfer(w), cn = cijferNiveau(c.score);  // kleur en woord volgen het cijfer, niet de wind
-        var bu = besteUren(w);
-        var gm = golfGem(w.uren);
+      /* Per sessie een kaartje, en als er binnen een sessie een uur ver bovenuit steekt komt dat er
+         als eigen kaartje naast: dan weet je wanneer je op het strand moet staan (Daniel, 12-09). */
+      var kaartjes = [];
+      o.ws.forEach(function (w, j) {
+        var c = cijfer(w), cn = cijferNiveau(c.score), gm = golfGem(w.uren);
         var punten = [
           "<b>" + (w.lo === w.hi ? w.lo : w.lo + "\u2013" + w.hi) + " kn</b> uit " + kompas(top(w.uren).dir) + ", vlagen tot " + vlMax(w.uren),
           "<b>kite " + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + "</b>",
           stroomZin(w.uren),
-          gm != null ? "golven " + komma(gm) + " m, " + golfWoord(gm) : null,
-          bu && bu !== w.tekst ? "<b>beste uren " + bu + "</b>" : null
+          gm != null && gm >= 0.8 ? "golven " + komma(gm) + " m, " + golfWoord(gm) : null
         ].filter(Boolean);
-        return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(cn) + ';--tint-v:' + tintV(cn) + '">' +
-          '<span class="vc">' + getal(c.score) + '</span><span class="vt">' + w.tekst + '</span>' +
-          '<i class="info" aria-hidden="true">i</i>' +
-          '<ul class="vlijst">' + punten.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>' +
-          '<span class="vsom"><i><b>' + c.start + '</b> voor de wind zelf</i>' +
-            c.delen.map(function (x) { return '<i>' + esc(x) + '</i>'; }).join("") +
-            '<i><b>= ' + getal(c.score) + '</b></i></span></button>';
-      }).join("");
+        kaartjes.push(kaart(j, c.score, cn, w.tekst, punten, c, null));
+        var t = topUur(w);
+        if (t) {
+          var u = t.uur, du = uurDelen(u), uu = +u.t.slice(11,13);
+          kaartjes.push(kaart(j, t.score, cijferNiveau(t.score), uurStr(u.t) + "\u2013" + (uu + 1) + ":00", [
+            "<b>" + u.kn + " kn</b> uit " + kompas(u.dir) + ", vlagen tot " + u.vl,
+            "<b>kite " + (kiteAdvies(u.kn, u.vl) ? kiteAdvies(u.kn, u.vl).maat + " m" : "\u2014") + "</b>",
+            stroomZin([u])
+          ], { start:getal(du.start), delen:du.posten.map(function (x) { return x[0] + " " + x[1].split(":")[0].split(",")[0]; }), score:t.score }, "het beste uur"));
+        }
+      });
+      $("vensterlijst").innerHTML = kaartjes.join("");
       $("onderverdict").innerHTML = '<span class="flauw">' + zon + indicatieTekst(i, d) + '</span>';
     } else {
       $("verdict").textContent = o.n === "aflandig" ? "Aflandig, niet gaan" : o.n === "matig" ? "Veel wind, " + o.b.kn + " kn" : "Te weinig wind";
