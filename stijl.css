@@ -321,8 +321,11 @@ main{padding-bottom:64px}
 .keuze::after{content:"";position:absolute;right:13px;top:50%;width:7px;height:7px;margin-top:-5px;
   border-right:2px solid var(--zacht);border-bottom:2px solid var(--zacht);transform:rotate(45deg);pointer-events:none}
 .keuze:hover{border-color:var(--inkt)}
-/* De focusring hoort om de hele pil, niet om de lijst erin. */
-.keuze:focus-within{border-color:var(--inkt);box-shadow:0 0 0 2.5px var(--inkt)}
+/* De focusring hoort om de hele pil, niet om de lijst erin, en alleen als je met het toetsenbord
+   navigeert. Op :focus-within sprong er een dikke zwarte ring om de pil zodra je hem op de
+   telefoon aantikte, en dat ziet eruit als een foutmelding. */
+.keuze:has(select:focus-visible){border-color:var(--inkt);box-shadow:0 0 0 2px var(--inkt)}
+.keuze:has(select:focus){border-color:var(--inkt)}
 
 .rider{display:flex;align-items:stretch;gap:8px}
 .rider .invoer{min-height:44px}
