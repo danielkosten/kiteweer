@@ -40,10 +40,14 @@ for (const k of ["bron text", "bevestigd integer", "garmin_id text", "duur_min i
   try { uit.exec("alter table sessie add column " + k); } catch (e) { /* stond er al */ }
 
 const bron = new DatabaseSync(FITHUB);
+// Alleen wat Garmin echt heeft OPGENOMEN, dus source = 'garmin'. De rijen uit de agenda
+// (source notion, program, recurring) staan er ook in, altijd op een rond uur als 18:00 en
+// altijd 90 minuten: dat is een plan, geen sessie. Nemen we die mee, dan komen er dubbele
+// sessies in de tabel (09-09 stond er twee keer: 18:00 uit de agenda, 18:03 uit het horloge).
 const rijen = bron.prepare(
   `select date, time, type, title, duration_min, garmin_activity_id
      from workout
-    where duration_min >= ? and type in (${SOORTEN.map(() => "?").join(",")})
+    where duration_min >= ? and source = 'garmin' and type in (${SOORTEN.map(() => "?").join(",")})
     order by date`).all(MIN_MINUTEN, ...SOORTEN);
 
 // Lokale tijd naar UTC via de tijdzone zelf, nooit een vaste +2: dit draait ook in de winter,
