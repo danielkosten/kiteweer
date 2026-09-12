@@ -145,6 +145,22 @@ main{padding-bottom:64px}
 .rij span:last-child{font-weight:700;text-align:right}
 @media(min-width:600px){.sheet{align-items:center}}
 
+/* Eén regel bovenin: hoe vers de twee dingen zijn waar de pagina op draait, de modellen en de
+   meetpaal. Stroming en golven staan er bewust niet bij: die veranderen niet per bezoek. */
+.vers{display:flex;align-items:center;gap:6px;margin:8px 0 0;font-size:11.5px;color:var(--flauw);
+  letter-spacing:.02em;flex-wrap:wrap}
+.vers b{color:var(--zacht);font-weight:700}
+.vers .verspunt{color:var(--goed)}
+.vers .verspunt.oud{color:var(--matig)}
+.vers .info{font-style:normal;font-size:9px;font-weight:700;width:15px;height:15px;border-radius:50%;
+  border:1.5px solid var(--lijn);color:var(--flauw);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.vers .info:hover{border-color:var(--zacht);color:var(--zacht)}
+
+/* ── de voet: vijf regels om te scannen, geen alinea's ── */
+.voetlijst{list-style:none;margin:0;padding:0;display:grid;gap:7px;max-width:62ch}
+.voetlijst li{font-size:13.5px;line-height:1.45;color:var(--zacht)}
+.voetlijst li b{color:var(--inkt)}
+
 .voet{border-top:1px solid var(--lijn);padding:20px 0 40px;font-size:13px;color:var(--zacht)}
 .voet p{margin:0 0 8px;max-width:70ch;line-height:1.5}
 .voet .dank{font-size:14px;color:var(--inkt)}
@@ -234,6 +250,15 @@ main{padding-bottom:64px}
 .uurtabel .tmeet small.minder{color:var(--matig)}
 .uurtabel .tmeet small.raak{color:var(--zacht)}
 .sv.meet{border-left:2px solid var(--lijn);padding-left:10px}
+/* Twee feiten die niet op een sessiekaartje passen: liep het vandaag hoger of lager dan het model
+   zei, en wanneer draait de stroom. Stonden als twee alinea's; nu twee regels om te scannen. */
+.feiten{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.feiten li{display:flex;align-items:baseline;gap:8px;font-size:14px;line-height:1.35}
+.feiten .fp{flex:none;font-weight:800;font-size:12.5px;padding:2px 8px;border-radius:var(--r-pil);
+  background:var(--tint-v);color:var(--tint);white-space:nowrap}
+.feiten .fx{min-width:0}
+.feiten .fx b{font-weight:700}
+.feiten small{display:block;color:var(--flauw);font-size:12px;line-height:1.3}
 .uurtabel .tu button{font-weight:700;font-size:13px;color:var(--zacht);padding:6px 0;width:100%;border-radius:6px}
 .uurtabel .tu button:hover{background:var(--lijn-2);color:var(--inkt)}
 .uurtabel .tu.aan button{background:var(--inkt);color:var(--papier)}
@@ -279,12 +304,27 @@ main{padding-bottom:64px}
 .uurtabel .ts small,.uurtabel .tx small{display:block;font-size:11px;color:var(--zacht);font-weight:700}
 .uurtabel .ts{padding-top:6px}
 .uurtabel .tx span{font-size:16px;line-height:1.1;display:block}
-.schuifrij{display:flex;align-items:center;gap:14px;padding:12px 18px 6px;border-top:1px solid var(--lijn-2)}
+.schuifrij{display:flex;align-items:center;gap:12px;padding:12px 18px 10px;border-top:1px solid var(--lijn-2)}
 .schuifuur{font-family:var(--kop);font-size:18px;min-width:52px}
-.schuifkolom{flex:1}
+.schuifkolom{flex:1;min-width:0}
 .schuiflabels{display:flex;gap:2px;height:6px;margin:0 8px 4px}
 .schuiflabels i{flex:1;border-radius:2px}
-#schuif{width:100%;accent-color:var(--inkt);margin:0}
+/* De schuif was een kale systeembalk: je zag niet dat je hem kon pakken. Nu een dikke greep in de
+   huisstijl, met een hint eronder en een knop die de dag zelf afspeelt. */
+#schuif{width:100%;margin:0;-webkit-appearance:none;appearance:none;background:transparent;height:24px;cursor:grab}
+#schuif:active{cursor:grabbing}
+#schuif::-webkit-slider-runnable-track{height:6px;border-radius:999px;background:var(--lijn)}
+#schuif::-moz-range-track{height:6px;border-radius:999px;background:var(--lijn)}
+#schuif::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-8px;border-radius:50%;
+  background:var(--inkt);border:3px solid var(--kaart);box-shadow:0 1px 6px rgba(23,19,15,.35)}
+#schuif::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--inkt);
+  border:3px solid var(--kaart);box-shadow:0 1px 6px rgba(23,19,15,.35)}
+.schuifhint{display:block;font-size:11px;color:var(--flauw);margin:1px 0 0 8px}
+.speel{flex:none;width:36px;height:36px;border-radius:50%;border:1.5px solid var(--lijn);
+  background:var(--kaart);color:var(--inkt);font-size:13px;line-height:1;display:flex;
+  align-items:center;justify-content:center;transition:var(--t)}
+.speel:hover{border-color:var(--inkt);background:var(--lijn-2)}
+.speel.aan{background:var(--inkt);color:var(--kaart);border-color:var(--inkt)}
 .onder-verdict b{color:var(--tint)}
 .flauw{color:var(--flauw);font-size:13px}
 .uurtabel td{cursor:pointer}

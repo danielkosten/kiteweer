@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Albert+Sans:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="stijl.css?v=20260911h">
+<link rel="stylesheet" href="stijl.css?v=20260912a">
 </head>
 <body>
 
@@ -20,6 +20,7 @@
       <button type="button" class="filter" id="modelknop" data-open-modellen="1" aria-haspopup="dialog"><b>DAJK</b><span>laden…</span></button>
       <a class="filter meet" id="meetknop" href="https://windmeting.nl" target="_blank" rel="noopener"><b>Nu op zee</b><span>windmeting.nl</span></a>
     </div>
+    <p class="vers" id="vers"><span id="verstekst">bijgewerkt: laden…</span><button type="button" class="info" data-info="vers" aria-label="Hoe vaak dit ververst">i</button></p>
     <div class="rider">
       <div class="stap" role="group" aria-label="Gewicht">
         <button type="button" data-kg="-5" aria-label="5 kg minder">−</button>
@@ -60,7 +61,7 @@
     <h3 class="sec">Op het strand <i id="scenenote"></i></h3>
     <div class="scenekaart">
       <div class="scene-label" id="scenelabel"></div><div class="scene" id="scene"><div id="kaart"></div><svg id="pijlen" viewBox="0 0 900 480" aria-hidden="true"></svg></div>
-      <div class="schuifrij"><span class="schuifuur" id="schuifuur"></span><div class="schuifkolom"><div class="schuiflabels" id="schuiflabels" aria-hidden="true"></div><input type="range" id="schuif" min="0" max="14" step="1" value="0" aria-label="Uur van de dag"></div></div>
+      <div class="schuifrij"><button type="button" class="speel" id="speel" aria-label="Speel de dag af, een uur per seconde">▶</button><span class="schuifuur" id="schuifuur"></span><div class="schuifkolom"><div class="schuiflabels" id="schuiflabels" aria-hidden="true"></div><input type="range" id="schuif" min="0" max="14" step="1" value="0" aria-label="Uur van de dag"><span class="schuifhint">sleep door de dag, of druk op ▶</span></div></div>
       <div class="scene-uitleg" id="sceneuitleg"></div>
     </div>
   </section>
@@ -69,10 +70,14 @@
 </main>
 
 <footer class="voet wrap">
-  <span id="ververst"></span>
-  <p class="dank">🙏 Met dank aan mijn vader Arthur: al het zware werk zit in zijn <a href="https://ajk68.com/kiteweer/" target="_blank" rel="noopener">ajk68.com/kiteweer</a>, de modellen, de meetstations, de stroming en de spotkennis. Deze pagina is alleen een andere blik op zijn data. 🪁</p>
-  <p class="disclaimer">⚠️ Alles hier is een schatting uit weermodellen, ook de kitemaat. Modellen zitten er geregeld 3–5 kn naast. Kijk zelf naar het water, vraag de locals, en beslis zelf wat je optuigt. Geen garantie, geen advies waar je op kunt bouwen.</p>
-  <p>Echt gemeten wind nu: <a href="https://windmeting.nl" target="_blank" rel="noopener">windmeting.nl</a> · weerdata van <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></p>
+  
+  <ul class="voetlijst">
+    <li>🪁 <b>Het rekenwerk is van mijn vader Arthur</b>: modellen, meetpalen, stroming, spotkennis. <a href="https://ajk68.com/kiteweer/" target="_blank" rel="noopener">ajk68.com/kiteweer</a></li>
+    <li>👀 <b>Dit is alleen een andere blik</b> op zijn data, geijkt op mijn eigen sessies.</li>
+    <li>⚠️ <b>Alles is een schatting</b>, ook de kitemaat. Modellen zitten er geregeld <b>3–5 kn</b> naast.</li>
+    <li>🌊 <b>Kijk zelf naar het water</b>, vraag de locals, en beslis zelf wat je optuigt. Geen garantie.</li>
+    <li>📡 Echt gemeten: <a href="https://windmeting.nl" target="_blank" rel="noopener">windmeting.nl</a> · weerdata: <a href="https://open-meteo.com" target="_blank" rel="noopener">Open-Meteo</a></li>
+  </ul>
 </footer>
 
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-t" hidden>
@@ -85,10 +90,10 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <!-- ?v= ophogen bij elke wijziging: GitHub Pages cachet 10 minuten en Safari langer -->
-<script src="data.js?v=20260911h"></script>
-<script src="stroom.js?v=20260911h"></script>
-<script src="meting.js?v=20260911h"></script>
-<script src="laad.js?v=20260911h"></script>
-<script src="app.js?v=20260911h"></script>
+<script src="data.js?v=20260912a"></script>
+<script src="stroom.js?v=20260912a"></script>
+<script src="meting.js?v=20260912a"></script>
+<script src="laad.js?v=20260912a"></script>
+<script src="app.js?v=20260912a"></script>
 </body>
 </html>

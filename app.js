@@ -443,7 +443,9 @@ window.KWU_READY.then(function () {
     if (!a) return "te weinig wind voor je " + GROOT() + " m";     // zelfs de hardste wind trekt je grootste kite niet
     if (!b) b = { maat: GROOT() };                                 // onderkant valt buiten je maten: hou het bij je grootste
     var tekst = a.maat === b.maat ? a.maat + " m" : a.maat + "–" + b.maat + " m";
-    return a.vlagerig ? tekst + " (" + a.klein + " m kan, de vlagen dragen je)" : tekst;
+    /* Stond hier "de vlagen dragen je": klinkt poetisch en zegt niets. Bij vlagerige wind is de
+       kleinere maat de veiligere keuze, want de piek trekt je uit het water, niet het gemiddelde. */
+    return a.vlagerig ? tekst + " (vlagerig: pak " + a.klein + " m)" : tekst;
   }
   function vlMax(us) { return Math.max.apply(null, us.map(function (u) { return u.vl; })); }
 
@@ -691,32 +693,43 @@ window.KWU_READY.then(function () {
 
   /* Eén zin: liep vandaag hoger of lager dan het model zei? Alleen op de dag van vandaag, en
      alleen als er genoeg uren geweest zijn om er iets van te vinden. */
+  /* Eén regel van de feitenlijst: een gekleurde pil met het getal, daarachter wat het betekent,
+     en eronder klein waar het vandaan komt. Drie alinea's waren het, nu twee regels (Daniel, 12-09). */
+  function feitRegel(niveau, pil, tekst, bron) {
+    return '<li><span class="fp" style="--tint:' + tint(niveau) + ';--tint-v:' + tintV(niveau) + '">' + pil + '</span>' +
+      '<span class="fx">' + tekst + (bron ? '<small>' + bron + '</small>' : '') + '</span></li>';
+  }
   function meetZin() {
     if (st.dag !== 0) return "";
     var a = afwijkingVandaag(); if (!a) return "";
-    var kop = Math.abs(a.kn) < 1.5 ? "Het model zit er vandaag goed op."
-      : a.kn > 0 ? "Vandaag staat er meer wind dan voorspeld." : "Vandaag staat er minder wind dan voorspeld.";
-    var staart = Math.abs(a.kn) < 1.5
-      ? "het station zit gemiddeld " + String(Math.abs(a.kn)).replace(".", ",") + " kn van de voorspelling af over " + a.uren + " uur."
-      : String(Math.abs(a.kn)).replace(".", ",") + " kn " + (a.kn > 0 ? "meer" : "minder") + ", gemiddeld over " + a.uren + " uur die al geweest zijn. Reken daar de rest van de dag ook op.";
-    return '<p class="sv meet"><b>' + kop + '</b> ' + esc(a.station) + ' op ' + String(a.km).replace(".", ",") + ' km meet ' + staart + '</p>';
+    var op = Math.abs(a.kn) < 1.5, getal = String(Math.abs(a.kn)).replace(".", ",");
+    var pil = op ? "klopt" : (a.kn > 0 ? "+" : "\u2212") + getal + " kn";
+    var tekst = op ? "<b>model zit er goed op</b> vandaag"
+      : "<b>" + (a.kn > 0 ? "meer" : "minder") + " wind dan voorspeld</b>, reken daar de rest van de dag op";
+    return feitRegel(op ? "weinig" : a.kn > 0 ? "goed" : "matig", pil, tekst,
+      esc(a.station) + ", " + String(a.km).replace(".", ",") + " km \u00b7 " + a.uren + " uur al gemeten");
+  }
+  /* Wanneer draait de stroom om: tijd vet, richting erachter. De tijd hoort in \u00e9\u00e9n vet stuk,
+     anders viel ":00" er los achter (qa.mjs let daarop). */
+  function stroomRegel(us) {
+    var k = kenteringen(us); if (!k.length) return "";
+    return feitRegel("weinig", "stroom", k.map(function (x) {
+      return "<b>" + uurStr(x.t) + "</b> " + x.van + " \u2192 " + x.naar; }).join(" \u00b7 "),
+      "bron rekent per 3 uur, dus ongeveer");
   }
 
   function tekenSamenvatting() {
     var d = huidigeDag(), o = dagOordeel(d), el = $("samenvatting");
-    if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Te weinig wind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' + meetZin() +
-      '<p class="sv flauw">' +
-      (st.dag === 0 ? '<a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a>' : '') + '</p>'; return; }
+    if (!o.v) { var mz = meetZin();
+      el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Te weinig wind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' +
+        (mz ? '<ul class="feiten">' + mz + '</ul>' : ''); return; }
     /* De kaartjes boven deze regels zeggen al per sessie wat er te halen valt, met cijfer, bullets
        en de som. Hier stond dat een tweede keer in een andere vorm: een apart blok "beste uren", een
        regel "ook prima", en per andere sessie nog een regel. Drie vormen voor dezelfde informatie,
        en de beste zag er anders uit dan de rest (Daniel, 12-09). Hier blijft alleen staan wat NIET
        op een kaartje past: wat er vandaag echt gemeten is, en wanneer de stroom draait. */
-    var html = "";
-    html += meetZin();
-    var kt = kenteringTekst(d.uren); if (kt) html += '<p class="sv"><b>Stroming:</b> ' + kt + ' (bron per 3 uur, dus ongeveer)</p>';
-    if (st.dag === 0) html += '<p class="sv flauw"><a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a></p>';
-    el.innerHTML = html;
+    var regels = meetZin() + stroomRegel(d.uren);
+    el.innerHTML = regels ? '<ul class="feiten">' + regels + '</ul>' : "";
   }
 
   // ── welke dag ────────────────────────────────────────
@@ -1133,6 +1146,35 @@ window.KWU_READY.then(function () {
     window.KWU_LAAD(id).then(function () { st.spot = id; st.t = null; st.dag = 0; cache.key = null; sluit(); teken(); })
       .catch(function (e) { $("spotknop").innerHTML = '<b>' + esc(spot().naam) + '</b><span style="color:var(--aflandig)">laden mislukt, probeer opnieuw</span>'; console.warn(e); });
   }
+  /* Hoe oud is iets, in gewone woorden. "3 uur geleden" leest sneller dan een tijdstip dat je
+     zelf nog van de klok moet aftrekken. */
+  function geleden(x) {
+    if (!x) return null;
+    var m = Math.round((Date.now() - new Date(x).getTime()) / 60000);
+    return m < 2 ? "net" : m < 90 ? m + " min geleden" : Math.round(m / 60) + " uur geleden";
+  }
+  /* Eén regel bovenin voor de twee dingen waar elk oordeel op deze pagina op rust: de modellen en
+     de meetpaal. Stroming en golven staan er bewust NIET bij (Daniel, 12-09): die komen uit het
+     getij, worden een keer per nacht gerekend, en hun leeftijd zegt je dus niets. */
+  function tekenVers() {
+    var w = geleden(KWU.gegenereerd), m = window.KWM ? geleden(window.KWM.gegenereerd) : null;
+    var mOud = window.KWM && Date.now() - new Date(window.KWM.gegenereerd).getTime() > 45 * 60e3;
+    var stuk = ['<span class="verspunt' + (KWU.live ? '' : ' oud') + '">\u25cf</span> <b>modellen</b> ' +
+      (KWU.live ? (w || "net") : "noodvoorraad, " + (w || "onbekend"))];
+    if (m) stuk.push('<span class="verspunt' + (mOud ? ' oud' : '') + '">\u25cf</span> <b>meetpaal</b> ' + m);
+    $("verstekst").innerHTML = "bijgewerkt " + stuk.join(" · ");
+  }
+  function openVers() {
+    $("sheet-t").textContent = "Hoe vers is dit";
+    $("sheet-b").innerHTML = '<ul class="redenen">' +
+      '<li class="p"><b>De meetpaal is het enige harde getal</b> op deze pagina: een echte paal op zee die elke 10 minuten doorgeeft wat er nu staat. Een eigen klok haalt dat op, of je de pagina nu opent of niet.</li>' +
+      '<li class="p"><b>De modellen haal ik op bij je bezoek</b>, maar dat is iets anders dan een nieuwe voorspelling. Een weermodel rekent eerst de hele wereld door en publiceert daarna pas: het Europese model twee keer per dag, de Amerikaanse vier keer, de kleine Nederlandse elk uur. Tussen twee van die rondes krijg je dezelfde cijfers, hoe vaak je ook ververst.</li>' +
+      '<li class="p"><b>Daarom staan ze naast elkaar.</b> De meetpaal is de nakijker: loopt die de hele ochtend hoger dan het model zei, dan zit het model er vandaag naast, en dat staat in de regel onder de kaartjes.</li>' +
+      '<li class="m"><b>Noodvoorraad</b> betekent dat de weerdienst tijdens je bezoek niets teruggaf en je naar de bundel van vannacht kijkt. Die cijfers kloppen nog, ze zijn alleen ouder.</li>' +
+      '<li class="m">Getij en golven staan er niet bij: een keer per nacht gerekend, en tussen twee bezoeken verandert daar niets aan.</li></ul>';
+    $("sheet").hidden = false; $("sheet-x").focus();
+  }
+
   function teken() { bewaar(); tekenSpotkeuze(); tekenHero(); tekenNu(); tekenModelknop(); tekenWeek(); tekenDag(); tekenSamenvatting(); tekenScene();
     if (!$("sheet").hidden && $("sheet-t").textContent === "Windmodellen") $("sheet-b").innerHTML = tekenModellen(); }
 
@@ -1153,6 +1195,7 @@ window.KWU_READY.then(function () {
     if (e.target.closest("[data-info=\"modellen\"]")) return openModellen();
     if (e.target.closest("[data-info=\"kite\"]")) return openKite();
     if (e.target.closest("[data-info=\"meten\"]")) return openMeten();
+    if (e.target.closest("[data-info=\"vers\"]")) return openVers();
     if (e.target.closest("[data-info=\"zeker\"]")) return openZeker();
     if (e.target.closest("[data-info=\"stroom\"]")) return openStroom();
     if (e.target.closest("[data-info=\"vlagen\"]")) return openVlagen();
@@ -1162,13 +1205,36 @@ window.KWU_READY.then(function () {
     if (kort && KORT[kort.dataset.info]) return openKort(kort.dataset.info);
     var vn = e.target.closest("[data-venster]"); if (vn) return openVenster(+vn.dataset.venster);
     if (e.target.id === "sheet-x" || e.target.id === "sheet") return sluit();
-    var dg = e.target.closest("[data-dag]"); if (dg) { st.dag = +dg.dataset.dag; st.t = null; teken();
+    var dg = e.target.closest("[data-dag]"); if (dg) { stopSpelen(); st.dag = +dg.dataset.dag; st.t = null; teken();
       if (dg.dataset.spring) { var k = document.querySelector(".dagkaart.aan"); if (k) k.scrollIntoView({ block: "nearest", inline: "start", behavior: "smooth" }); } return; }
-    var bl = e.target.closest("[data-t]"); if (bl) { st.t = bl.dataset.t; return teken(); }
+    var bl = e.target.closest("[data-t]"); if (bl) { stopSpelen(); st.t = bl.dataset.t; return teken(); }
   });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("sheet").hidden) sluit(); });
   document.addEventListener("input", function (e) { if (e.target.id === "spotzoek") { zoek = e.target.value; var lijst = $("sheet-b"); lijst.innerHTML = tekenSpots(); var z = $("spotzoek"); z.focus(); z.setSelectionRange(z.value.length, z.value.length); } });
-  $("schuif").addEventListener("input", function (e) { st.t = huidigeDag().uren[+e.target.value].t; teken(); });
+  /* De schuif hertekent alleen de strandkaart, niet de hele pagina. Met teken() erachter liep het
+     afspelen (een uur per seconde) zichtbaar te stotteren: de weekbalk, de kaartjes en de uurtabel
+     werden dan elke seconde opnieuw opgebouwd terwijl alleen het gekozen uur verandert. */
+  function zetUur(i) {
+    var d = huidigeDag(), u = d.uren[Math.max(0, Math.min(d.uren.length - 1, i))]; if (!u) return;
+    st.t = u.t; bewaar(); tekenScene();
+    $("dagen").querySelectorAll("td[data-t]").forEach(function (c) { c.classList.toggle("aan", c.dataset.t === st.t); });
+  }
+  $("schuif").addEventListener("input", function (e) { stopSpelen(); zetUur(+e.target.value); });
+
+  /* Een uur per seconde door de dag: zo zie je de wind opbouwen, de stroom omslaan en de golven
+     meelopen in plaats van het per uur zelf te vergelijken. Aan het eind begint hij weer vooraan.
+     Elke aanraking elders op de pagina zet hem stil, anders vecht het afspelen met je eigen klik. */
+  var speler = null;
+  function stopSpelen() { if (speler) { clearInterval(speler); speler = null; $("speel").classList.remove("aan"); $("speel").textContent = "\u25b6"; } }
+  function startSpelen() {
+    $("speel").classList.add("aan"); $("speel").textContent = "\u275a\u275a";
+    speler = setInterval(function () {
+      var d = huidigeDag(), i = d.uren.map(function (x) { return x.t; }).indexOf(st.t);
+      var volgend = i + 1 >= d.uren.length ? 0 : i + 1;
+      $("schuif").value = volgend; zetUur(volgend);
+    }, 1000);
+  }
+  $("speel").addEventListener("click", function () { speler ? stopSpelen() : startSpelen(); });
   /* Gewicht met min en plus in stappen van 5 kg: tikken in plaats van een cijfer intypen, en op
      een telefoon springt er geen toetsenbord over de pagina. */
   document.querySelectorAll("[data-kg]").forEach(function (b) {
@@ -1189,22 +1255,21 @@ window.KWU_READY.then(function () {
   document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
   if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";
   window.KWU_LAAD(st.spot).catch(function () { st.spot = "kijkduin"; return window.KWU_LAAD(st.spot); }).then(function () {
-    var klok = function (x) { return x ? new Date(x).toLocaleString("nl-NL", { day:"numeric", month:"numeric", hour:"2-digit", minute:"2-digit" }) : "onbekend"; };
-    /* Hoe oud iets is zegt meer dan hoe laat het opgehaald is: bij een gemiste verversing zie je
-       meteen "3 uur oud" in plaats van een tijd die je zelf moet aftrekken. */
-    var oud = function (x) {
-      if (!x) return "";
-      var m = Math.round((Date.now() - new Date(x).getTime()) / 60000);
-      if (m < 2) return " (net)";
-      if (m < 90) return " (" + m + " min oud)";
-      return " (" + Math.round(m / 60) + " uur oud)";
-    };
-    var regels = [(KWU.live ? "wind live opgehaald " : "wind uit de noodvoorraad, ") + klok(KWU.gegenereerd)];
-    if (window.KWS) regels.push("stroming " + klok(window.KWS.gegenereerd));
-    if (window.KWM) regels.push("metingen " + klok(window.KWM.gegenereerd) + oud(window.KWM.gegenereerd));
-    $("ververst").textContent = "bijgewerkt: " + regels.join(" · ");
+    tekenVers();
+    setInterval(tekenVers, 60e3);           // de leeftijd loopt door terwijl de pagina open staat
     teken();
+    springNaarNu();
   });
+
+  /* Op een telefoon stond de uurtabel met NU er vier schermen onder de vouw: je moest elke keer
+     eerst langs de kop, de week en de kaartjes scrollen voor je zag wat er nu staat (Daniel, 12-09).
+     Bij het openen springen we daar dus meteen heen, met de dagkop nog net in beeld. Alleen op een
+     smal scherm en alleen bij vandaag: op een breed scherm past alles toch al boven elkaar. */
+  function springNaarNu() {
+    if (window.innerWidth > 700 || st.dag !== 0) return;
+    var dag = document.querySelector(".dag"); if (!dag) return;
+    window.scrollTo({ top: dag.getBoundingClientRect().top + window.scrollY - 8, behavior: "auto" });
+  }
 
   /* Een pagina die uren openstaat (telefoon in je zak op het strand) wees anders nog naar het uur
      waarop je hem opende, en na middernacht naar de verkeerde dag. Elke minuut kijken of het uur
