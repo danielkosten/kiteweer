@@ -81,8 +81,10 @@ window.KWU_READY.then(function () {
     return "hsl(" + h.toFixed(0) + " " + sat.toFixed(0) + "% " + l.toFixed(0) + "%)";
   }
   function niveau(u) { if (!u) return "weinig"; if (!veilig(spot(), u.dir) && u.kn >= genoegKn()) return "aflandig"; return band(u.kn); }
-  /* "matig" heet nu "veel wind": het is de band boven 30 kn, niet meer de band net boven 12. */
-  var WOORD = { perfect:"perfect", goed:"goed", matig:"veel wind", weinig:"te weinig wind", aflandig:"aflandig" };
+  /* "matig" heet op de pagina "hard": het is de band boven 30 kn. Hard is geen slechte dag, het is
+     een andere dag, met een kleine kite (Daniel, 12-09). De interne naam blijft matig, want die
+     staat in de kleuren en in de sorteervolgorde van de labels. */
+  var WOORD = { perfect:"perfect", goed:"goed", matig:"hard", weinig:"te weinig wind", aflandig:"aflandig" };
   var RANG  = { perfect:0, goed:1, matig:2, weinig:3, aflandig:4 };
   var KLEUR = { perfect:"#0E7A54", goed:"#3E9B6E", matig:"#C08315", weinig:"#A9A096", aflandig:"#CE4A1F" };
   function tint(n) { return "var(--" + n + ")"; }
@@ -152,7 +154,10 @@ window.KWU_READY.then(function () {
   }
   function huidigeDag() { var ds = dagen(); return ds[Math.min(st.dag, ds.length-1)]; }
 
-  /* Alle aaneengesloten rijdbare vensters (vanaf 12 kn, veilige hoek), beste eerst (niveau, dan lengte).
+  /* Het cijfer van een venster, één keer gerekend en daarna bewaard: de volgorde van de vensters en
+     de keuze van de beste dag hangen eraan, en dat zijn allebei lijstjes die we vaak doorlopen. */
+  function scoreVan(v) { if (v._s == null) v._s = cijfer(v).score; return v._s; }
+  /* Alle aaneengesloten rijdbare vensters (vanaf 12 kn, veilige hoek), beste eerst (op cijfer, dan lengte).
      Label = het niveau dat het vaakst voorkomt; een venster van 14-14-14-15-14 heet dus "matig", maar
      staat er wél: 14 kn met een grote kite is een sessie (Daniel, 2026-09-06). */
   function vensters(us, zon) {
@@ -167,7 +172,10 @@ window.KWU_READY.then(function () {
       var n = ["perfect","goed","matig"].sort(function (a,b) { return tel[b] - tel[a] || RANG[a] - RANG[b]; })[0];
       return { uren:v, n:n, lo:Math.min.apply(null,kns), hi:Math.max.apply(null,kns), vlLo:Math.min.apply(null,vls), vlHi:Math.max.apply(null,vls),
         tekst: uurStr(v[0].t) + "–" + (zon && (+v[v.length-1].t.slice(11,13)+1) + ":00" > zon.onder ? zon.onder : (+v[v.length-1].t.slice(11,13)+1) + ":00") };
-    }).sort(function (a,b) { return RANG[a.n] - RANG[b.n] || b.uren.length - a.uren.length; });
+      /* Sorteren op het cijfer, niet op het label. Op het label won een dag van 16 kn ("goed") het
+         van een dag van 33 kn ("hard"), terwijl die tweede een 8 scoort en de eerste een 7: hard
+         waaien is geen mindere dag, het vraagt een kleinere kite (Daniel, 12-09). */
+    }).sort(function (a,b) { return scoreVan(b) - scoreVan(a) || b.uren.length - a.uren.length; });
   }
   function top(us) { return us.reduce(function (a,u) { return u.kn > a.kn ? u : a; }); }
   function dagOordeel(d) {
@@ -339,7 +347,7 @@ window.KWU_READY.then(function () {
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     var st0 = (Math.round(start * 2) / 2).toString().replace(".", ",");
     return { score:score, plus:pl, min:mn, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
-      een: (knGem > VEEL ? "Veel wind, kleine kite" : rGem < 1.05 ? "Je kite trekt net, marginaal" : rGem < 1.20 ? "Je gaat vooruit, niet meer" : rGem < 1.39 ? "Prettige wind" : rGem < 2.10 ? "Lekker powered" : "Veel druk, maat kleiner") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
+      een: (knGem > VEEL ? "Hard en goed powered, kleine kite" : rGem < 1.05 ? "Je kite trekt net, marginaal" : rGem < 1.20 ? "Je gaat vooruit, niet meer" : rGem < 1.39 ? "Prettige wind" : rGem < 2.10 ? "Lekker powered" : "Veel druk, maat kleiner") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
   }
 
   /* weercode -> icoon + woord */
@@ -438,7 +446,7 @@ window.KWU_READY.then(function () {
     var ds = dagen(), i = Math.min(st.dag, ds.length - 1), d = ds[i], s = spot(), o = dagOordeel(d);
     var beste = null, besteDag = null;
     ds.forEach(function (x) { var ox = dagOordeel(x);
-      if (ox.v && (!beste || RANG[ox.n] < RANG[beste.n] || (RANG[ox.n] === RANG[beste.n] && ox.v.uren.length > beste.uren.length))) { beste = ox.v; besteDag = x; } });
+      if (ox.v && (!beste || scoreVan(ox.v) > scoreVan(beste) || (scoreVan(ox.v) === scoreVan(beste) && ox.v.uren.length > beste.uren.length))) { beste = ox.v; besteDag = x; } });
     $("hero").style.setProperty("--tint", tint(o.n));
     $("kicker").textContent = s.naam + " · klik een kolom, de strandkaart volgt";
     var zon = "zon op " + d.zon.op + ", onder " + d.zon.onder;
@@ -829,7 +837,9 @@ window.KWU_READY.then(function () {
     venster: ["Het venster", [
       "<b>Een venster is een rij uren achter elkaar waarin je kunt</b>: genoeg wind, niet te hard, en uit een veilige hoek.",
       "<b>De balk laat zien hoe lang het duurt</b> en welk oordeel er hoort bij het grootste deel van die uren.",
-      "<b>Klik erop</b> voor het cijfer van dat venster, de kitemaat en wat er mee en tegen zit."]]
+      "<b>Klik erop</b> voor het cijfer van dat venster, de kitemaat en wat er mee en tegen zit.",
+      "<b>Een 9 is het hoogste dat de wind alleen kan halen</b>, en die krijg je in jouw band. Voor een 10 moet er meer goed staan: rustige wind zonder grote vlagen, stroom tegen de wind in, en een venster van vier uur of langer. Een 10 is dus zeldzaam, en dat hoort.",
+      "<b>Hard waaien kost geen punten.</b> Boven 30 kn heet het hier gewoon hard, met een kleine kite, en het cijfer blijft hoog. Wat daar w\u00e9l telt zijn de vlagen, de stroom en de golven: die wegen daar anderhalf keer zo zwaar, want bij die wind maken zij het verschil tussen een topsessie en een worsteling."]]
   };
   function openKort(k) {
     var x = KORT[k]; if (!x) return;

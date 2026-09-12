@@ -80,5 +80,21 @@ const stijgt = startBij(25) >= startBij(20) && startBij(20) > startBij(16);
 if (!stijgt) stuk++;
 console.log("  " + (stijgt ? "goed" : "FOUT") + "  cijfer stijgt naar zijn band toe".padEnd(46) + [16,20,25].map(k => Math.round(startBij(k)*10)/10).join(" \u2192 "));
 
+// Hard waaien mag geen punten kosten: 33 kn hoort hoger uit te komen dan 16 kn.
+// Hierop ging het mis: de pagina koos de beste dag op het label ("goed" sloeg "hard"), niet op het cijfer.
+const hard = startBij(33), zacht = startBij(16);
+const hardWint = hard > zacht;
+if (!hardWint) stuk++;
+console.log("\n" + (hardWint ? "goed" : "FOUT") + "  hard waait hoger dan halve wind".padEnd(46)
+  + "33 kn: " + Math.round(hard*10)/10 + " tegen 16 kn: " + Math.round(zacht*10)/10);
+
+// Een 10 moet bestaan, maar alleen als er meer goed staat dan de wind alleen.
+// Top van de curve 9, plus rustige wind (0,5), stroom tegen (0,5) en vier uur of langer (0,5).
+const top = Math.max(...CURVE.map(c => c[1]));
+const tienKan = top + 0.5 + 0.5 + 0.5 >= 10 && top < 10;
+if (!tienKan) stuk++;
+console.log((tienKan ? "goed" : "FOUT") + "  een 10 is haalbaar maar niet gratis".padEnd(46)
+  + "top van de curve " + top + ", met de bonussen " + (top + 1.5));
+
 console.log(stuk ? "\nIJKING: " + stuk + " PROBLEMEN" : "\nIJKING: alles goed");
 process.exit(stuk ? 1 : 0);

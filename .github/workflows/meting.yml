@@ -2,12 +2,11 @@ name: metingen verversen
 
 # Haalt op wat de meetstations van Rijkswaterstaat echt meten en commit meting.js.
 # Daarmee staat er in de tabel naast de voorspelling wat er werkelijk stond.
-# Let op: de klok van GitHub is gratis en dus traag. We vragen elk kwartier, maar in de praktijk
-# start er ongeveer elke 2 tot 5 uur één run (gemeten 11 en 12-09). Vaker echt nodig? Dan hoort
-# dit op de VPS met zijn eigen klok, niet hier.
+# De klok staat hier UIT sinds 12-09. De gratis klok van GitHub startte maar een run per 2 tot 5 uur
+# terwijl de metingen elk kwartier vernieuwen (gemeten 11 en 12-09). Dit draait nu elke 10 minuten op
+# de persoonlijke VPS srv1410799: /opt/kiteweer/ververs.sh, cron in /etc/cron.d/kiteweer, log in
+# /var/log/kiteweer.log. Hier blijft alleen de knop om het met de hand te starten, als terugval.
 on:
-  schedule:
-    - cron: "*/15 * * * *"
   workflow_dispatch:
 
 permissions:
