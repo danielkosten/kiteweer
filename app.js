@@ -28,7 +28,9 @@ window.KWU_READY.then(function () {
      op een landmast niet (De Kooy). Gemeten 60 dagen op Hoek van Holland (+3) en IJmuiden (+4), docs/dajk-mix.md. */
   var OPTELLING = { standaard: 3, noordpier: 4, zuidpier: 4, wijkaanzee: 4 };
   function optelling() { return OPTELLING[st.spot] != null ? OPTELLING[st.spot] : OPTELLING.standaard; }
-  var st = { board:"twintip", kg:85, groot:13, spot:"kijkduin", dag:0, t:null, modellen:DAJK.slice(), mix:"dajk" };
+  /* groot = je grootste kite in meters. 12 is de standaard omdat dat de maat is die de meeste
+     mensen als grootste hebben; Daniel heeft 13 en dat staat in zijn browser opgeslagen. */
+  var st = { board:"twintip", kg:85, groot:12, spot:"kijkduin", dag:0, t:null, modellen:DAJK.slice(), mix:"dajk" };
   try { var bewaard = JSON.parse(localStorage.getItem("kiteweer") || "{}");
     ["board","kg","groot","spot","modellen","mix"].forEach(function (k) { if (bewaard[k] != null) st[k] = bewaard[k]; });
     if (bewaard.v !== 3) { st.mix = "dajk"; st.modellen = DAJK.slice(); }   // eenmalig: iedereen naar de nieuwe DAJK-mix
@@ -283,7 +285,20 @@ window.KWU_READY.then(function () {
 
   /* ── cijfer voor een venster: wind, stabiliteit, stroming, golven, lengte ── */
   function cijfer(v) {
-    var us = v.uren, n = us.length, pl = [], mn = [], start = v.n === "perfect" ? 8 : v.n === "goed" ? 7 : 6, score = start, som = [];
+    var us = v.uren, n = us.length, pl = [], mn = [], som = [];
+    /* Het startcijfer komt uit de druk, niet uit het woord "goed" of "perfect". Eerst kreeg een
+       venster van 14 kn een 7 omdat het "goede wind" heette, terwijl je grootste kite daar net
+       trekt (Daniel, 12-09: "high grade for little wind"). Nu loopt het cijfer met de druk mee en
+       piekt het waar je lekker powered staat. */
+    var rGem = us.reduce(function (a, u) { return a + druk(u.kn); }, 0) / n;
+    var knGem = us.reduce(function (a, u) { return a + u.kn; }, 0) / n;
+    var start = knGem > VEEL ? 6              // boven 30 kn: kan, maar survival
+      : rGem < 1.05 ? 5                       // je kite trekt net
+      : rGem < 1.20 ? 6                       // je gaat vooruit, niet meer
+      : rGem < 1.35 ? 7                       // prettig
+      : rGem < 1.80 ? 8                       // lekker powered, de beste band
+      : 7;                                    // veel druk, kleinere kite nodig
+    var score = start;
     var tel = function (d, tekst) { score += d; som.push((d > 0 ? "+ " : "− ") + Math.abs(d).toString().replace(".", ",") + " " + tekst); (d > 0 ? pl : mn).push(tekst); };
     var vl = us.reduce(function (a,u) { return a + (u.vl - u.kn); }, 0) / n;
     if (vl >= 10) tel(-1.5, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vl < 6) tel(0.5, "stabiele wind");
@@ -295,8 +310,8 @@ window.KWU_READY.then(function () {
     if (mm >= 2) tel(-0.5, "regen, " + mm.toFixed(1) + " mm in het venster");
     if (n >= 4) pl.push(n + " uur lang"); else if (n <= 1) tel(-1, "slechts 1 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
-    return { score:score, plus:pl, min:mn, som: start + " voor " + WOORD[v.n] + " wind" + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
-      een: (v.n === "perfect" ? "Perfecte wind" : v.n === "goed" ? "Goede wind" : "Matige wind, grote kite") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
+    return { score:score, plus:pl, min:mn, som: start + " voor " + (rGem < 1.05 ? "wind waarbij je kite net trekt" : rGem < 1.35 ? "prettige wind" : rGem < 1.80 ? "lekker powered" : "veel druk") + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
+      een: (knGem > VEEL ? "Veel wind, kleine kite" : rGem < 1.05 ? "Je kite trekt net, marginaal" : rGem < 1.20 ? "Je gaat vooruit, niet meer" : rGem < 1.35 ? "Prettige wind" : rGem < 1.80 ? "Lekker powered" : "Veel druk, maat kleiner") + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
   }
 
   /* weercode -> icoon + woord */
@@ -625,7 +640,7 @@ window.KWU_READY.then(function () {
         /* Sommige grove modellen leveren geen vlagen: dan is vlaag = wind en zou er "+0" staan.
            Een streepje is eerlijker dan een nul die op windstil lijkt. */
         return td(u, "tv", '<span class="vp">' + u.vl + '</span>' +
-          '<small>' + (extra > 0 ? "+" + extra : "—") + (vlagerig ? ' <em>gusty</em>' : '') + '</small>',
+          '<small' + (vlagerig ? ' class="gusty" title="gusty: de vlagen zitten meer dan 60% boven de wind"' : '') + '>' + (extra > 0 ? "+" + extra : "—") + '</small>',
           "--tint:" + tint(n) + ";--tint-v:" + tintV(n)); }) +
       (i === 0 && meetstation() ? rij(rijkop("gemeten", "meten", "Welk meetstation en hoe ver weg"), function (u) {
         var m = metingBij(u.t);
@@ -666,7 +681,7 @@ window.KWU_READY.then(function () {
       var g14 = genoegKn(), g19 = knBij(1.32);
       return '<span class="lg"><i style="background:' + tint(k) + '"></i><b>' + WOORD[k] + '</b>' +
         (k === "perfect" ? " " + g19 + "–" + VEEL : k === "goed" ? " " + g14 + "–" + g19 : k === "matig" ? " boven " + VEEL + ", kleine kite" : k === "weinig" ? " &lt;" + g14 + ", je " + GROOT() + " m trekt niet" : "") + '</span>'; }).join("") +
-      '<span class="lg"><b>vlagen 25 +9</b> wat er binnen dat uur echt gebeurt: de piek, en hoeveel knopen dat boven de wind is. 40% erbij is normaal, vanaf 60% staat er gusty</span>' +
+      '<span class="lg"><b>vlagen 25 +9</b> de piek binnen dat uur, en hoeveel knopen dat boven de wind is. 40% erbij is normaal; kleurt het plusje oker, dan is het gusty en neem je een maat kleiner</span>' +
       '<span class="lg"><b>8–22 onder de wind</b> geen wind maar twijfel: de laagste en hoogste van de tien modellen. Oker = meer dan 7 kn oneens</span>' +
       '<span class="lg"><b>pijl</b> waar de wind of de stroom heen gaat</span>' +
       '<span class="lg"><b>regen</b> 1 druppel is licht, 3 is 1 mm per uur, 5 is een plensbui</span>' +
@@ -901,12 +916,25 @@ window.KWU_READY.then(function () {
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !$("sheet").hidden) sluit(); });
   document.addEventListener("input", function (e) { if (e.target.id === "spotzoek") { zoek = e.target.value; var lijst = $("sheet-b"); lijst.innerHTML = tekenSpots(); var z = $("spotzoek"); z.focus(); z.setSelectionRange(z.value.length, z.value.length); } });
   $("schuif").addEventListener("input", function (e) { st.t = huidigeDag().uren[+e.target.value].t; teken(); });
-  $("kg").addEventListener("input", function (e) { var v = parseInt(e.target.value,10); if (v >= 40 && v <= 140) { st.kg = v; bewaar(); teken(); } });
-  $("groot").addEventListener("input", function (e) { var v = parseInt(e.target.value,10); if (v >= 5 && v <= 21) { st.groot = v; bewaar(); teken(); } });
+  /* Gewicht met min en plus in stappen van 5 kg: tikken in plaats van een cijfer intypen, en op
+     een telefoon springt er geen toetsenbord over de pagina. */
+  document.querySelectorAll("[data-kg]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      st.kg = Math.max(40, Math.min(140, st.kg + parseInt(b.dataset.kg, 10)));
+      $("kglabel").textContent = st.kg + " kg"; bewaar(); teken();
+    });
+  });
+  /* Kitematen uit een lijst: 4 t/m 15 m, want dat is wat mensen echt hebben. */
+  (function () {
+    var opties = "";
+    for (var m = 4; m <= 15; m++) opties += '<option value="' + m + '"' + (m === st.groot ? " selected" : "") + '>' + m + ' m</option>';
+    $("groot").innerHTML = opties;
+  })();
+  $("groot").addEventListener("change", function (e) { st.groot = parseInt(e.target.value, 10); bewaar(); teken(); });
 
   $("legenda-box").open = window.matchMedia("(min-width:601px)").matches;
-  $("kg").value = st.kg;
-  $("groot").value = st.groot;
+  if (st.groot < 4 || st.groot > 15) st.groot = 12;          // oude opgeslagen maat buiten de lijst
+  $("kglabel").textContent = st.kg + " kg";
   document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
   if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";
   window.KWU_LAAD(st.spot).catch(function () { st.spot = "kijkduin"; return window.KWU_LAAD(st.spot); }).then(function () {

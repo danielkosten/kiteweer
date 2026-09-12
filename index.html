@@ -21,8 +21,12 @@
       <a class="filter meet" id="meetknop" href="https://windmeting.nl" target="_blank" rel="noopener"><b>Nu op zee</b><span>windmeting.nl</span></a>
     </div>
     <div class="rider">
-      <label class="invoer"><input id="kg" type="number" min="40" max="140" step="1" value="85" aria-label="Gewicht"><b>kg</b></label>
-      <label class="invoer"><input id="groot" type="number" min="5" max="21" step="1" value="13" aria-label="Grootste kite"><b>m max kite</b></label>
+      <div class="stap" role="group" aria-label="Gewicht">
+        <button type="button" data-kg="-5" aria-label="5 kg minder">−</button>
+        <b id="kglabel">85 kg</b>
+        <button type="button" data-kg="5" aria-label="5 kg meer">+</button>
+      </div>
+      <label class="keuze"><span>max kite</span><select id="groot" aria-label="Grootste kite"></select></label>
       <div class="seg klein" role="group" aria-label="Board">
         <button type="button" class="on" data-board="twintip">Twintip</button>
         <button type="button" data-board="directional">Directional</button>

@@ -20,7 +20,7 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   }).slice(0,4).map(e=>e.tagName+'.'+(e.className||'').toString().slice(0,25)));
   // 3b. staan de vaste onderdelen er op DEZE breedte ook echt, en zijn ze zichtbaar?
   //     Zonder deze controle kan een regel in een media-query iets stil laten verdwijnen.
-  const mist = await p.evaluate(()=>['#weekmini','#weekstrip','.uurtabel','#legenda','.weekmini .wm','#kg','#groot']
+  const mist = await p.evaluate(()=>['#weekmini','#weekstrip','.uurtabel','#legenda','.weekmini .wm','.stap','#groot']
     .filter(s=>{const e=document.querySelector(s); if(!e) return true; const r=e.getBoundingClientRect(); return r.width<2||r.height<2;}));
   console.log(`\n== ${naam} ==`);
   console.log('  onderdelen :', mist.length?'MIST '+mist.join(', '):'alle aanwezig');
