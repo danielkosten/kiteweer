@@ -1216,7 +1216,7 @@ window.KWU_READY.then(function () {
      werden dan elke seconde opnieuw opgebouwd terwijl alleen het gekozen uur verandert. */
   function zetUur(i) {
     var d = huidigeDag(), u = d.uren[Math.max(0, Math.min(d.uren.length - 1, i))]; if (!u) return;
-    st.t = u.t; bewaar(); tekenScene();
+    st.t = u.t; tekenScene();
     $("dagen").querySelectorAll("td[data-t]").forEach(function (c) { c.classList.toggle("aan", c.dataset.t === st.t); });
   }
   $("schuif").addEventListener("input", function (e) { stopSpelen(); zetUur(+e.target.value); });
@@ -1265,6 +1265,7 @@ window.KWU_READY.then(function () {
      eerst langs de kop, de week en de kaartjes scrollen voor je zag wat er nu staat (Daniel, 12-09).
      Bij het openen springen we daar dus meteen heen, met de dagkop nog net in beeld. Alleen op een
      smal scherm en alleen bij vandaag: op een breed scherm past alles toch al boven elkaar. */
+  if ("scrollRestoration" in history) history.scrollRestoration = "manual";
   function springNaarNu() {
     if (window.innerWidth > 700 || st.dag !== 0) return;
     var dag = document.querySelector(".dag"); if (!dag) return;

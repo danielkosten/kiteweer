@@ -249,7 +249,6 @@ main{padding-bottom:64px}
 .uurtabel .tmeet small.meer{color:var(--perfect)}
 .uurtabel .tmeet small.minder{color:var(--matig)}
 .uurtabel .tmeet small.raak{color:var(--zacht)}
-.sv.meet{border-left:2px solid var(--lijn);padding-left:10px}
 /* Twee feiten die niet op een sessiekaartje passen: liep het vandaag hoger of lager dan het model
    zei, en wanneer draait de stroom. Stonden als twee alinea's; nu twee regels om te scannen. */
 .feiten{list-style:none;margin:0;padding:0;display:grid;gap:6px}
@@ -470,7 +469,9 @@ main{padding-bottom:64px}
 .mchip.aan{background:var(--perfect-v);color:var(--perfect);border-color:var(--perfect)}
 .voet a{color:var(--inkt)}
 .uurtabel .tm small{white-space:nowrap}
-.uurtabel .tm .kans{display:inline-block;background:var(--tint-v);color:var(--tint);font-weight:700;font-size:12.5px;border-radius:6px;padding:2px 7px}
+/* De pil moet BINNEN zijn cel blijven: met 7px lucht links en rechts werd "29%" 39px breed in een
+   cel van 36 en liep hij over de buurman heen (gemeten op 390px, 12-09). */
+.uurtabel .tm .kans{display:inline-block;max-width:100%;background:var(--tint-v);color:var(--tint);font-weight:700;font-size:12.5px;border-radius:6px;padding:2px 5px}
 .uurtabel .tm small{display:block;font-size:10.5px;color:var(--flauw);margin-top:2px}
 .mkop>span:not(.mknoppen){line-height:1.4}
 .mkop>span:not(.mknoppen) b{font-size:inherit;letter-spacing:0;text-transform:none;color:var(--inkt)}
