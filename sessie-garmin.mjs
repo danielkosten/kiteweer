@@ -108,8 +108,8 @@ const zet = uit.prepare(`insert or replace into sessie
 // (ja of nee) blijft staan, want dat oordeel kan geen enkele import terughalen.
 const alBeoordeeld = new Set(uit.prepare("select datum, van from sessie where bevestigd = 1").all().map(r => r.datum + " " + r.van));
 
-console.log(`${rijen.length} activiteiten van ${MIN_MINUTEN} minuten of langer bekeken\n`);
-console.log("datum        van    duur   wind   vlaag   kandidaat");
+console.log(`${rijen.length} kitesessies bij Garmin vanaf ${VANAF}\n`);
+console.log("datum        van    duur   wind   vlaag   sport");
 let n = 0;
 for (const r of rijen) {
   const datum = String(r.date).slice(0, 10);
