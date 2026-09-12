@@ -17,7 +17,13 @@ node gen-meting.mjs || exit 0
 node log-db.mjs || echo "log-db mislukt, verder met de rest"
 # Een keer per dag kijken of er nieuwe sessies in Garmin staan. Niet elke 10 minuten: Garmin
 # levert met dagen vertraging, en KNMI hoeft niet 144 keer per dag dezelfde dag te geven.
-[ "$(date -u +%H%M)" = "0620" ] && { node sessie-garmin.mjs --schrijf || echo "sessie-garmin mislukt"; }
+# Niet op de klok maar op een datumstempel: het ophalen hierboven duurt soms een minuut, en dan
+# staat de klok al op 06:21 en slaat een toets op "is het 06:20" de dag stilletjes over.
+STEMPEL=/var/lib/kiteweer-garmin-dag
+if [ "$(cat $STEMPEL 2>/dev/null)" != "$(date -u +%F)" ]; then
+  mkdir -p "$(dirname $STEMPEL)"
+  node sessie-garmin.mjs --schrijf && date -u +%F > $STEMPEL || echo "sessie-garmin mislukt, morgen weer"
+fi
 git add meting.js
 git diff --staged --quiet && exit 0
 git commit -q -m "Metingen ververst"
