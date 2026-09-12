@@ -271,6 +271,21 @@ window.KWU_READY.then(function () {
      is dezelfde vraag: loopt de stroom een kant op of niet. */
   function stroomZone(u) { var c = stroomC(blokBij(u.t), u.dir); return c > KENTERING ? "tegen" : c < -KENTERING ? "mee" : "dwars"; }
   function top(us) { return us.reduce(function (a,u) { return u.kn > a.kn ? u : a; }); }
+  /* De uren binnen een sessie met het hoogste cijfer: het lekkerste stuk van dat blok. Stond eerst
+     als een los blok boven de kaartjes, maar dat was een tweede vorm voor dezelfde informatie
+     (Daniel, 12-09). */
+  function besteUren(w) {
+    var us = w.uren.filter(function (u) { return uurScore(u) != null; });
+    if (!us.length) return null;
+    var max = Math.max.apply(null, us.map(uurScore));
+    var b = us.filter(function (u) { return uurScore(u) >= max - 0.25; });
+    return b.length === us.length ? null : runs(b).map(runTekst).join(", ");
+  }
+  function golfGem(us) { var g = us.filter(function (u) { return u.golf; }); return g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null; }
+  function golfWoord(m) { return m < 0.5 ? "vlak water" : m < 1 ? "beetje hobbelig" : m < 1.5 ? "hobbelig" : "flinke golven"; }
+  /* Een zin over de stroom, met dezelfde grenzen als het cijfer. */
+  function stroomZin(us) { var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / us.length;
+    var sp = stroomPost(c); return sp ? sp[1] : "stroom dwars of stil"; }
   function dagOordeel(d) {
     var ws = vensters(d.uren, d.zon), b = ws.length ? top(ws[0].uren) : top(d.uren);
     return { ws:ws, v:ws[0] || null, b:b, n:ws.length ? ws[0].n : niveau(b) };
@@ -566,14 +581,23 @@ window.KWU_READY.then(function () {
     if (o.v) {
       $("verdict").textContent = (o.ws.length === 1 ? "kitebaar" : o.ws.length + " keer kitebaar") + " · " + cijferWoord(scoreVan(o.v));
       $("vensterlijst").innerHTML = o.ws.map(function (w, j) {
-        var c = cijfer(w);
-        var cn = cijferNiveau(c.score);                 // kleur van de balk volgt het cijfer, niet alleen de wind
+        var c = cijfer(w), cn = cijferNiveau(c.score);  // kleur en woord volgen het cijfer, niet de wind
+        var bu = besteUren(w);
+        var gm = golfGem(w.uren);
+        var punten = [
+          "<b>" + (w.lo === w.hi ? w.lo : w.lo + "\u2013" + w.hi) + " kn</b> uit " + kompas(top(w.uren).dir) + ", vlagen tot " + vlMax(w.uren),
+          "<b>kite " + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + "</b>",
+          stroomZin(w.uren),
+          gm != null ? "golven " + gm.toFixed(1) + " m, " + golfWoord(gm) : null,
+          bu && bu !== w.tekst ? "<b>beste uren " + bu + "</b>" : null
+        ].filter(Boolean);
         return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(cn) + ';--tint-v:' + tintV(cn) + '">' +
-          '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn <small>vlagen ' + w.vlLo + "–" + w.vlHi + '</small></span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span>' +
-          '<span class="vc">' + getal(c.score) + '</span><span class="veen">' + c.een + '</span>' +
+          '<span class="vc">' + getal(c.score) + '</span><span class="vt">' + w.tekst + '</span>' +
+          '<i class="info" aria-hidden="true">i</i>' +
+          '<ul class="vlijst">' + punten.map(function (x) { return '<li>' + x + '</li>'; }).join("") + '</ul>' +
           '<span class="vsom"><i><b>' + c.start + '</b> voor de wind zelf</i>' +
             c.delen.map(function (x) { return '<i>' + esc(x) + '</i>'; }).join("") +
-            '<i><b>= ' + getal(c.score) + '</b></i></span><i class="info" aria-hidden="true">i</i></button>';
+            '<i><b>= ' + getal(c.score) + '</b></i></span></button>';
       }).join("");
       $("onderverdict").innerHTML = '<span class="flauw">' + zon + indicatieTekst(i, d) + '</span>';
     } else {
@@ -591,21 +615,6 @@ window.KWU_READY.then(function () {
      uur van 33 kn onder een uur van 16 kn eindigde terwijl het hoger hoort (Daniel, 12-09).
      Beste uren = de uren met de hoogste score in het beste venster; de rest van het venster is "ook prima". */
   function uurScore(u) { var d = uurDelen(u); return d ? d.score : null; }
-  /* Hetzelfde, maar over een groep uren in plaats van één uur: het gemiddelde van die uren.
-     Het cijfer op het scherm, de bullets eronder en de opbouw achter de i-knop komen hier
-     alledrie uit, zodat ze niet uit elkaar kunnen lopen. */
-  function urenDelen(us) {
-    var n = us.length;
-    var kn = us.reduce(function (a,u) { return a + u.kn; }, 0) / n;
-    var rGem = us.reduce(function (a,u) { return a + druk(u.kn); }, 0) / n;
-    var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
-    var vh = us.reduce(function (a,u) { return a + (u.kn ? u.vl / u.kn : 1); }, 0) / n;
-    var start = startCijfer(rGem), sc = start, posten = [];
-    var sp = stroomPost(c);
-    if (sp) { sc += sp[0]; posten.push([(sp[0] > 0 ? "+ " : "\u2212 ") + Math.abs(sp[0]).toString().replace(".", ","), sp[1]]); }
-    if (vh >= VLAGERIG) { sc -= STRAF_VLAGERIG; posten.push(["\u2212 " + getal(STRAF_VLAGERIG), "vlagerig: de pieken zijn meer dan " + VLAGERIG.toString().replace(".", ",") + " keer de wind"]); }
-    return { score:sc, start:start, posten:posten, kn:Math.round(kn) };
-  }
   /* Hetzelfde cijfer, maar opgeknipt in zijn stukken, zodat de i-knop kan laten zien waar het
      vandaan komt in plaats van alleen het getal te tonen (Daniel, 12-09). */
   function uurDelen(u) {
@@ -618,14 +627,6 @@ window.KWU_READY.then(function () {
   }
   function runs(us) { var out = [], nu = null; us.forEach(function (u) { if (!nu || +u.t.slice(11,13) !== +nu[nu.length-1].t.slice(11,13) + 1) { nu = [u]; out.push(nu); } else nu.push(u); }); return out; }
   function runTekst(r) { return r[0].t.slice(11,13) + "–" + (+r[r.length-1].t.slice(11,13)+1) + " u"; }
-  function waarom(us) {
-    var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / us.length, vl = us.reduce(function (a,u) { return a + u.vl/u.kn; }, 0) / us.length;
-    var p = [];
-    var sp = stroomPost(c);                              // dezelfde grenzen als in het cijfer, anders spreken de twee elkaar tegen
-    p.push(sp ? sp[1] : "stroom dwars");
-    if (vl >= VLAGERIG) p.push("vlagerig");
-    return p.join(", ");
-  }
   /* Kentering: het uur waarop de stroom van mee naar tegen draait (of andersom). Bron is per 3 uur,
      dus "rond" en niet "om". */
   function kenteringen(us) {
@@ -662,38 +663,17 @@ window.KWU_READY.then(function () {
     return '<p class="sv meet"><b>' + kop + '</b> ' + esc(a.station) + ' op ' + String(a.km).replace(".", ",") + ' km meet ' + staart + '</p>';
   }
 
-  var laatsteBeste = null;
   function tekenSamenvatting() {
     var d = huidigeDag(), o = dagOordeel(d), el = $("samenvatting");
     if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Te weinig wind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' + meetZin() +
       '<p class="sv flauw">' +
       (st.dag === 0 ? '<a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a>' : '') + '</p>'; return; }
-    /* Alleen de uren van de BESTE sessie, niet van alle sessies van de dag. Sinds sessies geknipt
-       worden waar de stroom draait, liep "beste uren" anders dwars door twee sessies heen: 18-21 u
-       met de stroom mee en 14-15 u met de stroom tegen in een regel, met een bullet die maar een van
-       de twee kon beschrijven (Daniel, 12-09). */
-    var alle = o.v.uren.filter(function (u) { return uurScore(u) != null; });
-    var max = Math.max.apply(null, alle.map(uurScore));
-    var beste = alle.filter(function (u) { return uurScore(u) >= max - 0.25; }), rest = alle.filter(function (u) { return uurScore(u) < max - 0.25; });
-    laatsteBeste = beste;
-    var rb = runs(beste), rr = runs(rest), lo = Math.min.apply(null, beste.map(function (u) { return u.kn; })), hi = Math.max.apply(null, beste.map(function (u) { return u.kn; }));
-    var html = '<div class="sv beste" style="--tint:' + tint(niveau(top(beste))) + '">' +
-      '<p class="svkop"><span class="vc">' + getal(urenDelen(beste).score) + '</span><b>Beste uren ' + rb.map(runTekst).join(", ") + '</b>' +
-      '<button type="button" class="info" data-info="cijfer" aria-label="Hoe dit cijfer is opgebouwd">i</button></p>' +
-      '<ul class="svlijst">' +
-      '<li><b>' + (lo === hi ? lo : lo + "\u2013" + hi) + ' kn</b>, vlagen tot ' + vlMax(beste) + '</li>' +
-      '<li>' + waarom(beste) + '</li>' +
-      '<li><b>kite ' + kiteBereik(lo, hi, vlMax(beste)) + '</b></li></ul></div>';
-    if (rest.length) { var lo2 = Math.min.apply(null, rest.map(function (u) { return u.kn; })), hi2 = Math.max.apply(null, rest.map(function (u) { return u.kn; }));
-      html += '<p class="sv"><b>Ook prima ' + rr.map(runTekst).join(", ") + '</b><br><span class="flauw">' + (lo2 === hi2 ? lo2 : lo2 + "\u2013" + hi2) + ' kn \u00b7 ' + waarom(rest) + '</span></p>'; }
-    /* Elke andere sessie van de dag krijgt zijn eigen regel met zijn eigen cijfer. Ze samenvoegen
-       middelt de stroom weer weg, en dat is precies waarom sessies geknipt worden (Daniel, 12-09). */
-    o.ws.slice(1).forEach(function (w) {
-      html += '<p class="sv"><b>' + getal(scoreVan(w)) + ' \u00b7 ' + w.tekst + '</b><br><span class="flauw">' +
-        (w.lo === w.hi ? w.lo : w.lo + "\u2013" + w.hi) + ' kn \u00b7 ' + waarom(w.uren) + ' \u00b7 kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span></p>';
-    });
-    var niet = d.uren.filter(function (u) { return uurScore(u) == null; });
-    if (niet.length) html += '<p class="sv flauw">Niet: ' + runs(niet).map(runTekst).join(", ") + ' · ' + (niet.some(function (u) { return niveau(u) === "aflandig"; }) ? "aflandig of " : "") + 'te weinig wind</p>';
+    /* De kaartjes boven deze regels zeggen al per sessie wat er te halen valt, met cijfer, bullets
+       en de som. Hier stond dat een tweede keer in een andere vorm: een apart blok "beste uren", een
+       regel "ook prima", en per andere sessie nog een regel. Drie vormen voor dezelfde informatie,
+       en de beste zag er anders uit dan de rest (Daniel, 12-09). Hier blijft alleen staan wat NIET
+       op een kaartje past: wat er vandaag echt gemeten is, en wanneer de stroom draait. */
+    var html = "";
     html += meetZin();
     var kt = kenteringTekst(d.uren); if (kt) html += '<p class="sv"><b>Stroming:</b> ' + kt + ' (bron per 3 uur, dus ongeveer)</p>';
     if (st.dag === 0) html += '<p class="sv flauw"><a href="https://windmeting.nl" target="_blank" rel="noopener">wat er nu echt staat, windmeting.nl</a></p>';
@@ -1013,23 +993,6 @@ window.KWU_READY.then(function () {
 
   /* De vraag die twee keer is gesteld: is wind–vlagen niet hetzelfde als de spreiding? Nee.
      Vlagen = wat er binnen dat uur echt gebeurt. Spreiding = hoe oneens de modellen zijn. */
-  /* Waar het cijfer boven de beste uren vandaan komt. Er stond alleen een getal, en een getal zonder
-     opbouw is een mening (Daniel, 12-09). */
-  function openCijfer() {
-    var us = laatsteBeste; if (!us || !us.length) return;
-    var d0 = urenDelen(us), sc = d0.score, kn = d0.kn;
-    $("sheet-t").textContent = "Hoe dit cijfer is opgebouwd";
-    $("sheet-b").innerHTML = '<ul class="redenen">' +
-      '<li class="p"><b>' + getal(d0.start) + ' voor de wind zelf.</b> Bij ' + kn + ' kn trekt je ' + GROOT() + ' m ' +
-        drukKort(druk(kn)) +
-        '.</li>' +
-      d0.posten.map(function (x) { return '<li class="p"><b>' + x[0] + '</b> ' + x[1] + '</li>'; }).join("") +
-      (d0.posten.length ? '<li class="p"><b>Samen ' + getal(sc) + '.</b> Alles wordt op een half punt afgerond, want nauwkeuriger dan dat is het niet.</li>'
-        : '<li class="p"><b>Verder niets erbij of eraf.</b> De stroom staat dwars, de vlagen zijn normaal: dit uur is puur de wind. Afgerond op een half punt, want nauwkeuriger is het niet.</li>') +
-      '<li class="p"><b>Een 9 is het hoogste dat wind alleen kan halen</b>, tussen ' + knBij(1.60) + ' en ' + VEEL + ' kn. Een 10 is dus nooit weinig wind, hij is hard.</li>' +
-      '<li class="p"><b>Die laatste punt komt van de rest</b>: gelijkmatige wind (weinig vlagen), stroom tegen de wind in, en vier uur of langer. Het cijfer van de hele sessie zie je als je op de balk klikt.</li></ul>';
-    $("sheet").hidden = false; $("sheet-x").focus();
-  }
   /* De legenda stond als uitklapper onder de tabel en was een muur tekst. Nu achter dezelfde
      i-knop als de rest (Daniel, 12-09). */
   function openLegenda() {
@@ -1142,7 +1105,6 @@ window.KWU_READY.then(function () {
     if (e.target.closest("[data-info=\"zeker\"]")) return openZeker();
     if (e.target.closest("[data-info=\"stroom\"]")) return openStroom();
     if (e.target.closest("[data-info=\"vlagen\"]")) return openVlagen();
-    if (e.target.closest("[data-info=\"cijfer\"]")) return openCijfer();
     if (e.target.closest("[data-info=\"legenda\"]")) return openLegenda();
     var kort = e.target.closest("[data-info]");
     if (kort && KORT[kort.dataset.info]) return openKort(kort.dataset.info);
