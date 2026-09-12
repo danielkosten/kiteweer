@@ -2,7 +2,7 @@
 
 **kiteweer** — Live: https://danielskiing.cloud/kiteweer/ (ook nog https://danielkosten.github.io/kiteweer/)
 
-Stack: JS · 47 tracked files · last commit 2026-09-12 · regenerate with `code-map repo --write`
+Stack: JS · 49 tracked files · last commit 2026-09-12 · regenerate with `code-map repo --write`
 
 ## Start here
 
