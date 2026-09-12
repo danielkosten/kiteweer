@@ -146,10 +146,16 @@ window.KWU_READY.then(function () {
     var h = 42 + t * 115, sat = 62 - t * 10, l = 44 - t * 16;        // 42 = oker, 157 = groen
     return "hsl(" + h.toFixed(0) + " " + sat.toFixed(0) + "% " + l.toFixed(0) + "%)";
   }
+  /* De wind waarmee je daadwerkelijk rijdt. Loopt de stroom met de wind mee, dan drijft je board
+     mee met het water terwijl je kite in de lucht hangt: die knopen zijn weg. 14 kn met 1,4 kn
+     stroom mee is in de praktijk 12,6 kn en dan kom je niet op je board (Daniel, 12-09).
+     LET OP: dit verandert alleen het OORDEEL, nooit het windgetal in de tabel. Daar staat wat de
+     modellen zeggen dat er waait, en dat moet blijven staan zoals het is. */
+  function werkKn(u) { return u.kn + stroomC(blokBij(u.t), u.dir); }
   /* Aflandig telt alleen als er genoeg wind staat om te gaan, en "genoeg" is hier precies hetzelfde
      als in band(): het oordeel zelf. Eerst stond hier de afgeronde genoegKn(), zodat een uur op de
      grens tegelijk "aflandig" (dus wind genoeg) en "te weinig wind" kon heten. */
-  function niveau(u) { if (!u) return "weinig"; var b = band(u.kn); if (!veilig(spot(), u.dir) && b !== "weinig") return "aflandig"; return b; }
+  function niveau(u) { if (!u) return "weinig"; var b = band(werkKn(u)); if (!veilig(spot(), u.dir) && b !== "weinig") return "aflandig"; return b; }
   /* "matig" heet op de pagina "hard": het is de band boven 30 kn. Hard is geen slechte dag, het is
      een andere dag, met een kleine kite (Daniel, 12-09). De interne naam blijft matig, want die
      staat in de kleuren en in de sorteervolgorde van de labels. */
