@@ -570,7 +570,8 @@ window.KWU_READY.then(function () {
         var cn = cijferNiveau(c.score);                 // kleur van de balk volgt het cijfer, niet alleen de wind
         return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(cn) + ';--tint-v:' + tintV(cn) + '">' +
           '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn <small>vlagen ' + w.vlLo + "–" + w.vlHi + '</small></span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span>' +
-          '<span class="vc">' + getal(c.score) + '</span><span class="veen">' + c.een + '</span><i class="info" aria-hidden="true">i</i></button>';
+          '<span class="vc">' + getal(c.score) + '</span><span class="veen">' + c.een + '</span>' +
+          '<span class="vsom">' + c.som + '</span><i class="info" aria-hidden="true">i</i></button>';
       }).join("");
       $("onderverdict").innerHTML = '<span class="flauw">' + zon + indicatieTekst(i, d) + '</span>';
     } else {

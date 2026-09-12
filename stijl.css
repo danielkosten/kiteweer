@@ -331,12 +331,15 @@ main{padding-bottom:64px}
 .venster .vkite{font-size:13px;font-weight:700;color:var(--zacht);white-space:nowrap}
 .venster .vc{font-family:var(--kop);font-size:20px;background:var(--tint);color:#fff;border-radius:8px;padding:2px 9px;line-height:1.2}
 .venster .veen{font-size:13.5px;color:var(--inkt)}
+/* De som onder het cijfer. Zonder die regel kunnen twee sessies allebei op 6 uitkomen langs heel
+   verschillende wegen, en dan lijkt het of de stroming niet meetelt (Daniel, 12-09). */
+.venster .vsom{font-size:12px;color:var(--zacht);grid-column:1/-1;margin-top:2px}
 .venster .info{font-style:normal;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center}
 
 .venster ul{margin:0;padding:0 14px 12px 34px;font-size:13.5px;color:var(--zacht)}
 .venster li.p::marker{content:"+ ";color:var(--perfect)}
 .venster li.m::marker{content:"− ";color:var(--aflandig)}
-@media(max-width:640px){.venster{grid-template-columns:auto auto 1fr auto}.venster .vkite,.venster .veen{grid-column:1/-1}}
+@media(max-width:640px){.venster{grid-template-columns:auto auto 1fr auto}.venster .vkite,.venster .veen,.venster .vsom{grid-column:1/-1}}
 /* Op een breed scherm staan de sessies naast elkaar als kaartjes, met het cijfer groot bovenaan.
    Ze zijn sinds 12-09 geknipt waar de stroom draait, dus het zijn er meestal twee of drie op een
    dag, en dan is naast elkaar vergelijken makkelijker dan eronder scrollen (Daniel, 12-09). */
@@ -348,6 +351,7 @@ main{padding-bottom:64px}
   .venster .vk{grid-row:2;grid-column:2}
   .venster .vkite{grid-row:3;grid-column:2}
   .venster .veen{grid-row:4;grid-column:1/-1;margin-top:4px}
+  .venster .vsom{grid-row:5;grid-column:1/-1}
   .venster .info{grid-row:1;grid-column:2;justify-self:end;align-self:start}
 }
 /* scene-kaarten */
