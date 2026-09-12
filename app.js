@@ -267,6 +267,19 @@ window.KWU_READY.then(function () {
      c = stroom x cos(hoek tussen stroom-naar en wind-vandaan).
      Positief = tegen de wind in = goed: gratis hoogte + extra druk in de kite (vooral onder 20 kn).
      Negatief = mee met de wind: haalt druk uit je kite, je zakt af, wel vlakker water. */
+  /* Wat de stroming met een cijfer doet. Stond op een vast half punt, ongeacht of het water met
+     0,4 kn of met 3 kn meeliep. Daniel (12-09): loopt de stroom dezelfde kant op als de wind, dan
+     verlies je hoogte en heb je een grotere kite nodig, en dat is geen half punt waard.
+     Mee kost meer dan tegen oplevert, want tegen krijg je hoogte cadeau maar wordt het water ook
+     steiler: boven 2 kn kom je er moeilijk terug. */
+  function stroomPost(c) {
+    if (c >= 0.3) return c > 2 ? [0.25, "stroom tegen de wind, gratis hoogte, maar steil water: boven 2 kn kom je er lastig terug"]
+                               : [0.5, "stroom tegen de wind, gratis hoogte"];
+    if (c <= -2) return [-1.5, "stroom hard mee met de wind, " + Math.abs(c).toFixed(1) + " kn: je zakt flink af en je kite trekt minder"];
+    if (c <= -1) return [-1, "stroom mee met de wind, " + Math.abs(c).toFixed(1) + " kn: je zakt af, neem een maat groter"];
+    if (c <= -0.3) return [-0.5, "stroom mee met de wind, je zakt af"];
+    return null;
+  }
   function stroomC(b, dir) {
     if (!b || !b.stroom || b.stroom.kn < 0.08) return 0;
     return b.stroom.kn * Math.cos(hoekTussen(b.stroom.naar, dir) * Math.PI / 180);
@@ -373,11 +386,11 @@ window.KWU_READY.then(function () {
     var vh = us.reduce(function (a,u) { return a + (u.kn ? u.vl / u.kn : 1); }, 0) / n;
     if (vh >= VLAGERIG) tel(-1.5, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vh < STABIEL) tel(0.5, "stabiele wind");
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
-    if (c > 0.3) tel(0.5, "stroom tegen de wind, gratis hoogte"); else if (c < -0.5) tel(-0.5, "stroom mee, je zakt af");
+    var sp = stroomPost(c); if (sp) tel(sp[0], sp[1]);
     var g = us.filter(function (u) { return u.golf; }); var gm = g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null;
     if (gm != null) { if (gm > 1.5) tel(-0.5, "flinke golven " + gm.toFixed(1) + " m"); else if (gm < 0.5) pl.push("vlak water"); }
     var mm = us.reduce(function (a,u) { return a + (u.mm||0); }, 0);
-    if (mm >= 2) tel(-0.5, "regen, " + mm.toFixed(1) + " mm in het venster");
+    if (mm >= 2) tel(-0.5, "regen, " + mm.toFixed(1) + " mm in die uren");
     /* Duur telde eerst hoogstens een punt, terwijl een uur rijden met op- en afbouwen voor één uur
        water een andere dag is dan een middag staan (Daniel, 12-09). */
     if (n >= 6) tel(1, n + " uur lang, een hele sessie"); else if (n >= 4) tel(0.5, n + " uur lang");
@@ -489,7 +502,7 @@ window.KWU_READY.then(function () {
     $("kicker").textContent = s.naam + " · klik een kolom, de strandkaart volgt";
     var zon = "zon op " + d.zon.op + ", onder " + d.zon.onder;
     if (o.v) {
-      $("verdict").textContent = o.ws.length + (o.ws.length === 1 ? " venster" : " vensters") + " · " + WOORD[o.n];
+      $("verdict").textContent = (o.ws.length === 1 ? "kitebaar" : o.ws.length + " keer kitebaar") + " · " + WOORD[o.n];
       $("vensterlijst").innerHTML = o.ws.map(function (w, j) {
         var c = cijfer(w);
         return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' +
@@ -517,9 +530,8 @@ window.KWU_READY.then(function () {
   function uurDelen(u) {
     var n = niveau(u); if (n === "weinig" || n === "aflandig") return null;
     var start = startCijfer(druk(u.kn)), sc = start, posten = [];
-    var c = stroomC(blokBij(u.t), u.dir);
-    if (c > 0.3) { sc += 0.5; posten.push(["+ 0,5", "stroom tegen de wind, dat geeft gratis hoogte"]); }
-    else if (c < -0.5) { sc -= 0.5; posten.push(["\u2212 0,5", "stroom mee met de wind, je zakt af"]); }
+    var c = stroomC(blokBij(u.t), u.dir), sp = stroomPost(c);
+    if (sp) { sc += sp[0]; posten.push([(sp[0] > 0 ? "+ " : "\u2212 ") + Math.abs(sp[0]).toString().replace(".", ","), sp[1]]); }
     if (u.vl / u.kn >= VLAGERIG) { sc -= 1; posten.push(["\u2212 1", "vlagerig: de pieken zijn meer dan " + VLAGERIG.toString().replace(".", ",") + " keer de wind"]); }
     return { score:sc, start:start, posten:posten };
   }
@@ -557,7 +569,7 @@ window.KWU_READY.then(function () {
     return '<p class="sv meet"><b>' + kop + '</b> ' + esc(a.station) + ' op ' + String(a.km).replace(".", ",") + ' km meet ' + staart + '</p>';
   }
 
-  var laatsteBeste = null;
+  var laatsteBeste = null, laatsteScore = null;
   function tekenSamenvatting() {
     var d = huidigeDag(), o = dagOordeel(d), el = $("samenvatting");
     if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Te weinig wind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' + meetZin() +
@@ -566,7 +578,7 @@ window.KWU_READY.then(function () {
     var alle = [].concat.apply([], o.ws.map(function (w) { return w.uren; })).filter(function (u) { return uurScore(u) != null; });
     var max = Math.max.apply(null, alle.map(uurScore));
     var beste = alle.filter(function (u) { return uurScore(u) >= max - 0.25; }), rest = alle.filter(function (u) { return uurScore(u) < max - 0.25; });
-    laatsteBeste = beste;
+    laatsteBeste = beste; laatsteScore = max;
     var rb = runs(beste), rr = runs(rest), lo = Math.min.apply(null, beste.map(function (u) { return u.kn; })), hi = Math.max.apply(null, beste.map(function (u) { return u.kn; }));
     var html = '<div class="sv beste" style="--tint:' + tint(niveau(top(beste))) + '">' +
       '<p class="svkop"><span class="vc">' + getal(max) + '</span><b>Beste uren ' + rb.map(runTekst).join(", ") + '</b>' +
@@ -683,7 +695,7 @@ window.KWU_READY.then(function () {
     var ds = dagen(), i = Math.min(st.dag, ds.length - 1), d = ds[i], o = dagOordeel(d);
 
     var kop = '<div class="dagkop" style="--tint:' + tint(o.n) + '"><b>' + (i === 0 ? "vandaag, " : "") + dagLang(d.uren[0].t) + '</b>' +
-      '<span class="dagv">' + (o.v ? o.ws.length + (o.ws.length === 1 ? " venster" : " vensters") + " · " + WOORD[o.n] : WOORD[o.n]) + '</span>' +
+      '<span class="dagv">' + (o.v ? (o.ws.length === 1 ? "kitebaar" : o.ws.length + "x kitebaar") + " · " + WOORD[o.n] : WOORD[o.n]) + '</span>' +
       '<span class="ind">zon op ' + d.zon.op + ', onder ' + d.zon.onder + indicatieTekst(i, d) + '</span></div>';
     var nu = uurNu();
     /* Elke rijkop met uitleg krijgt dezelfde vorm: tekst links, de i-knop rechts tegen de rand.
@@ -705,7 +717,7 @@ window.KWU_READY.then(function () {
           cells += '<td colspan="' + w.uren.length + '"><span class="vpil" title="' + w.tekst + " · " + WOORD[w.n] + '" style="--tint:' + tint(w.n) + ';--tint-v:' + tintV(w.n) + '">' + lbl + '</span></td>'; k += w.uren.length; }
         else { cells += '<td></td>'; k++; }
       }
-      return '<tr class="vrij"><th scope="row">' + rijkop("venster", "venster", "Wat een venster is") + '</th>' + cells + '</tr>';
+      return '<tr class="vrij"><th scope="row">' + rijkop("sessie", "venster", "Wat een sessie is") + '</th>' + cells + '</tr>';
     })();
     var tabel = '<table class="uurtabel"><tbody>' + (o.v ? vensterRij : "") +
       rij(rijkop("uur", "uur", "Wat het uur en de inktring betekenen"), function (u) { return td(u, "tu", '<button type="button">' + u.t.slice(11,13) + (u.t === nu ? '<small>nu</small>' : '') + '</button>'); }) +
@@ -849,7 +861,7 @@ window.KWU_READY.then(function () {
     $("sheet-b").innerHTML =
       '<ul class="redenen">' +
       '<li class="p"><b>Grote getal</b> = de maat waarmee je bij die wind lekker powered staat: 2,2 × je gewicht ÷ knopen, × 1 voor twintip en iets kleiner voor directional. Bij ' + st.kg + ' kg en 19 kn is dat ' + Math.round(ideaal(19)) + ' m.</li>' +
-      '<li class="p"><b>Bereik eronder</b>: één maat kleiner (vlagen, jij wilt rustig) tot één maat groter (ondergrens van het venster, je wilt zeker de hoogte halen).</li>' +
+      '<li class="p"><b>Bereik eronder</b>: één maat kleiner (vlagen, jij wilt rustig) tot één maat groter (ondergrens van de sessie, je wilt zeker de hoogte halen).</li>' +
       '<li class="m">Schatting uit modellen die er geregeld 3 tot 5 kn naast zitten. Kijk naar het water en naar wat de anderen optuigen, en beslis zelf.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
@@ -876,11 +888,12 @@ window.KWU_READY.then(function () {
       "<b>Eén druppel is licht</b>, drie is 1 mm per uur, vijf is een plensbui.",
       "<b>Het getal is millimeters per uur.</b> Droog staat er als er niets valt.",
       "<b>Regen maakt je kite zwaarder</b> en het zicht slechter, maar hij vliegt gewoon door."]],
-    venster: ["Het venster", [
-      "<b>Een venster is een rij uren achter elkaar waarin je kunt</b>: genoeg wind, niet te hard, en uit een veilige hoek.",
+    venster: ["De sessie", [
+      "<b>Een sessie is een rij uren achter elkaar waarin je kunt</b>: genoeg wind, niet te hard, en uit een veilige hoek.",
       "<b>De balk laat zien hoe lang het duurt</b> en welk oordeel er hoort bij het grootste deel van die uren.",
-      "<b>Klik erop</b> voor het cijfer van dat venster, de kitemaat en wat er mee en tegen zit.",
-      "<b>Een 9 is het hoogste dat de wind alleen kan halen</b>, en die krijg je in jouw band. Voor een 10 moet er meer goed staan: rustige wind zonder grote vlagen, stroom tegen de wind in, en een venster van vier uur of langer. Een 10 is dus zeldzaam, en dat hoort.",
+      "<b>Klik erop</b> voor het cijfer van die sessie, de kitemaat en wat er mee en tegen zit. Zijn er meer sessies op een dag, dan krijgt elke balk zijn eigen cijfer.",
+      "<b>Een 9 is het hoogste dat de wind alleen kan halen</b>, en die krijg je bij 23 tot 30 kn: jouw band. Een 10 is dus nooit weinig wind, hij is hard.",
+      "<b>Voor die laatste punt moet er meer goed staan dan alleen de wind</b>: gelijkmatige wind (weinig vlagen), stroom tegen de wind in, en vier uur of langer. Een 10 is zeldzaam, en dat hoort.",
       "<b>Hard waaien kost geen punten.</b> Boven 30 kn heet het hier gewoon hard, met een kleine kite, en het cijfer blijft hoog. Wat daar w\u00e9l telt zijn de vlagen, de stroom en de golven: die wegen daar anderhalf keer zo zwaar, want bij die wind maken zij het verschil tussen een topsessie en een worsteling."]]
   };
   function openKort(k) {
@@ -896,18 +909,23 @@ window.KWU_READY.then(function () {
      opbouw is een mening (Daniel, 12-09). */
   function openCijfer() {
     var us = laatsteBeste; if (!us || !us.length) return;
-    var d0 = uurDelen(us[0]); if (!d0) return;
-    var sc = us.reduce(function (a,u) { return a + uurScore(u); }, 0) / us.length;
-    var kn = Math.round(us.reduce(function (a,u) { return a + u.kn; }, 0) / us.length);
+    /* Het uur dat het cijfer buiten bepaalt, is het uur waarvan we de opbouw laten zien. Eerst nam
+       dit het eerste uur en het gemiddelde van alle beste uren, en dan stond er 6,5 buiten en
+       "samen 6" binnen (Daniel, 12-09). */
+    var beste0 = us.reduce(function (a,u) { return uurScore(u) > uurScore(a) ? u : a; });
+    var d0 = uurDelen(beste0); if (!d0) return;
+    var sc = laatsteScore != null ? laatsteScore : d0.score;
+    var kn = beste0.kn;
     $("sheet-t").textContent = "Hoe dit cijfer is opgebouwd";
     $("sheet-b").innerHTML = '<ul class="redenen">' +
       '<li class="p"><b>' + getal(d0.start) + ' voor de wind zelf.</b> Bij ' + kn + ' kn trekt je ' + GROOT() + ' m ' +
         (druk(kn) < 1.05 ? "net" : druk(kn) < 1.39 ? "prettig" : druk(kn) < 2.10 ? "lekker" : "hard") +
-        '. Het hoogste dat de wind alleen kan halen is een 9, en dat is tussen ' + knBij(1.60) + ' en ' + VEEL + ' kn: jouw band.</li>' +
+        '.</li>' +
       d0.posten.map(function (x) { return '<li class="p"><b>' + x[0] + '</b> ' + x[1] + '</li>'; }).join("") +
       (d0.posten.length ? '<li class="p"><b>Samen ' + getal(sc) + '.</b> Alles wordt op een half punt afgerond, want nauwkeuriger dan dat is het niet.</li>'
         : '<li class="p"><b>Verder niets erbij of eraf.</b> De stroom staat dwars, de vlagen zijn normaal: dit uur is puur de wind. Afgerond op een half punt, want nauwkeuriger is het niet.</li>') +
-      '<li class="p"><b>Voor een 10 moet er meer goed staan</b> dan alleen wind: rustige wind zonder grote vlagen, stroom tegen de wind in, en een venster van vier uur of langer. Dat cijfer van het hele venster zie je als je op de balk klikt.</li></ul>';
+      '<li class="p"><b>Een 9 is het hoogste dat wind alleen kan halen</b>, tussen ' + knBij(1.60) + ' en ' + VEEL + ' kn. Een 10 is dus nooit weinig wind, hij is hard.</li>' +
+      '<li class="p"><b>Die laatste punt komt van de rest</b>: gelijkmatige wind (weinig vlagen), stroom tegen de wind in, en vier uur of langer. Het cijfer van de hele sessie zie je als je op de balk klikt.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
   /* De legenda stond als uitklapper onder de tabel en was een muur tekst. Nu achter dezelfde
