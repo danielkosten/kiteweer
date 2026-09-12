@@ -67,6 +67,7 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | `knBij()` | `genoegKn()`, de legenda (`openLegenda`), de zin "een 9 zit tussen X en 30 kn" in `openCijfer()` | `ijk.mjs`: de vier grenzen en de 20 heen-en-terug-sommen met de afkapping op 3 m |
 | `genoegKn()` | de gate in `uren()` (welke modellen "ja" stemmen), de sessiekans, de kans uit de ensembles, de streep in de weekbalk plus de uitleg eronder, de kop van de sessiekans-rij, de oker kleurschaal `knKleur()`, het vlagerig-plusje in de tabel | `ijk.mjs`, via `knBij(DRUK_GOED)` = 14 kn |
 | `band()` | `niveau()`, en daarmee echt alles wat gekleurd of beoordeeld is | `ijk.mjs` toetst de grenzen, niet de functie zelf |
+| `werkKn()` | `niveau()`: de wind waarmee je echt rijdt, dus wind plus of min de stroom in de windrichting. Verandert alleen het OORDEEL, nooit het windgetal in de tabel | `ijk.mjs` niet rechtstreeks; de ondergrenscontrole raakt hem wel |
 | `niveau()` | tabelkleuren, weekbalk, schuifbalk, `vensters()`, `uurDelen()` (geeft niets terug bij te weinig of aflandig), de tekst "Niet: ..." in de samenvatting, de pijlkleur | `qa.mjs` ziet alleen dat er iets staat, niet of het klopt |
 | `CURVE` / `startCijfer()` | `cijfer()` (venstercijfer) én `uurDelen()` (uurcijfer), en daarmee de volgorde van de vensters, de keuze van de beste dag en de beste uren | `ijk.mjs`: acht punten op de curve, de eis dat hij stijgt naar Daniels band, dat 33 kn hoger scoort dan 16 kn, en dat een 10 net niet uit de wind alleen komt |
 | `cijfer()` | het getal op elke vensterknop, `scoreVan()` → de sortering van de vensters en de beste dag van de week, het venster-uitlegvenster | alleen het startcijfer via `ijk.mjs`. De optelposten zelf: **niets** |
@@ -129,11 +130,11 @@ git commit -am "..." && git push
 
 Wat de twee toetsen echt controleren:
 
-| `node ijk.mjs` | de vier windgrenzen bij 85 kg met een 13 m (14 · 19 · 30 · 40 kn), dat de standaardmaat binnen de keuzelijst 4 tot 15 m valt, dat de ondergrens meebeweegt met een andere kitemaat, acht punten van de cijfercurve, dat de curve stijgt naar Daniels band, dat 33 kn hoger scoort dan 16 kn, dat een 10 bestaat maar niet uit de wind alleen, dat zijn drie echte sessies goed beoordeeld worden, en 20 heen-en-terug-sommen |
+| `node ijk.mjs` | de vier windgrenzen bij 85 kg met een 13 m (14 · 19 · 30 · 40 kn), dat de standaardmaat binnen de keuzelijst 4 tot 15 m valt, dat de ondergrens meebeweegt met een andere kitemaat, acht punten van de cijfercurve, dat de curve stijgt naar Daniels band, dat 33 kn hoger scoort dan 16 kn, dat een 10 bestaat maar niet uit de wind alleen, dat zijn **vier** echte sessies goed beoordeeld worden (waaronder 07-09, zijn ondergrens-sessie op ~17 kn), dat de ondergrens tussen 12 en 15 kn blijft, en 20 heen-en-terug-sommen |
 |---|---|
-| `node dubbel.mjs` | dat de zeven geijkte getallen (2,2 · 1,8 · 1,34 · 1,6 · 0,97 · 1,32 en de rest) elk maar een keer in `app.js` staan, dat elke naam ook echt gebruikt wordt, en dat de stroomsterkte alleen in `stroomPost()` tot een oordeel leidt |
+| `node dubbel.mjs` | dat de geijkte getallen (2,2 · 1,8 · 1,34 · 1,6 · 0,97 · 1,32 en de rest) elk maar een keer in `app.js` staan, dat elke naam ook echt gebruikt wordt, en dat de stroomsterkte alleen in `stroomPost()` tot een oordeel leidt |
 |---|---|
-| `node qa.mjs <url>` | op 390 en 1200 px breed: stopt er ergens vet midden in een tijd of getal, lekt er ruwe code of "undefined" de pagina in, schuift de pagina zijwaarts, steekt er iets buiten het scherm, staan zeven vaste onderdelen er echt en zijn ze zichtbaar, zijn er fouten in de browser, en gaat élke i-knop open, past het venster in beeld en lekt er niets in. Schrijft `qa-mobiel.png` en `qa-breed.png` |
+| `node qa.mjs <url>` | op 390 en 1200 px breed: steekt een invoerveld buiten zijn pil, stopt er ergens vet midden in een tijd of getal, lekt er ruwe code of "undefined" de pagina in, schuift de pagina zijwaarts, steekt er iets buiten het scherm, staan zeven vaste onderdelen er echt en zijn ze zichtbaar, zijn er fouten in de browser, en gaat élke i-knop open, past het venster in beeld en lekt er niets in. Schrijft `qa-mobiel.png` en `qa-breed.png` |
 
 ## 6. Wat nergens door getest wordt
 
@@ -149,6 +150,7 @@ Wat de twee toetsen echt controleren:
 - **De meetketen**: `metingBij()`, `afwijkingVandaag()` en de zin "vandaag staat er meer wind dan
   voorspeld" worden door geen enkele toets aangeraakt.
 - **Een ander gewicht dan 85 kg** buiten de heen-en-terug-som, en elke andere spot dan de standaard.
+- **De kaartjes zelf**: `sessieKaart()`, `topUur()`, en de grenzen daarin (een topuur moet een heel punt hoger scoren).
 - **De geometrie van de knoppen**: gelijke hoogtes, niets dat buiten beeld valt, de scrollpositie die
   blijft staan. Alle drie met de hand nagemeten, nergens vastgelegd.
 - **De drie ophalers** (`gen-*.mjs`) hebben geen enkele toets; je merkt een fout pas als de pagina
