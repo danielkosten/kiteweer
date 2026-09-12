@@ -525,6 +525,21 @@ window.KWU_READY.then(function () {
      uur van 33 kn onder een uur van 16 kn eindigde terwijl het hoger hoort (Daniel, 12-09).
      Beste uren = de uren met de hoogste score in het beste venster; de rest van het venster is "ook prima". */
   function uurScore(u) { var d = uurDelen(u); return d ? d.score : null; }
+  /* Hetzelfde, maar over een groep uren in plaats van één uur: het gemiddelde van die uren.
+     Het cijfer op het scherm, de bullets eronder en de opbouw achter de i-knop komen hier
+     alledrie uit, zodat ze niet uit elkaar kunnen lopen. */
+  function urenDelen(us) {
+    var n = us.length;
+    var kn = us.reduce(function (a,u) { return a + u.kn; }, 0) / n;
+    var rGem = us.reduce(function (a,u) { return a + druk(u.kn); }, 0) / n;
+    var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
+    var vh = us.reduce(function (a,u) { return a + (u.kn ? u.vl / u.kn : 1); }, 0) / n;
+    var start = startCijfer(rGem), sc = start, posten = [];
+    var sp = stroomPost(c);
+    if (sp) { sc += sp[0]; posten.push([(sp[0] > 0 ? "+ " : "\u2212 ") + Math.abs(sp[0]).toString().replace(".", ","), sp[1]]); }
+    if (vh >= VLAGERIG) { sc -= 1; posten.push(["\u2212 1", "vlagerig: de pieken zijn meer dan " + VLAGERIG.toString().replace(".", ",") + " keer de wind"]); }
+    return { score:sc, start:start, posten:posten, kn:Math.round(kn) };
+  }
   /* Hetzelfde cijfer, maar opgeknipt in zijn stukken, zodat de i-knop kan laten zien waar het
      vandaan komt in plaats van alleen het getal te tonen (Daniel, 12-09). */
   function uurDelen(u) {
@@ -569,7 +584,7 @@ window.KWU_READY.then(function () {
     return '<p class="sv meet"><b>' + kop + '</b> ' + esc(a.station) + ' op ' + String(a.km).replace(".", ",") + ' km meet ' + staart + '</p>';
   }
 
-  var laatsteBeste = null, laatsteScore = null;
+  var laatsteBeste = null;
   function tekenSamenvatting() {
     var d = huidigeDag(), o = dagOordeel(d), el = $("samenvatting");
     if (!o.v) { el.innerHTML = '<p class="sv"><b>' + (o.n === "aflandig" ? "Aflandig, niet gaan." : "Te weinig wind.") + '</b> hoogste ' + o.b.kn + ' kn om ' + uurStr(o.b.t) + '.</p>' + meetZin() +
@@ -578,10 +593,10 @@ window.KWU_READY.then(function () {
     var alle = [].concat.apply([], o.ws.map(function (w) { return w.uren; })).filter(function (u) { return uurScore(u) != null; });
     var max = Math.max.apply(null, alle.map(uurScore));
     var beste = alle.filter(function (u) { return uurScore(u) >= max - 0.25; }), rest = alle.filter(function (u) { return uurScore(u) < max - 0.25; });
-    laatsteBeste = beste; laatsteScore = max;
+    laatsteBeste = beste;
     var rb = runs(beste), rr = runs(rest), lo = Math.min.apply(null, beste.map(function (u) { return u.kn; })), hi = Math.max.apply(null, beste.map(function (u) { return u.kn; }));
     var html = '<div class="sv beste" style="--tint:' + tint(niveau(top(beste))) + '">' +
-      '<p class="svkop"><span class="vc">' + getal(max) + '</span><b>Beste uren ' + rb.map(runTekst).join(", ") + '</b>' +
+      '<p class="svkop"><span class="vc">' + getal(urenDelen(beste).score) + '</span><b>Beste uren ' + rb.map(runTekst).join(", ") + '</b>' +
       '<button type="button" class="info" data-info="cijfer" aria-label="Hoe dit cijfer is opgebouwd">i</button></p>' +
       '<ul class="svlijst">' +
       '<li><b>' + (lo === hi ? lo : lo + "\u2013" + hi) + ' kn</b>, vlagen tot ' + vlMax(beste) + '</li>' +
@@ -909,13 +924,7 @@ window.KWU_READY.then(function () {
      opbouw is een mening (Daniel, 12-09). */
   function openCijfer() {
     var us = laatsteBeste; if (!us || !us.length) return;
-    /* Het uur dat het cijfer buiten bepaalt, is het uur waarvan we de opbouw laten zien. Eerst nam
-       dit het eerste uur en het gemiddelde van alle beste uren, en dan stond er 6,5 buiten en
-       "samen 6" binnen (Daniel, 12-09). */
-    var beste0 = us.reduce(function (a,u) { return uurScore(u) > uurScore(a) ? u : a; });
-    var d0 = uurDelen(beste0); if (!d0) return;
-    var sc = laatsteScore != null ? laatsteScore : d0.score;
-    var kn = beste0.kn;
+    var d0 = urenDelen(us), sc = d0.score, kn = d0.kn;
     $("sheet-t").textContent = "Hoe dit cijfer is opgebouwd";
     $("sheet-b").innerHTML = '<ul class="redenen">' +
       '<li class="p"><b>' + getal(d0.start) + ' voor de wind zelf.</b> Bij ' + kn + ' kn trekt je ' + GROOT() + ' m ' +
