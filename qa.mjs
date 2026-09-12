@@ -31,11 +31,24 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
     .slice(0,3).map(e=>e.textContent.trim().slice(-24)));
   console.log('  onderdelen :', mist.length?'MIST '+mist.join(', '):'alle aanwezig');
   console.log('  vet kapot  :', kapotVet.length?kapotVet.join(' | '):'nee');
+  // 3d. steekt een invoerveld of keuzelijst buiten de pil waar hij in zit? Zo tekende Safari op de
+  //     telefoon een zwarte doos om de kitekiezer heen, buiten zijn eigen rand (12-09).
+  const uitPil = await p.evaluate(()=>{
+    const uit=[];
+    for (const el of document.querySelectorAll('.keuze select, .keuze input, .stap b')) {
+      const pil=el.closest('.keuze,.stap'); if(!pil) continue;
+      const a=pil.getBoundingClientRect(), c=el.getBoundingClientRect();
+      const over=Math.max(a.left-c.left, c.right-a.right, a.top-c.top, c.bottom-a.bottom);
+      if (over>1) uit.push((el.id||el.tagName)+' steekt '+Math.round(over)+'px uit');
+    }
+    return uit;
+  });
+  console.log('  uit de pil :', uitPil.length?uitPil.join(' | '):'nee');
   console.log('  fouten     :', errs.length?errs.join(' | '):'geen');
   console.log('  codelek    :', lek.length?lek.map(String).join(' '):'geen');
   console.log('  zijwaarts  :', breed?'JA (fout)':'nee');
   console.log('  buiten beeld:', buiten.length?buiten.join(', '):'geen');
-  if (errs.length||lek.length||breed||buiten.length||mist.length||kapotVet.length) stuk++;
+  if (errs.length||lek.length||breed||buiten.length||mist.length||kapotVet.length||uitPil.length) stuk++;
 
   // 4. elk uitlegvenster openen en op lek controleren
   //    Loopt over ELKE i-knop op de pagina, niet alleen die in de tabel: zo valt een nieuwe knop
