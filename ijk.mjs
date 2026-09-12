@@ -109,6 +109,11 @@ const SESSIES = [
   { dag:"zo 30-08", kn:19, vlaag:31, maat:10, kleiner:0, gevoel:"well powered" },
   { dag:"ma 31-08", kn:23, vlaag:30, maat:10, kleiner:0, gevoel:"well powered" },
   { dag:"vr 04-09", kn:24, vlaag:30, maat:8,  kleiner:KLEINER_D, gevoel:"nicely powered" },
+  // 07-09: opgezocht in zijn Garmin (79 min, Wassenaar, 19:08-20:27) en de wind erbij gehaald uit de
+  // meetpalen van Rijkswaterstaat: Hoek van Holland mat 16,6 kn gemiddeld, IJmuiden 19,2. Wassenaar
+  // ligt daartussen, dus reken op 17. Hij zei: "had niet per se veel minder moeten zijn." Dit is dus
+  // zijn ondergrens-sessie en die moet kitebaar blijven, maar geen mooi cijfer krijgen.
+  { dag:"zo 07-09", kn:17, vlaag:24, maat:13, kleiner:0, gevoel:"kon net, ondergrens", maxCijfer:7 },
 ];
 // Dezelfde woorden als de pagina (staat() in app.js).
 const staat = (r) => r > 1.35 ? "over" : r > 1.15 ? "lekker powered" : r < 0.80 ? "te klein" : r < 0.90 ? "iets under" : "goed";
@@ -124,7 +129,9 @@ for (const S of SESSIES) {
   // En een dag die hij zelf goed noemde mag nooit als vlagerig te boek staan.
   const vlaagOk = !gusty;
   // En het kale windcijfer hoort minstens een 7 te zijn: dit waren goede dagen.
-  const cijferOk = cijf >= 7;
+  // Meestal: dit waren goede dagen, dus minstens een 7. Voor de ondergrens-sessie juist andersom:
+  // die moet wel kunnen, maar mag geen mooi cijfer krijgen.
+  const cijferOk = S.maxCijfer ? (cijf >= 5 && cijf <= S.maxCijfer) : cijf >= 7;
   if (!maatOk || !vlaagOk || !cijferOk) stuk++;
   console.log("  " + (maatOk && vlaagOk && cijferOk ? "goed" : "FOUT") + "  " + (S.dag + " " + S.kn + " kn, " + S.maat + " m").padEnd(26)
     + "maat: " + hoe.padEnd(15) + "vlagen " + vh.toFixed(2) + "x " + (gusty ? "VLAGERIG" : "rustig").padEnd(9) + " cijfer " + cijf
@@ -148,6 +155,13 @@ for (const [kg, kleiner, groot] of [[85,0,13], [85,KLEINER_D,13], [45,0,6], [45,
 if (heenTerug) stuk++;
 console.log("\n" + (heenTerug ? "FOUT" : "goed") + "  heen en terug rekenen klopt".padEnd(46)
   + "20 combinaties van gewicht, board en kitemaat, " + heenTerug + " mis");
+
+// De ondergrens zelf, tegen zijn sessie van 07-09 gehouden: 17 kn moest kunnen, ver daaronder niet.
+const onder = knBij(ONDER);
+const grensOk = onder <= 15 && onder >= 12;
+if (!grensOk) stuk++;
+console.log("\n" + (grensOk ? "goed" : "FOUT") + "  de ondergrens blijft bij zijn gemeten sessie  ".padEnd(48)
+  + onder + " kn (07-09 reed hij op ~17 kn en noemde dat het randje)");
 
 console.log(stuk ? "\nIJKING: " + stuk + " PROBLEMEN" : "\nIJKING: alles goed");
 process.exit(stuk ? 1 : 0);
