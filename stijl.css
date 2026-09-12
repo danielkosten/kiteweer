@@ -324,8 +324,7 @@ main{padding-bottom:64px}
 /* De focusring hoort om de hele pil, niet om de lijst erin, en alleen als je met het toetsenbord
    navigeert. Op :focus-within sprong er een dikke zwarte ring om de pil zodra je hem op de
    telefoon aantikte, en dat ziet eruit als een foutmelding. */
-.keuze:has(select:focus-visible){border-color:var(--inkt);box-shadow:0 0 0 2px var(--inkt)}
-.keuze:has(select:focus){border-color:var(--inkt)}
+.keuze:has(select:focus){border-color:var(--inkt);box-shadow:0 0 0 3px rgba(23,19,15,.16)}
 
 .rider{display:flex;align-items:stretch;gap:8px}
 .rider .invoer{min-height:44px}
