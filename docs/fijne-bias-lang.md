@@ -262,3 +262,27 @@ Wel drie dingen om te weten:
    scheef.
 3. **Vermenigvuldigen is de goede vorm, niet optellen**, en de factor voor Hoek van Holland is
    x1,11, vlak tot 35 kn. Dat is wat de correctie mag zijn, niet x1,18.
+
+## Getoetst en afgevallen: Harmonie uit de mix halen
+
+Gevraagd op 12-09: zit er een patroon in welke combinatie van fijne modellen het best werkt?
+Getoetst zijn alle 15 combinaties van de vier fijne modellen, op de uren waarop ze alle vier
+bestaan (2025 t/m september 2026, ongeveer 14.500 uren per station).
+
+Op Hoek van Holland zag het er sterk uit. De huidige mix van vier stond achtste van de vijftien,
+en elke combinatie zonder KNMI Harmonie versloeg elke combinatie met Harmonie erin.
+
+| station | nu, vier modellen | zonder Harmonie | winst |
+|---|---|---|---|
+| Hoek van Holland | fout 2,83 · HSS 0,608 | fout 2,61 · HSS 0,655 | **+0,047** |
+| IJmuiden | fout 3,88 · HSS 0,503 | fout 3,97 · HSS 0,495 | -0,008 |
+| De Kooy | fout 2,15 · HSS 0,640 | fout 2,16 · HSS 0,633 | -0,007 |
+
+Het houdt dus op één station van de drie stand. Dat is geen patroon maar een toevalstreffer:
+wie 15 combinaties naast 3 stations legt heeft 45 vakjes, en dan springt er altijd wel een uit.
+**Niet doen.** De mix blijft vier modellen met Arthurs gewichten.
+
+Dit is meteen het beste argument tegen een eigen tabel op de VPS waarin van alles wordt
+meegeschreven om later naar patronen te zoeken. Hoe meer vakjes je maakt, hoe zekerder je
+iets vindt dat er niet is. Een vondst telt pas als hij op een station standhoudt dat je
+niet gebruikt hebt om hem te vinden.
