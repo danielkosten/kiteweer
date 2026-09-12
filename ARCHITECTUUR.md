@@ -61,7 +61,7 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | `st.spot` | `spot()`, `veilig()`, `optelling()`, `uren()` (de cache-sleutel), `versStroom()`, `meetstation()`, `fijnBij()` | niets rekenkundigs. `qa.mjs` kijkt alleen naar de standaardspot |
 | `st.modellen` | welke modellen in `uren()` meedoen, `gewichten()`, `fijnBij()`, de tekst op de modelknop | niets |
 | `st.mix` | klassegewicht in `gewichten()`, de optelling voor grove modellen, of de sessiekans uit de ensembles wordt gerekend (`uren()`, `kansPerDrempel()`) | niets |
-| `ideaal()` | `druk()`, `knBij()` (eigen kopie van de som), `staat()`, `kiteAdvies()`, de uitleg in het kite-venster | `ijk.mjs` leest de factor 2,2 uit `ideaal()` en rekent er alles mee na |
+| `ideaal()` | `druk()`, `knBij()` (eigen kopie van de som), `staat()`, `kiteAdvies()`, de uitleg in het kite-venster | `ijk.mjs` leest `KITEFACTOR` en rekent er alles mee na |
 | `druk()` | `band()` → `niveau()` → de kleuren, de tabel, de weekbalk, `vensters()`; en `cijfer()` en `uurDelen()` via `startCijfer()`; de woorden in `openCijfer()` | `ijk.mjs`, indirect via de vier grenzen en de cijfercurve |
 | `knBij()` | `genoegKn()`, de legenda (`openLegenda`), de zin "een 9 zit tussen X en 30 kn" in `openCijfer()` | `ijk.mjs`: de vier grenzen en de 20 heen-en-terug-sommen met de afkapping op 3 m |
 | `genoegKn()` | de gate in `uren()` (welke modellen "ja" stemmen), de sessiekans, de kans uit de ensembles, de streep in de weekbalk plus de uitleg eronder, de kop van de sessiekans-rij, de oker kleurschaal `knKleur()`, het vlagerig-plusje in de tabel | `ijk.mjs`, via `knBij(DRUK_GOED)` = 14 kn |
@@ -75,7 +75,7 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | `TEVEEL` (40) | de gate in `uren()` (te hard telt als nee), de kans uit de ensembles, de kop van de sessiekans-rij, "te hard" onder het percentage, twee uitlegvensters | `ijk.mjs` pint 40 vast |
 | `DRUK_GOED` (0,97) | `band()` en `genoegKn()`, dus de hele ondergrens van de pagina | `ijk.mjs`: moet 14 kn geven bij 85 kg en 13 m |
 | `DRUK_PERFECT` (1,32) | `band()` en de legenda | `ijk.mjs`: moet 19 kn geven |
-| `VLAGERIG` (1,8) | de strafpost in `cijfer()` (−1,5), de andere strafpost in `uurDelen()` (−1), het woord bij de windhoek, het oker plusje in de tabel, de reden-tekst `waarom()` | `ijk.mjs`: geen van Daniels drie sessies mag vlagerig heten |
+| `VLAGERIG` (1,8) | de strafpost `STRAF_VLAGERIG` in `cijfer()`, `uurDelen()` en `urenDelen()`, het woord bij de windhoek, het oker plusje in de tabel, de reden-tekst `waarom()` | `ijk.mjs`: geen van Daniels drie sessies mag vlagerig heten |
 | `STABIEL` (1,35) | de bonus "stabiele wind" in `cijfer()`, het woord bij de windhoek | niets |
 | `MAATJE_KLEINER` (1,6) | `kiteAdvies()` (een maat kleiner bij vlagen), de kite-regel in het venster-uitlegvenster | niets |
 | `KLEINER` (twintip 0, directional 1,5) | `ideaal()`, `knBij()`, en de nakijkregel op de browseropslag | `ijk.mjs` leest de directional-waarde en toetst de sessie van 04-09 |
@@ -85,11 +85,9 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | Val | Wat er echt gebeurde |
 |---|---|
 | Een hulpvariabele die je in de ene functie zet, bestaat niet in de andere | Een woord uit `kansPerDrempel` werd in `openZeker` gebruikt; het kansvenster ging stil niet meer open, `qa.mjs` zag "venster zeker: DICHT" (commit 2e0e9d9) |
-| Dezelfde regel op twee plekken loopt uit elkaar | Vlagerig stond vijf keer in de code, in twee eenheden (1,5 · 1,6 · 1,8 · +10 kn · +6 kn), dus een uur kon tegelijk "stabiel" en "gusty" heten. Nu één getal. **Het staat er nog steeds twee keer met een ander gewicht:** `cijfer()` haalt er 1,5 punt af, `uurDelen()` 1 punt |
+| Dezelfde regel op twee plekken loopt uit elkaar | Vlagerig stond vijf keer in de code, in twee eenheden (1,5 · 1,6 · 1,8 · +10 kn · +6 kn), dus een uur kon tegelijk "stabiel" en "gusty" heten. Nu één getal `STRAF_VLAGERIG`, gebruikt door alle drie de sommen |
 | De omgekeerde som vergat de afkapping | `ideaal()` kapt af op 3 m, dus onder die maat bestaat de gevraagde druk niet. Zonder rem gaf `knBij()` daar een wind die niet klopte met het oordeel ernaast. Valt op bij een lichte rijder op een kleine kite, niet bij Daniel (commit b3c346d) |
 | Een waarde uit de browseropslag die niemand nakeek | Een onbekende boardnaam maakte `KLEINER[st.board]` leeg, en dan werd elke som stil "geen getal": geen foutmelding, alleen lege vakjes. Gewicht en kitemaat vielen al terug, het board niet |
-| De factor 2,2 staat twee keer in `app.js` | In `ideaal()` (regel 302) en nog eens los in `knBij()` (regel 107). `ijk.mjs` leest alleen die van `ideaal()` en rekent er allebei mee na, dus verander je er één, dan meldt de toets het pas als een grens verschuift |
-| De woorden bij de druk staan drie keer los | `drukWoord()`, de zin in `cijfer().een` en de zin in `openCijfer()` hebben alle drie eigen grenzen 1,05 / 1,20 / 1,39 / 2,10, los van `DRUK_GOED` en `CURVE` |
 | Sorteren op het woord in plaats van op het cijfer | Een dag van 16 kn ("goed") won van een dag van 33 kn ("hard"), terwijl die tweede hoger scoort. Zowel de vensters als de beste uren gaan nu op het cijfer |
 | Ronden waar je rekent | Boven de beste uren stond ooit 6,265151515151515. Rond af waar je het toont (`half()`, `getal()`), nooit in de som |
 | Korte namen in één groot bestand | `app.js` is 1090 regels met korte functienamen. Kijk of een nieuwe naam nog vrij is, en kijk na een wijziging naar de hele pagina, niet naar een uitsnede |
@@ -132,10 +130,10 @@ Wat de twee toetsen echt controleren:
 
 ## 6. Wat nergens door getest wordt
 
-- **De optelposten van het cijfer.** −1,5 vlagerig, +0,5 stroom tegen, −0,5 golven, −0,5 regen, de
+- **De optelposten van het cijfer.** −1 vlagerig, de stroomposten (+0,5 tegen, −0,5 tot −1,5 mee), −0,5 golven, −0,5 regen, de
   duurposten, en de 1,5x zwaardere straf boven 30 kn: allemaal geraden gewichten, door niets getoetst.
-- **Het uurcijfer** (`uurDelen`) helemaal. Het gebruikt dezelfde curve maar andere posten dan het
-  venstercijfer, en niemand meet of ze bij elkaar passen.
+- **Het uurcijfer** (`uurDelen`, `urenDelen`) helemaal. Het gebruikt dezelfde curve en dezelfde
+  drempels als het sessiecijfer, maar minder posten, en niemand meet of ze bij elkaar passen.
 - **`vensters()`**: hoe uren tot een venster worden geplakt en welk woord dat venster krijgt.
 - **De stroming en de golven**: `stroomC()`, `stroomOordeel()`, `golfOordeel()`, de kentering.
 - **De sessiekans en de ensembles**: de gate in `uren()`, `kansPerDrempel()`, `kansTekst()`.
