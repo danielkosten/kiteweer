@@ -286,3 +286,26 @@ Dit is meteen het beste argument tegen een eigen tabel op de VPS waarin van alle
 meegeschreven om later naar patronen te zoeken. Hoe meer vakjes je maakt, hoe zekerder je
 iets vindt dat er niet is. Een vondst telt pas als hij op een station standhoudt dat je
 niet gebruikt hebt om hem te vinden.
+
+## Wanneer kijk je hier weer naar, en waarnaar
+
+Sinds 12-09-2026 loopt er een tabel mee op de VPS (zie `ARCHITECTUUR.md`, hoofdstuk 7). Niet alles
+wat daarin komt is even nuttig, en dat is belangrijk om te weten voordat je over een paar maanden
+gaat zitten zoeken.
+
+| vraag | wacht je op de tabel? | waarom |
+|---|---|---|
+| Leest de fijne mix in de winter anders? | **nee** | al beantwoord, op vier winters uit het archief. Winter wijkt 0,02 tot 0,04 af, en leest juist iets minder laag |
+| Klopt de grens van 40 kn? | **nee, wacht op weer** | het archief heeft de dag na een storm alles. Draai `node toets-lang.mjs` opnieuw zodra er een keer 35 kn of meer gestaan heeft |
+| Moet er een correctie op de fijne modellen? | **nee** | gemeten over 96.329 uren: niet doen. Zie hierboven |
+| Klopt zijn ondergrens van 14 kn met wat hij echt doet? | **ja** | daar heb je sessies voor nodig, en die staan nergens anders |
+| Gaat hij op dagen die de pagina afraadt? | **ja** | zelfde reden |
+| Hoe voelt een dag die de pagina een 8 geeft? | **ja** | het oordeel is het enige dat geen enkele bron kan terughalen |
+
+Kort: **de sessietabel is waar de winst zit, de rest is verzekering.** Het archief van Open-Meteo
+levert model-tegen-paal altijd al, 3,5 jaar diep, in een paar minuten. De tabel heeft over drie
+maanden drie maanden.
+
+Zinvol moment om terug te komen: **na de winter, met minstens tien bevestigde sessies**. Minder dan
+tien en je bent weer aan het zoeken in te weinig vakjes, precies de fout die op deze pagina hierboven
+beschreven staat.
