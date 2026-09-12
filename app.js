@@ -51,6 +51,8 @@ window.KWU_READY.then(function () {
      boven de beste uren (Daniel, 12-09). Rond af waar je het toont, niet waar je rekent. */
   function half(x) { return Math.round(x * 2) / 2; }
   function getal(x) { return half(x).toString().replace(".", ","); }
+  /* Nederlandse komma in elk getal dat op het scherm komt. Stond er als "0.9 m" en "1.2 kn". */
+  function komma(x, n) { return x.toFixed(n == null ? 1 : n).replace(".", ","); }
   var ARTHUR = KWU.modellen.filter(function (m) { return m.arthur; }).map(function (m) { return m.id; });
   var DAJK = KWU.modellen.filter(function (m) { return m.tijd; }).map(function (m) { return m.id; });
   /* Mixen: "dajk" = de DAJK-mix van docs/dajk-mix.md (fijn zolang het reikt, dan grof met optelling, ARPEGE, kans uit ensembles);
@@ -346,8 +348,8 @@ window.KWU_READY.then(function () {
   function stroomPost(c) {
     if (c >= 0.3) return c > 2 ? [0.25, "stroom tegen de wind, gratis hoogte, maar steil water: boven 2 kn kom je er lastig terug"]
                                : [0.5, "stroom tegen de wind, gratis hoogte"];
-    if (c <= -2) return [-1.5, "stroom hard mee met de wind, " + Math.abs(c).toFixed(1) + " kn: je zakt flink af en je kite trekt minder"];
-    if (c <= -1) return [-1, "stroom mee met de wind, " + Math.abs(c).toFixed(1) + " kn: je zakt af, neem een maat groter"];
+    if (c <= -2) return [-1.5, "stroom hard mee met de wind, " + komma(Math.abs(c)) + " kn: je zakt flink af en je kite trekt minder"];
+    if (c <= -1) return [-1, "stroom mee met de wind, " + komma(Math.abs(c)) + " kn: je zakt af, neem een maat groter"];
     if (c <= -0.3) return [-0.5, "stroom mee met de wind, je zakt af"];
     return null;
   }
@@ -465,9 +467,9 @@ window.KWU_READY.then(function () {
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
     var sp = stroomPost(c); if (sp) tel(sp[0], sp[1]);
     var g = us.filter(function (u) { return u.golf; }); var gm = g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null;
-    if (gm != null) { if (gm > 1.5) tel(-0.5, "flinke golven " + gm.toFixed(1) + " m"); else if (gm < 0.5) pl.push("vlak water"); }
+    if (gm != null) { if (gm > 1.5) tel(-0.5, "flinke golven " + komma(gm) + " m"); else if (gm < 0.5) pl.push("vlak water"); }
     var mm = us.reduce(function (a,u) { return a + (u.mm||0); }, 0);
-    if (mm >= 2) tel(-0.5, "regen, " + mm.toFixed(1) + " mm in die uren");
+    if (mm >= 2) tel(-0.5, "regen, " + komma(mm) + " mm in die uren");
     /* Duur telde eerst hoogstens een punt, terwijl een uur rijden met op- en afbouwen voor één uur
        water een andere dag is dan een middag staan (Daniel, 12-09). */
     if (n >= 6) tel(1, n + " uur lang, een hele sessie"); else if (n >= 4) tel(0.5, n + " uur lang");
@@ -588,7 +590,7 @@ window.KWU_READY.then(function () {
           "<b>" + (w.lo === w.hi ? w.lo : w.lo + "\u2013" + w.hi) + " kn</b> uit " + kompas(top(w.uren).dir) + ", vlagen tot " + vlMax(w.uren),
           "<b>kite " + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + "</b>",
           stroomZin(w.uren),
-          gm != null ? "golven " + gm.toFixed(1) + " m, " + golfWoord(gm) : null,
+          gm != null ? "golven " + komma(gm) + " m, " + golfWoord(gm) : null,
           bu && bu !== w.tekst ? "<b>beste uren " + bu + "</b>" : null
         ].filter(Boolean);
         return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(cn) + ';--tint-v:' + tintV(cn) + '">' +
