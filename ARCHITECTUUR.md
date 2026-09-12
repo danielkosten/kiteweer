@@ -20,6 +20,7 @@ elke handmatige wijziging is de volgende run weg.
 | `dubbel.mjs` | kijkt of elk geijkt getal nog maar op EEN plek staat, en of de stroming maar op een plek beoordeeld wordt | met de hand |
 | `qa.mjs` | zet een echte browser op de pagina en kijkt of er niets stuk is | met de hand |
 | `verifieer.mjs`, `toets-horizon.mjs` | eenmalige metingen: hoe goed elk weermodel het deed. Draaien niet in de keten | met de hand |
+| `ververs.sh` | de klok op de VPS: haalt de metingen op en pusht ze. Draait elke 10 minuten als `/opt/kiteweer/ververs.sh`, wat dezelfde map is als deze repo | met de hand |
 | `.github/workflows/meting.yml`, `stroom.yml` | opdrachten die op GitHub kunnen draaien, zie hieronder | met de hand |
 | `qa-*.png` | schermafdrukken die `qa.mjs` bij elke run overschrijft | **door de machine** |
 | `docs/adr/*.md`, `docs/dajk-mix.md`, `docs/stroom.md` | waarom een keuze zo is gemaakt | met de hand |
@@ -100,6 +101,7 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | Sorteren op het woord in plaats van op het cijfer | Een dag van 16 kn ("goed") won van een dag van 33 kn ("hard"), terwijl die tweede hoger scoort. Zowel de vensters als de beste uren gaan nu op het cijfer |
 | Ronden waar je rekent | Boven de beste uren stond ooit 6,265151515151515. Rond af waar je het toont (`half()`, `getal()`), nooit in de som |
 | Instellingen die alleen per apparaat leven | Spot, gewicht, grootste kite en board zaten alleen in de browseropslag. Telefoon stond op Zandmotor, laptop op Wassenaarse Slag, 17 km verderop: 16-19 kn tegen 16-17 kn, en dat las als een kapotte app (12-09). Sinds die dag draagt het webadres ze alle vier plus de mix, en wint het adres van de opslag |
+| De bot pusht te laat en wordt geweigerd | `ververs.sh` haalt eerst 38 meetstations op, en dat duurt een minuut of wat. Push jij in dat raampje zelf naar main, dan is de bot te laat en weigert GitHub hem. Op 12-09 gebeurde dat 8 keer op een dag en werd de laatste meting 28 minuten oud terwijl de klok elke 10 minuten draait. Het script probeert nu drie keer, met een verse rebase ertussen |
 | Een open pagina die nooit opnieuw ophaalt | Wind, metingen en stroming kwamen een keer binnen bij het laden; de minuutklok tekende daarna alleen opnieuw met diezelfde cijfers. Een telefoon die uren in je zak zit toonde dus de ochtend terwijl een verse laptop het nu toonde, en dat leest als "de app klopt niet" (12-09). Sinds die dag: ouder dan 10 minuten en je komt terug op de pagina = opnieuw laden |
 | Korte namen in één groot bestand | `app.js` is 1090 regels met korte functienamen. Kijk of een nieuwe naam nog vrij is, en kijk na een wijziging naar de hele pagina, niet naar een uitsnede |
 | De bot commit zelf | De VPS pusht elke 10 minuten `meting.js`. Pull met rebase voor je pusht, anders botst het |
