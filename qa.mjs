@@ -20,7 +20,7 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   }).slice(0,4).map(e=>e.tagName+'.'+(e.className||'').toString().slice(0,25)));
   // 3b. staan de vaste onderdelen er op DEZE breedte ook echt, en zijn ze zichtbaar?
   //     Zonder deze controle kan een regel in een media-query iets stil laten verdwijnen.
-  const mist = await p.evaluate(()=>['#weekmini','#weekstrip','.uurtabel','#legenda','.weekmini .wm','.stap','#groot']
+  const mist = await p.evaluate(()=>['#weekmini','#weekstrip','.uurtabel','.legenda-knop','.weekmini .wm','.stap','#groot']
     .filter(s=>{const e=document.querySelector(s); if(!e) return true; const r=e.getBoundingClientRect(); return r.width<2||r.height<2;}));
   console.log(`\n== ${naam} ==`);
   console.log('  onderdelen :', mist.length?'MIST '+mist.join(', '):'alle aanwezig');
@@ -31,9 +31,12 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   if (errs.length||lek.length||breed||buiten.length||mist.length) stuk++;
 
   // 4. elk uitlegvenster openen en op lek controleren
-  const knoppen = await p.$$eval('.uurtabel th button.info', els=>els.map(e=>e.dataset.info));
+  //    Loopt over ELKE i-knop op de pagina, niet alleen die in de tabel: zo valt een nieuwe knop
+  //    nooit buiten de controle. Stond eerst vast op '.uurtabel th', waardoor de legenda- en
+  //    cijferknop ongetest bleven (12-09).
+  const knoppen = await p.$$eval('button.info[data-info]', els=>[...new Set(els.map(e=>e.dataset.info))]);
   for (const naam of knoppen) {
-    const sel = `.uurtabel th [data-info="${naam}"]`;
+    const sel = `[data-info="${naam}"]`;
     if (!await p.$(sel)) { console.log('  venster', sel, ': knop ontbreekt'); continue; }
     await p.click(sel); await p.waitForTimeout(350);
     const s = await p.evaluate(()=>({t:document.getElementById('sheet-t').textContent, b:document.getElementById('sheet-b').innerText, open:!document.getElementById('sheet').hidden, past:(()=>{const r=document.querySelector('.sheet-in').getBoundingClientRect();return r.left>=-1&&r.right<=innerWidth+1;})()}));
