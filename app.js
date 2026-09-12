@@ -230,20 +230,31 @@ window.KWU_READY.then(function () {
       var n = niveau(u);
       if (n === "perfect" || n === "goed" || n === "matig") { if (!nu) { nu = []; alle.push(nu); } nu.push(u); } else nu = null;
     });
-    /* Knip een sessie door zodra de stroom draait. Zonder dit werd 14:00 tot 20:00 één sessie met
-       één cijfer, en dat cijfer nam het gemiddelde van de stroom over die zes uur. De stroom draaide
-       om 16:00, dus de eerste helft met gratis hoogte en de tweede helft waarin je afzakt vielen
-       tegen elkaar weg en er kwam één braaf getal uit (Daniel, 12-09: "dus vandaag is het helemaal
-       niet ideaal tussen 16 en 19?"). Nu krijgt elk stuk zijn eigen cijfer. */
+    /* Knip een sessie door waar de stroom omslaat van mee naar tegen of andersom. Zonder dit werd
+       14:00 tot 20:00 een sessie met een cijfer, en dat cijfer nam het gemiddelde van de stroom over
+       die zes uur. De stroom draaide om 16:00, dus de helft met gratis hoogte en de helft waarin je
+       afzakt vielen tegen elkaar weg en er kwam een braaf getal uit (Daniel, 12-09: "dus vandaag is
+       het helemaal niet ideaal tussen 16 en 19?").
+       Twee dingen voorkomen dat het snippers worden: een uur waarin de stroom dwars staat hoort bij
+       het stuk ervoor, en een stuk korter dan twee uur wordt teruggeplakt aan de buurman. Op de
+       eerste poging leverde dit twee sessies van een uur op, allebei met straf voor "slechts 1 uur". */
     alle = alle.reduce(function (uit, v) {
-      var stuk = [v[0]], vorige = stroomZone(v[0]);
+      var zones = [], vorige = null;
+      v.forEach(function (u) { var z = stroomZone(u); if (z === "dwars") z = vorige || "dwars"; zones.push(z); vorige = z; });
+      var stukken = [[v[0]]];
       for (var i = 1; i < v.length; i++) {
-        var z = stroomZone(v[i]);
-        if (z !== vorige && stuk.length) { uit.push(stuk); stuk = []; vorige = z; }
-        stuk.push(v[i]);
+        if (zones[i] !== zones[i-1]) stukken.push([]);
+        stukken[stukken.length - 1].push(v[i]);
       }
-      if (stuk.length) uit.push(stuk);
-      return uit;
+      // Te korte stukken terugplakken: liever een sessie van zes uur dan drie van twee.
+      for (var k = 0; k < stukken.length; k++) {
+        if (stukken.length > 1 && stukken[k].length < 2) {
+          var buur = k === 0 ? 1 : k - 1;
+          stukken[buur] = buur < k ? stukken[buur].concat(stukken[k]) : stukken[k].concat(stukken[buur]);
+          stukken.splice(k, 1); k = -1;
+        }
+      }
+      return uit.concat(stukken);
     }, []);
     return alle.map(function (v) {
       var kns = v.map(function (u) { return u.kn; }), vls = v.map(function (u) { return u.vl; });
