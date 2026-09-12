@@ -297,8 +297,9 @@ window.KWU_READY.then(function () {
     return { uur:beste, score:bs };
   }
   function golfGem(us) { var g = us.filter(function (u) { return u.golf; }); return g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null; }
-  /* Eén vorm voor elk kaartje, of het nu een hele sessie is of het beste uur erbinnen. */
-  function kaart(j, score, cn, tijd, punten, c, merk) {
+  /* Eén vorm voor elk kaartje, of het nu een hele sessie is of het beste uur erbinnen.
+     Heet met opzet niet "kaart": die naam is al van de luchtfoto, en die wist deze stilletjes. */
+  function sessieKaart(j, score, cn, tijd, punten, c, merk) {
     return '<button type="button" class="venster' + (merk ? " topuur" : "") + '" data-venster="' + j + '" style="--tint:' + tint(cn) + ';--tint-v:' + tintV(cn) + '">' +
       '<span class="vc">' + getal(score) + '</span><span class="vt">' + tijd + (merk ? '<small>' + merk + '</small>' : '') + '</span>' +
       '<i class="info" aria-hidden="true">i</i>' +
@@ -617,11 +618,11 @@ window.KWU_READY.then(function () {
           stroomZin(w.uren),
           gm != null && gm >= 0.8 ? "golven " + komma(gm) + " m, " + golfWoord(gm) : null
         ].filter(Boolean);
-        kaartjes.push(kaart(j, c.score, cn, w.tekst, punten, c, null));
+        kaartjes.push(sessieKaart(j, c.score, cn, w.tekst, punten, c, null));
         var t = topUur(w);
         if (t) {
           var u = t.uur, du = uurDelen(u), uu = +u.t.slice(11,13);
-          kaartjes.push(kaart(j, t.score, cijferNiveau(t.score), uurStr(u.t) + "\u2013" + (uu + 1) + ":00", [
+          kaartjes.push(sessieKaart(j, t.score, cijferNiveau(t.score), uurStr(u.t) + "\u2013" + (uu + 1) + ":00", [
             "<b>" + u.kn + " kn</b> uit " + kompas(u.dir) + ", vlagen tot " + u.vl,
             "<b>kite " + (kiteAdvies(u.kn, u.vl) ? kiteAdvies(u.kn, u.vl).maat + " m" : "\u2014") + "</b>",
             stroomZin([u])
