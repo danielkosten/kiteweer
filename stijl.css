@@ -333,7 +333,9 @@ main{padding-bottom:64px}
 .venster .veen{font-size:13.5px;color:var(--inkt)}
 /* De som onder het cijfer. Zonder die regel kunnen twee sessies allebei op 6 uitkomen langs heel
    verschillende wegen, en dan lijkt het of de stroming niet meetelt (Daniel, 12-09). */
-.venster .vsom{font-size:12px;color:var(--zacht);grid-column:1/-1;margin-top:2px}
+.venster .vsom{font-size:12px;color:var(--zacht);grid-column:1/-1;margin-top:6px;padding-top:6px;border-top:1px solid var(--lijn-2);display:flex;flex-direction:column;gap:1px}
+.venster .vsom b{font-weight:700;color:var(--inkt)}
+.venster .vsom i{font-style:normal}
 .venster .info{font-style:normal;font-size:11px;font-weight:700;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--zacht);color:var(--zacht);display:inline-flex;align-items:center;justify-content:center}
 
 .venster ul{margin:0;padding:0 14px 12px 34px;font-size:13.5px;color:var(--zacht)}

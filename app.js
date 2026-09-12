@@ -459,7 +459,7 @@ window.KWU_READY.then(function () {
     else if (n <= 1) tel(-1.5, "slechts 1 uur, dat is opbouwen en weer afbouwen"); else if (n === 2) tel(-0.5, "kort, 2 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     var st0 = getal(start);
-    return { score:score, plus:pl, min:mn, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
+    return { score:score, plus:pl, min:mn, start:st0, delen:som, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
       een: (knGem > VEEL ? "Hard en goed powered, kleine kite" : drukWoord(rGem).charAt(0).toUpperCase() + drukWoord(rGem).slice(1)) + (pl.length ? ", " + pl[0] : "") + (mn.length ? ", maar " + mn[0].split(",")[0] : "") };
   }
 
@@ -571,7 +571,9 @@ window.KWU_READY.then(function () {
         return '<button type="button" class="venster" data-venster="' + j + '" style="--tint:' + tint(cn) + ';--tint-v:' + tintV(cn) + '">' +
           '<span class="vt">' + w.tekst + '</span><span class="vk">' + w.lo + "–" + w.hi + ' kn <small>vlagen ' + w.vlLo + "–" + w.vlHi + '</small></span><span class="vkite">kite ' + kiteBereik(w.lo, w.hi, vlMax(w.uren)) + '</span>' +
           '<span class="vc">' + getal(c.score) + '</span><span class="veen">' + c.een + '</span>' +
-          '<span class="vsom">' + c.som + '</span><i class="info" aria-hidden="true">i</i></button>';
+          '<span class="vsom"><b>' + c.start + '</b> voor de wind' +
+            c.delen.map(function (x) { return '<i>' + esc(x) + '</i>'; }).join("") +
+            '<b>= ' + getal(c.score) + '</b></span><i class="info" aria-hidden="true">i</i></button>';
       }).join("");
       $("onderverdict").innerHTML = '<span class="flauw">' + zon + indicatieTekst(i, d) + '</span>';
     } else {
