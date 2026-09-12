@@ -503,11 +503,10 @@ window.KWU_READY.then(function () {
     if (gm != null && gm < 0.5) pl.push("vlak water");
     var mm = us.reduce(function (a,u) { return a + (u.mm||0); }, 0);
     if (mm >= 2) tel(-0.5, "regen, " + komma(mm) + " mm in die uren", "regen");
-    /* Duur is plat, niet oplopend: meer dan twee uur is een halve punt waard en daarna houdt het op.
-       Daniel gaat vaak toch hooguit twee uur, dus zes uur is niet twee keer zo goed als drie. En een
-       uur kostte anderhalve punt, en dat was flink overdreven (Daniel, 12-09). */
+    /* Duur kan alleen punten OPLEVEREN, nooit kosten: een uur is een sessie, daar hoort geen straf
+       bij (Daniel, 12-09). En het is plat, niet oplopend: boven twee uur een half punt en daarna
+       houdt het op, want Daniel gaat vaak toch hooguit twee uur. */
     if (n > 2) tel(0.5, n + " uur lang, ruim de tijd", n + " uur");
-    else if (n <= 1) tel(-0.5, "slechts 1 uur, dat is opbouwen en weer afbouwen", "1 uur");
     score = Math.max(1, Math.min(10, Math.round(score * 2) / 2));
     var st0 = getal(start);
     return { score:score, plus:pl, min:mn, start:st0, delen:som, som: st0 + " voor " + drukWoord(rGem) + (som.length ? " " + som.join(" ") : "") + " = " + score.toString().replace(".", ","),
