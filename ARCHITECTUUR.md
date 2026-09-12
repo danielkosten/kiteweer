@@ -141,7 +141,7 @@ Wat de twee toetsen echt controleren:
 - **Het woord en de kleur van een sessie** (`cijferWoord`, `cijferNiveau`) en de vlaagkleur
   (`vlaagKleur`): de grenzen 8,5 / 7 / 5,5 / 4 en 1,4 tot 2,0 zijn gekozen, niet gemeten.
 - **De optelposten van het cijfer.** −1 vlagerig, de stroomposten (+0,5 tegen, −0,5 tot −1,5 mee), −0,5 golven, −0,5 regen, de
-  duurposten, en de 1,5x zwaardere straf boven 30 kn: allemaal geraden gewichten, door niets getoetst.
+  duurposten (−0,5 bij een uur, +0,5 boven twee uur), en de 1,5x zwaardere straf boven 30 kn: allemaal geraden gewichten, door niets getoetst.
 - **Het uurcijfer** (`uurDelen`, `urenDelen`) helemaal. Het gebruikt dezelfde curve en dezelfde
   drempels als het sessiecijfer, maar minder posten, en niemand meet of ze bij elkaar passen.
 - **`vensters()`**: hoe uren tot een venster worden geplakt en welk woord dat venster krijgt.
