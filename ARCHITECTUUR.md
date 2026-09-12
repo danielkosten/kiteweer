@@ -98,6 +98,7 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 | Een waarde uit de browseropslag die niemand nakeek | Een onbekende boardnaam maakte `KLEINER[st.board]` leeg, en dan werd elke som stil "geen getal": geen foutmelding, alleen lege vakjes. Gewicht en kitemaat vielen al terug, het board niet |
 | Sorteren op het woord in plaats van op het cijfer | Een dag van 16 kn ("goed") won van een dag van 33 kn ("hard"), terwijl die tweede hoger scoort. Zowel de vensters als de beste uren gaan nu op het cijfer |
 | Ronden waar je rekent | Boven de beste uren stond ooit 6,265151515151515. Rond af waar je het toont (`half()`, `getal()`), nooit in de som |
+| Een open pagina die nooit opnieuw ophaalt | Wind, metingen en stroming kwamen een keer binnen bij het laden; de minuutklok tekende daarna alleen opnieuw met diezelfde cijfers. Een telefoon die uren in je zak zit toonde dus de ochtend terwijl een verse laptop het nu toonde, en dat leest als "de app klopt niet" (12-09). Sinds die dag: ouder dan 10 minuten en je komt terug op de pagina = opnieuw laden |
 | Korte namen in één groot bestand | `app.js` is 1090 regels met korte functienamen. Kijk of een nieuwe naam nog vrij is, en kijk na een wijziging naar de hele pagina, niet naar een uitsnede |
 | De bot commit zelf | De VPS pusht elke 10 minuten `meting.js`. Pull met rebase voor je pusht, anders botst het |
 
