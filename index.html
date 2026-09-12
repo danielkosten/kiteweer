@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Albert+Sans:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="stijl.css?v=20260912b">
+<link rel="stylesheet" href="stijl.css?v=20260912c">
 </head>
 <body>
 
@@ -22,16 +22,12 @@
     </div>
     <p class="vers" id="vers"><span id="verstekst">bijgewerkt: laden…</span><button type="button" class="info" data-info="vers" aria-label="Hoe vaak dit ververst">i</button></p>
     <div class="rider">
-      <div class="stap" role="group" aria-label="Gewicht">
-        <button type="button" data-kg="-5" aria-label="5 kg minder">−</button>
-        <b id="kglabel">85 kg</b>
-        <button type="button" data-kg="5" aria-label="5 kg meer">+</button>
-      </div>
+      <label class="keuze"><span>gewicht</span><select id="kg" aria-label="Gewicht"></select></label>
       <label class="keuze"><span>max kite</span><select id="groot" aria-label="Grootste kite"></select></label>
-      <div class="seg klein" role="group" aria-label="Board">
-        <button type="button" class="on" data-board="twintip">Twintip</button>
-        <button type="button" data-board="directional">Directional</button>
-      </div>
+      <label class="keuze"><span>board</span><select id="board" aria-label="Board">
+        <option value="twintip">Twintip</option>
+        <option value="directional">Directional</option>
+      </select></label>
     </div>
   </header>
 </div>
@@ -90,10 +86,10 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <!-- ?v= ophogen bij elke wijziging: GitHub Pages cachet 10 minuten en Safari langer -->
-<script src="data.js?v=20260912b"></script>
-<script src="stroom.js?v=20260912b"></script>
-<script src="meting.js?v=20260912b"></script>
-<script src="laad.js?v=20260912b"></script>
-<script src="app.js?v=20260912b"></script>
+<script src="data.js?v=20260912c"></script>
+<script src="stroom.js?v=20260912c"></script>
+<script src="meting.js?v=20260912c"></script>
+<script src="laad.js?v=20260912c"></script>
+<script src="app.js?v=20260912c"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 
 **kiteweer** — Live: https://danielkosten.github.io/kiteweer/
 
-Stack: JS · 40 tracked files · last commit 2026-09-12 · regenerate with `code-map repo --write`
+Stack: JS · 41 tracked files · last commit 2026-09-12 · regenerate with `code-map repo --write`
 
 ## Start here
 

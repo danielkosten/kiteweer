@@ -35,7 +35,7 @@ for (const [naam, st] of COMBIS) {
     return {
       rommel: /NaN|undefined|\[object/.test(t),
       leeg: t.length < 400,
-      kg: (document.getElementById("kglabel") || {}).textContent || "",
+      kg: ((document.getElementById("kg") || {}).value || "") + " kg",
       kite: (document.getElementById("groot") || {}).value || "",
       kop: (document.getElementById("verdict") || {}).textContent || "",
       sessies: document.querySelectorAll(".venster").length,

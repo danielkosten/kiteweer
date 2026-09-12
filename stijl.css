@@ -44,7 +44,7 @@ a{color:var(--inkt)}
 main{padding-bottom:64px}
 
 /* ── kop ─────────────────────────────────────────── */
-.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:22px 0 16px;
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:22px 0 14px;
   border-bottom:1px solid var(--lijn)}
 .merk{display:flex;align-items:center;gap:9px;margin-right:auto}
 .merk h1{font-size:20px;letter-spacing:-.03em}
@@ -105,6 +105,8 @@ main{padding-bottom:64px}
 /* ── secties ─────────────────────────────────────── */
 .sec{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--zacht);
   margin:34px 0 12px;font-family:var(--tekst);font-weight:700}
+/* De eerste sectie zit vlak onder de kiezers: daar was 34px lucht te veel (Daniel, 12-09). */
+main.wrap>section:first-of-type>.sec{margin-top:18px}
 .sec i{font-style:normal;letter-spacing:0;text-transform:none;font-weight:500;opacity:.85}
 
 /* ── kit ─────────────────────────────────────────── */
@@ -253,11 +255,14 @@ main{padding-bottom:64px}
    zei, en wanneer draait de stroom. Stonden als twee alinea's; nu twee regels om te scannen. */
 .feiten{list-style:none;margin:0;padding:0;display:grid;gap:6px}
 .feiten li{display:flex;align-items:baseline;gap:8px;font-size:14px;line-height:1.35}
+.feiten .info{margin-left:auto;align-self:center;font-style:normal;font-size:10px;font-weight:700;
+  width:18px;height:18px;border-radius:50%;border:1.5px solid var(--lijn);color:var(--flauw);
+  display:inline-flex;align-items:center;justify-content:center;flex:none}
+.feiten .info:hover{border-color:var(--zacht);color:var(--zacht)}
 .feiten .fp{flex:none;font-weight:800;font-size:12.5px;padding:2px 8px;border-radius:var(--r-pil);
   background:var(--tint-v);color:var(--tint);white-space:nowrap}
 .feiten .fx{min-width:0}
 .feiten .fx b{font-weight:700}
-.feiten small{display:block;color:var(--flauw);font-size:12px;line-height:1.3}
 .uurtabel .tu button{font-weight:700;font-size:13px;color:var(--zacht);padding:6px 0;width:100%;border-radius:6px}
 .uurtabel .tu button:hover{background:var(--lijn-2);color:var(--inkt)}
 .uurtabel .tu.aan button{background:var(--inkt);color:var(--papier)}
@@ -341,12 +346,6 @@ main{padding-bottom:64px}
 /* rider in de kop */
 /* Twee eenvoudige controls in plaats van twee invulvelden: gewicht met min en plus, kitemaat uit
    een lijst. Zelfde hoogte, zelfde ronding, zelfde rand als de rest van de kop. */
-.stap{display:inline-flex;align-items:center;gap:2px;border:1px solid var(--lijn);
-  border-radius:var(--r-pil);background:var(--papier);padding:0 4px;min-height:44px}
-.stap button{width:34px;height:34px;border-radius:50%;font:700 18px var(--tekst);color:var(--zacht);background:none;cursor:pointer;line-height:1}
-.stap button:hover{background:var(--lijn-2);color:var(--inkt)}
-.stap button:active{transform:scale(.92)}
-.stap b{min-width:58px;text-align:center;font:700 16px var(--tekst);color:var(--inkt)}
 /* De kitekiezer is EEN pil: de keuzelijst vult hem helemaal en heeft zelf geen rand, geen
    achtergrond en geen focusring. Zonder dit tekende Safari op de telefoon een zwarte afgeronde
    doos om de lijst heen, buiten de pil, omdat de algemene focusregel ook op een select slaat
@@ -368,13 +367,11 @@ main{padding-bottom:64px}
    telefoon aantikte, en dat ziet eruit als een foutmelding. */
 .keuze:has(select:focus){border-color:var(--inkt);box-shadow:0 0 0 3px rgba(23,19,15,.16)}
 
+/* Gewicht, grootste kite en board zijn drie even zware keuzes, dus drie identieke pillen naast
+   elkaar. Op een breed scherm label links en waarde rechts; op een telefoon label klein boven de
+   waarde, want anders past "Directional" er niet naast zijn eigen label. */
 .rider{display:flex;align-items:stretch;gap:8px}
-.rider .invoer{min-height:44px}
-.rider .invoer b{white-space:nowrap}
-.rider .seg{min-height:44px;align-items:stretch}
-.seg.klein button{padding:5px 13px;font-size:13px;white-space:nowrap}
-.rider .invoer{padding:5px 12px}
-.rider .invoer input{width:46px;font-size:16px}
+.rider .keuze{min-height:48px}
 /* vensters onder elkaar */
 .vensters{display:flex;flex-direction:column;gap:8px;margin:14px 0 10px}
 /* Een sessie is een kaartje: cijfer linksboven, tijd ernaast, daaronder de feiten en de som.
@@ -440,13 +437,15 @@ main{padding-bottom:64px}
 @media(max-width:600px){
   .top{gap:10px}
   .merk{width:100%}
-  /* Twee even brede pillen op de eerste regel, het bord eronder over de volle breedte:
-     alles begint op dezelfde lijn en niets wrapt binnen een pil. */
-  .rider{width:100%;flex-wrap:wrap;margin-left:0}
-  .rider .invoer,.rider .stap,.rider .keuze{flex:1 1 calc(50% - 4px);min-width:0;justify-content:space-between}
-  .rider .seg{flex:1 1 100%}
-  .rider .seg button{flex:1 1 0}
-  .seg button{padding:6px 11px;font-size:13px}
+  /* Drie even brede pillen op een regel. Label boven de waarde, want naast elkaar past het niet
+     op 390 px. Elke pil even hoog en even breed, en niets binnenin mag afbreken. */
+  .rider{width:100%;margin-left:0;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+  .rider .keuze{flex-direction:column;align-items:flex-start;justify-content:center;gap:0;
+    min-width:0;min-height:54px;padding:6px 22px 6px 11px;border-radius:14px}
+  .rider .keuze span{font-size:10.5px;letter-spacing:.04em;color:var(--flauw)}
+  .rider .keuze select{width:100%;text-align:left;font-size:15px;padding:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rider .keuze::after{right:9px;width:6px;height:6px;margin-top:-4px}
   .hero{padding:18px 16px}
   .verdict{font-size:28px}
   .venster .vt{font-size:19px}

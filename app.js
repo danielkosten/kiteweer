@@ -695,9 +695,10 @@ window.KWU_READY.then(function () {
      alleen als er genoeg uren geweest zijn om er iets van te vinden. */
   /* Eén regel van de feitenlijst: een gekleurde pil met het getal, daarachter wat het betekent,
      en eronder klein waar het vandaan komt. Drie alinea's waren het, nu twee regels (Daniel, 12-09). */
-  function feitRegel(niveau, pil, tekst, bron) {
+  function feitRegel(niveau, pil, tekst, sleutel, label) {
     return '<li><span class="fp" style="--tint:' + tint(niveau) + ';--tint-v:' + tintV(niveau) + '">' + pil + '</span>' +
-      '<span class="fx">' + tekst + (bron ? '<small>' + bron + '</small>' : '') + '</span></li>';
+      '<span class="fx">' + tekst + '</span>' +
+      '<button type="button" class="info" data-info="' + sleutel + '" aria-label="' + label + '">i</button></li>';
   }
   function meetZin() {
     if (st.dag !== 0) return "";
@@ -706,8 +707,7 @@ window.KWU_READY.then(function () {
     var pil = op ? "klopt" : (a.kn > 0 ? "+" : "\u2212") + getal + " kn";
     var tekst = op ? "<b>model zit er goed op</b> vandaag"
       : "<b>" + (a.kn > 0 ? "meer" : "minder") + " wind dan voorspeld</b>, reken daar de rest van de dag op";
-    return feitRegel(op ? "weinig" : a.kn > 0 ? "goed" : "matig", pil, tekst,
-      esc(a.station) + ", " + String(a.km).replace(".", ",") + " km \u00b7 " + a.uren + " uur al gemeten");
+    return feitRegel(op ? "weinig" : a.kn > 0 ? "goed" : "matig", pil, tekst, "meten", "Welke paal dit meet");
   }
   /* Wanneer draait de stroom om: tijd vet, richting erachter. De tijd hoort in \u00e9\u00e9n vet stuk,
      anders viel ":00" er los achter (qa.mjs let daarop). */
@@ -715,7 +715,7 @@ window.KWU_READY.then(function () {
     var k = kenteringen(us); if (!k.length) return "";
     return feitRegel("weinig", "stroom", k.map(function (x) {
       return "<b>" + uurStr(x.t) + "</b> " + x.van + " \u2192 " + x.naar; }).join(" \u00b7 "),
-      "bron rekent per 3 uur, dus ongeveer");
+      "stroom", "Wat de stroming met je doet");
   }
 
   function tekenSamenvatting() {
@@ -943,6 +943,8 @@ window.KWU_READY.then(function () {
         : s ? '<li class="p"><b>Twee stations samen</b>, want ze liggen even ver van ' + esc(spot().naam) + ': ' +
             s.lijst.map(function (b) { return esc(b.naam) + ' op ' + String(b.km).replace(".", ",") + ' km telt voor ' + Math.round(b.w * 100) + '%'; }).join(", ") +
             '. Nagerekend scheelt dat een halve knoop.</li>' : '') +
+      (function () { var a = afwijkingVandaag(); return a ? '<li class="p"><b>Vandaag al ' + a.uren + ' uur gemeten</b>, en daarover zit de paal gemiddeld ' +
+        String(Math.abs(a.kn)).replace(".", ",") + ' kn ' + (a.kn > 0 ? "boven" : "onder") + ' wat het model zei.</li>' : ''; })() +
       '<li class="p"><b>Het kleine cijfer is het verschil</b> met wat het model voor dat uur zei. Groen is meer wind dan voorspeld, oker is minder, grijs betekent dat het model erop zat.</li>' +
       '<li class="m">Onder de 10 km is het jouw strand, boven de 20 km een aanwijzing. Een paal op zee vangt meer wind dan een strand in de luwte van de duinen.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
@@ -993,7 +995,8 @@ window.KWU_READY.then(function () {
     $("sheet-b").innerHTML = '<ul class="redenen">' +
       '<li class="p"><b>Stroom tegen de wind in is gratis hoogte.</b> Het water duwt je bovenwinds terwijl je vaart, dus je verliest minder terrein en je kite krijgt meer druk.</li>' +
       '<li class="p"><b>Stroom met de wind mee kost je je sessie.</b> Je zakt af, en terugkruisen tegen stroom en wind in is zwaar werk.</li>' +
-      '<li class="p"><b>De pijl wijst waar het water heen gaat.</b> Het getal is de sterkte in knopen, het woord zegt of hij tegen, mee of dwars staat.</li></ul>';
+      '<li class="p"><b>De pijl wijst waar het water heen gaat.</b> Het getal is de sterkte in knopen, het woord zegt of hij tegen, mee of dwars staat.</li>' +
+      '<li class="m"><b>De omslagtijden zijn een schatting.</b> Rijkswaterstaat rekent het getij per 3 uur door, dus een kentering van "rond 09:00" kan er een halfuur naast zitten. De reeks wordt elke nacht opnieuw opgehaald.</li></ul>';
     $("sheet").hidden = false; $("sheet-x").focus();
   }
 
@@ -1146,21 +1149,23 @@ window.KWU_READY.then(function () {
     window.KWU_LAAD(id).then(function () { st.spot = id; st.t = null; st.dag = 0; cache.key = null; sluit(); teken(); })
       .catch(function (e) { $("spotknop").innerHTML = '<b>' + esc(spot().naam) + '</b><span style="color:var(--aflandig)">laden mislukt, probeer opnieuw</span>'; console.warn(e); });
   }
-  /* Hoe oud is iets, in gewone woorden. "3 uur geleden" leest sneller dan een tijdstip dat je
-     zelf nog van de klok moet aftrekken. */
+  /* Hoe oud is iets, kort. Een leeftijd leest sneller dan een tijdstip dat je zelf van de klok
+     moet aftrekken, en "27 min" past op een regel waar "27 min geleden" er twee van maakte. */
   function geleden(x) {
     if (!x) return null;
     var m = Math.round((Date.now() - new Date(x).getTime()) / 60000);
-    return m < 2 ? "net" : m < 90 ? m + " min geleden" : Math.round(m / 60) + " uur geleden";
+    return m < 2 ? "net" : m < 90 ? m + " min" : Math.round(m / 60) + " uur";
   }
   /* Eén regel bovenin voor de twee dingen waar elk oordeel op deze pagina op rust: de modellen en
      de meetpaal. Stroming en golven staan er bewust NIET bij (Daniel, 12-09): die komen uit het
      getij, worden een keer per nacht gerekend, en hun leeftijd zegt je dus niets. */
+  var modelRun = null;                    // vult zichzelf zodra Open-Meteo zijn meta.json teruggeeft
   function tekenVers() {
-    var w = geleden(KWU.gegenereerd), m = window.KWM ? geleden(window.KWM.gegenereerd) : null;
+    var m = window.KWM ? geleden(window.KWM.gegenereerd) : null;
     var mOud = window.KWM && Date.now() - new Date(window.KWM.gegenereerd).getTime() > 45 * 60e3;
-    var stuk = ['<span class="verspunt' + (KWU.live ? '' : ' oud') + '">\u25cf</span> <b>modellen</b> ' +
-      (KWU.live ? (w || "net") : "noodvoorraad, " + (w || "onbekend"))];
+    var mod = !KWU.live ? "noodvoorraad" : modelRun ? geleden(modelRun) : "\u2026";
+    var modOud = KWU.live && modelRun && Date.now() - modelRun > 6 * 3600e3;
+    var stuk = ['<span class="verspunt' + (KWU.live && !modOud ? '' : ' oud') + '">\u25cf</span> <b>modellen</b> ' + mod];
     if (m) stuk.push('<span class="verspunt' + (mOud ? ' oud' : '') + '">\u25cf</span> <b>meetpaal</b> ' + m);
     $("verstekst").innerHTML = "bijgewerkt " + stuk.join(" · ");
   }
@@ -1181,8 +1186,6 @@ window.KWU_READY.then(function () {
   document.addEventListener("click", function (e) {
     if (e.target.closest("[data-open-spot]")) return openSpotPaneel();
     var sp = e.target.closest("[data-spot]"); if (sp) return kiesSpot(sp.dataset.spot);
-    var bd = e.target.closest("[data-board]");
-    if (bd) { bd.parentNode.querySelectorAll("button").forEach(function (b) { b.classList.remove("on"); }); bd.classList.add("on"); st.board = bd.dataset.board; return teken(); }
     var ms = e.target.closest("[data-mset]");
     if (ms) { var k = ms.dataset.mset;
       if (k === "dajk") { st.mix = k; st.modellen = DAJK.slice(); }
@@ -1221,7 +1224,7 @@ window.KWU_READY.then(function () {
   }
   $("schuif").addEventListener("input", function (e) { stopSpelen(); zetUur(+e.target.value); });
 
-  /* Een uur per seconde door de dag: zo zie je de wind opbouwen, de stroom omslaan en de golven
+  /* Twee uur per seconde door de dag: zo zie je de wind opbouwen, de stroom omslaan en de golven
      meelopen in plaats van het per uur zelf te vergelijken. Aan het eind begint hij weer vooraan.
      Elke aanraking elders op de pagina zet hem stil, anders vecht het afspelen met je eigen klik. */
   var speler = null;
@@ -1232,45 +1235,40 @@ window.KWU_READY.then(function () {
       var d = huidigeDag(), i = d.uren.map(function (x) { return x.t; }).indexOf(st.t);
       var volgend = i + 1 >= d.uren.length ? 0 : i + 1;
       $("schuif").value = volgend; zetUur(volgend);
-    }, 1000);
+    }, 500);
   }
   $("speel").addEventListener("click", function () { speler ? stopSpelen() : startSpelen(); });
-  /* Gewicht met min en plus in stappen van 5 kg: tikken in plaats van een cijfer intypen, en op
-     een telefoon springt er geen toetsenbord over de pagina. */
-  document.querySelectorAll("[data-kg]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      st.kg = Math.max(40, Math.min(140, st.kg + parseInt(b.dataset.kg, 10)));
-      $("kglabel").textContent = st.kg + " kg"; bewaar(); teken();
-    });
-  });
-  /* Kitematen uit een lijst: 4 t/m 15 m, want dat is wat mensen echt hebben. */
+  /* Drie kiezers met dezelfde vorm: gewicht, grootste kite, board. Het gewicht ging met een min-
+     en een plusknop, de board met twee schakelaars, en de kitemaat met een lijst: drie vormen voor
+     drie keuzes die precies even zwaar zijn, en op een telefoon namen ze samen twee regels
+     (Daniel, 12-09). Een lijst per keuze, en ze passen alle drie naast elkaar op 390 px.
+     Gewicht in stappen van 5 kg, 40 t/m 140; kitematen 4 t/m 15 m, want dat is wat mensen hebben. */
   (function () {
-    var opties = "";
-    for (var m = 4; m <= 15; m++) opties += '<option value="' + m + '"' + (m === st.groot ? " selected" : "") + '>' + m + ' m</option>';
-    $("groot").innerHTML = opties;
+    var o = "";
+    for (var k = 40; k <= 140; k += 5) o += '<option value="' + k + '"' + (k === st.kg ? " selected" : "") + '>' + k + ' kg</option>';
+    $("kg").innerHTML = o;
+    o = "";
+    for (var m = 4; m <= 15; m++) o += '<option value="' + m + '"' + (m === st.groot ? " selected" : "") + '>' + m + ' m</option>';
+    $("groot").innerHTML = o;
+    $("board").value = st.board;
   })();
+  $("kg").addEventListener("change", function (e) { st.kg = parseInt(e.target.value, 10); bewaar(); teken(); });
+  $("board").addEventListener("change", function (e) { st.board = e.target.value; bewaar(); teken(); });
   $("groot").addEventListener("change", function (e) { st.groot = parseInt(e.target.value, 10); bewaar(); teken(); });
 
-  $("kglabel").textContent = st.kg + " kg";
-  document.querySelectorAll("[data-board]").forEach(function (b) { b.classList.toggle("on", b.dataset.board === st.board); });
   if (!KW.spots.some(function (x) { return x.id === st.spot; })) st.spot = "kijkduin";
   window.KWU_LAAD(st.spot).catch(function () { st.spot = "kijkduin"; return window.KWU_LAAD(st.spot); }).then(function () {
     tekenVers();
     setInterval(tekenVers, 60e3);           // de leeftijd loopt door terwijl de pagina open staat
+    if (window.KWU_RUNS) window.KWU_RUNS().then(function (ts) { modelRun = ts; tekenVers(); });
     teken();
-    springNaarNu();
   });
 
-  /* Op een telefoon stond de uurtabel met NU er vier schermen onder de vouw: je moest elke keer
-     eerst langs de kop, de week en de kaartjes scrollen voor je zag wat er nu staat (Daniel, 12-09).
-     Bij het openen springen we daar dus meteen heen, met de dagkop nog net in beeld. Alleen op een
-     smal scherm en alleen bij vandaag: op een breed scherm past alles toch al boven elkaar. */
+  /* De pagina opent gewoon bovenaan. Hij sprong hier even naar de uurtabel, maar dat was het
+     verkeerde middel: de tabel schuift zichzelf al zijwaarts naar NU, en dat is wat je wilde zien.
+     scrollRestoration blijft wel op "manual": anders zet de browser bij een harde verversing je
+     oude scrollhoogte terug en land je middenin de pagina (gemeten 12-09: 2601px). */
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
-  function springNaarNu() {
-    if (window.innerWidth > 700 || st.dag !== 0) return;
-    var dag = document.querySelector(".dag"); if (!dag) return;
-    window.scrollTo({ top: dag.getBoundingClientRect().top + window.scrollY - 8, behavior: "auto" });
-  }
 
   /* Een pagina die uren openstaat (telefoon in je zak op het strand) wees anders nog naar het uur
      waarop je hem opende, en na middernacht naar de verkeerde dag. Elke minuut kijken of het uur

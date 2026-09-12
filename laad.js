@@ -8,11 +8,11 @@
   // tijd = doet mee in de DAJK-mix; off = krijgt daar de spot-optelling (grof leest 3–4 kn te laag aan het water,
   // ARPEGE niet). Gemeten: toets-horizon.mjs, docs/dajk-mix.md.
   var MODELLEN = [
-    { id: "knmi_harmonie_arome_netherlands", naam: "KNMI Harmonie 2 km", dagen: 2.5, arthur: true, tijd: true, klasse: "regionaal", w: 0.88 },
-    { id: "meteofrance_arome_france_hd", naam: "AROME-HD 1,3 km", dagen: 2, arthur: true, tijd: true, klasse: "regionaal", w: 1.16 },
+    { meta: true, id: "knmi_harmonie_arome_netherlands", naam: "KNMI Harmonie 2 km", dagen: 2.5, arthur: true, tijd: true, klasse: "regionaal", w: 0.88 },
+    { meta: true, id: "meteofrance_arome_france_hd", naam: "AROME-HD 1,3 km", dagen: 2, arthur: true, tijd: true, klasse: "regionaal", w: 1.16 },
     { id: "icon_d2", naam: "ICON-D2 2 km", dagen: 2, arthur: true, tijd: true, klasse: "regionaal", w: 1.03 },
-    { id: "ukmo_uk_deterministic_2km", naam: "UKV 2 km", dagen: 2, arthur: true, tijd: true, klasse: "regionaal", w: 0.93 },
-    { id: "ecmwf_ifs", naam: "ECMWF 9 km", dagen: 7, arthur: true, tijd: true, off: true, klasse: "globaal", w: 1 },   // volle 9 km HRES, gratis sinds okt 2025; de 25 km-versie zat 5,5 kn te laag
+    { meta: true, id: "ukmo_uk_deterministic_2km", naam: "UKV 2 km", dagen: 2, arthur: true, tijd: true, klasse: "regionaal", w: 0.93 },
+    { meta: true, id: "ecmwf_ifs", naam: "ECMWF 9 km", dagen: 7, arthur: true, tijd: true, off: true, klasse: "globaal", w: 1 },   // volle 9 km HRES, gratis sinds okt 2025; de 25 km-versie zat 5,5 kn te laag
     { id: "gfs_seamless", naam: "GFS 13 km", dagen: 7, arthur: true, tijd: true, off: true, klasse: "globaal", w: 1 },
     { id: "icon_seamless", naam: "ICON 7 km", dagen: 7, arthur: true, tijd: true, off: true, klasse: "globaal", w: 1 },
     { id: "meteofrance_seamless", naam: "ARPEGE 5 km", dagen: 4, arthur: false, tijd: true, klasse: "globaal", w: 1 },   // gerekt rooster, ~5 km boven onze kust; leest waar, dus geen optelling
@@ -86,5 +86,33 @@
       el.onload = function () { var b = window.KWU; window.KWU = live; Object.keys(b.spots || {}).forEach(function (k) { if (!live.spots[k]) live.spots[k] = b.spots[k]; }); live.live = false; live.gegenereerd = b.gegenereerd; ok(); };
       document.head.appendChild(el); });
   }
+  /* Wanneer heeft een model voor het laatst GEREKEND? Dat is iets heel anders dan wanneer jouw
+     browser de cijfers ophaalde, en precies wat de regel bovenin moest zeggen. Stond daar eerst
+     de tijd van het paginabezoek, dus altijd "net", ook als de cijfers uit de browsercache van
+     een half uur geleden kwamen (gemeten 12-09).
+     Open-Meteo zet per model een meta.json neer met de tijd waarop de laatste ronde beschikbaar
+     kwam. Alleen de echte modellen hebben er een; de "seamless"-reeksen zijn samengeplakt uit
+     meerdere modellen en geven 500. Die slaan we stil over: we nemen de NIEUWSTE ronde die we
+     vinden, want dat is het verste dat deze pagina kan kijken.
+     Vier kleine bestanden, 15 minuten in de browser bewaard, en niets wacht erop: de regel vult
+     zichzelf in zodra ze binnen zijn. */
+  var RUNVERS = 15 * 60e3;
+  window.KWU_RUNS = function () {
+    try { var c = JSON.parse(localStorage.getItem("kiteweer-run:" + DATAVERSIE) || "null");
+      if (c && Date.now() - c.op < RUNVERS) return Promise.resolve(c.ts); } catch (e) {}
+    /* Alleen de modellen met meta:true worden gevraagd. De rest ("seamless"-reeksen, samengeplakt
+       uit meerdere modellen) geeft 500 terug: gevangen, maar de browser schrijft die fout toch in
+       de console en dan meldt qa.mjs terecht zes fouten op een schone pagina (gemeten 12-09). */
+    return Promise.all(MODELLEN.filter(function (m) { return m.meta; }).map(function (m) {
+      return haal("https://api.open-meteo.com/data/" + m.id + "/static/meta.json")
+        .then(function (j) { return j.last_run_availability_time ? j.last_run_availability_time * 1000 : null; })
+        .catch(function () { return null; });
+    })).then(function (ts) {
+      var goed = ts.filter(Boolean); if (!goed.length) return null;
+      var nieuwste = Math.max.apply(null, goed);
+      try { localStorage.setItem("kiteweer-run:" + DATAVERSIE, JSON.stringify({ op: Date.now(), ts: nieuwste })); } catch (e) {}
+      return nieuwste;
+    });
+  };
   window.KWU_READY = Promise.resolve();
 })();

@@ -20,7 +20,7 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   }).slice(0,4).map(e=>e.tagName+'.'+(e.className||'').toString().slice(0,25)));
   // 3b. staan de vaste onderdelen er op DEZE breedte ook echt, en zijn ze zichtbaar?
   //     Zonder deze controle kan een regel in een media-query iets stil laten verdwijnen.
-  const mist = await p.evaluate(()=>['#weekmini','#weekstrip','.uurtabel','.legenda-knop','.weekmini .wm','.stap','#groot']
+  const mist = await p.evaluate(()=>['#weekmini','#weekstrip','.uurtabel','.legenda-knop','.weekmini .wm','#kg','#groot','#board']
     .filter(s=>{const e=document.querySelector(s); if(!e) return true; const r=e.getBoundingClientRect(); return r.width<2||r.height<2;}));
   console.log(`\n== ${naam} ==`);
   // 3c. stopt er ergens vet midden in een tijd of een getal? Zo stond er "stroom draait rond 09"
@@ -35,8 +35,8 @@ for (const [w,h,naam] of [[390,844,'mobiel'],[1200,1900,'breed']]) {
   //     telefoon een zwarte doos om de kitekiezer heen, buiten zijn eigen rand (12-09).
   const uitPil = await p.evaluate(()=>{
     const uit=[];
-    for (const el of document.querySelectorAll('.keuze select, .keuze input, .stap b')) {
-      const pil=el.closest('.keuze,.stap'); if(!pil) continue;
+    for (const el of document.querySelectorAll('.keuze select, .keuze input')) {
+      const pil=el.closest('.keuze'); if(!pil) continue;
       const a=pil.getBoundingClientRect(), c=el.getBoundingClientRect();
       const over=Math.max(a.left-c.left, c.right-a.right, a.top-c.top, c.bottom-a.bottom);
       if (over>1) uit.push((el.id||el.tagName)+' steekt '+Math.round(over)+'px uit');
