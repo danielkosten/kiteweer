@@ -19,10 +19,14 @@ const GROOT = 13;
 const STANDAARD = pak("standaardmaat", /groot:(\d+)/);
 const ONDER   = pak("ondergrens-druk", /r < ([\d.]+) \? "weinig"/);
 const PERFECT = pak("perfect-druk", /r < ([\d.]+) \? "goed"/);
-const FACTOR  = pak("kitefactor", /return ([\d.]+) \* st\.kg/);
+const FACTOR  = pak("kitefactor", /Math\.max\(3, ([\d.]+) \* st\.kg/);
+const KLEINER_D = pak("directional maten kleiner", /KLEINER = \{ twintip:0, directional:([\d.]+) \}/);
+const VLAGERIG = pak("vlagerig", /var VLAGERIG = ([\d.]+)/);
+const STABIEL  = pak("stabiel", /STABIEL = ([\d.]+)/);
 
-// Zelfde formule als de pagina: druk = jouw grootste maat / de ideale maat bij die wind.
-const knBij = (druk, kg = 85, board = 1, groot = GROOT) => Math.round(druk * FACTOR * kg * board / groot);
+// Zelfde formules als de pagina.
+const ideaal = (kn, kg = 85, kleiner = 0) => Math.max(3, FACTOR * kg / kn - kleiner);
+const knBij = (druk, kg = 85, kleiner = 0, groot = GROOT) => Math.round(FACTOR * kg / (groot / druk + kleiner));
 
 const verwacht = [
   ["ondergrens, je grootste kite trekt", knBij(ONDER), 14],
@@ -40,19 +44,19 @@ for (const [wat, echt, hoort] of verwacht) {
   console.log("  " + (ok ? "goed" : "FOUT") + "  " + wat.padEnd(40) + echt + " kn (hoort " + hoort + ")");
 }
 // En de grenzen moeten meebewegen met een andere kite, anders is de schaal weer hard-coded.
-const met9 = knBij(ONDER, 85, 1, 9), met17 = knBij(ONDER, 85, 1, 17);
+const met9 = knBij(ONDER, 85, 0, 9), met17 = knBij(ONDER, 85, 0, 17);
 const beweegt = met9 > knBij(ONDER) && met17 < knBij(ONDER);
 if (!beweegt) stuk++;
 console.log("  " + (beweegt ? "goed" : "FOUT") + "  ondergrens beweegt mee met de kitemaat    9 m: " + met9 + " kn, 17 m: " + met17 + " kn");
 
 // Het startcijfer moet met de druk meelopen en pieken waar Daniel lekker staat: 20 tot 30 kn bij
 // 85 kg met een 13 m. Daarboven kan het nog, maar dan beslissen de omstandigheden, niet de wind.
-const drukVan = (kn, kg = 85, board = 1, groot = GROOT) => groot / (2.2 * kg / kn * board);
+const drukVan = (kn, kg = 85, kleiner = 0, groot = GROOT) => groot / ideaal(kn, kg, kleiner);
 const mC = app.match(/var CURVE = (\[\[[^;]+\]\]);/);
 if (!mC) { console.error("FOUT: CURVE niet gevonden in app.js"); process.exit(1); }
 const CURVE = JSON.parse(mC[1]);
-const startBij = (kn) => {
-  const r = drukVan(kn);
+const startBij = (kn, kleiner = 0) => {
+  const r = drukVan(kn, 85, kleiner);
   if (r <= CURVE[0][0]) return CURVE[0][1];
   for (let i = 1; i < CURVE.length; i++) {
     if (r <= CURVE[i][0]) { const a = CURVE[i-1], b = CURVE[i]; return a[1] + (b[1]-a[1]) * (r-a[0]) / (b[0]-a[0]); }
@@ -95,6 +99,37 @@ const tienKan = top + 0.5 + 0.5 + 0.5 >= 10 && top < 10;
 if (!tienKan) stuk++;
 console.log((tienKan ? "goed" : "FOUT") + "  een 10 is haalbaar maar niet gratis".padEnd(46)
   + "top van de curve " + top + ", met de bonussen " + (top + 1.5));
+
+// ── De echte sessies ─────────────────────────────────────────────────────────
+// Dit is de enige harde grond onder de hele pagina: drie sessies die Daniel zelf heeft gereden,
+// met de wind en de vlagen zoals KNMI Hoek van Holland ze die dag mat. Elke drempel hier moet
+// ze goed beoordelen. Ging het mis op: bij een vlaaggrens van 1,6 kreeg 30-08 straf voor
+// vlagerigheid, terwijl dat zijn beste dag was, met sprongen van 10 m.
+const SESSIES = [
+  { dag:"zo 30-08", kn:19, vlaag:31, maat:10, kleiner:0, gevoel:"well powered" },
+  { dag:"ma 31-08", kn:23, vlaag:30, maat:10, kleiner:0, gevoel:"well powered" },
+  { dag:"vr 04-09", kn:24, vlaag:30, maat:8,  kleiner:KLEINER_D, gevoel:"nicely powered" },
+];
+// Dezelfde woorden als de pagina (staat() in app.js).
+const staat = (r) => r > 1.35 ? "over" : r > 1.15 ? "lekker powered" : r < 0.80 ? "te klein" : r < 0.90 ? "iets under" : "goed";
+console.log("\nde drie sessies die Daniel echt gereden heeft (85 kg):");
+for (const S of SESSIES) {
+  const r = S.maat / ideaal(S.kn, 85, S.kleiner);
+  const hoe = staat(r);
+  const vh = S.vlaag / S.kn;
+  const gusty = vh >= VLAGERIG;
+  const cijf = Math.round(startBij(S.kn, S.kleiner) * 10) / 10;
+  // Wat hij reed moet "goed" of "lekker powered" heten, nooit "over" of "te klein".
+  const maatOk = hoe === "goed" || hoe === "lekker powered";
+  // En een dag die hij zelf goed noemde mag nooit als vlagerig te boek staan.
+  const vlaagOk = !gusty;
+  // En het kale windcijfer hoort minstens een 7 te zijn: dit waren goede dagen.
+  const cijferOk = cijf >= 7;
+  if (!maatOk || !vlaagOk || !cijferOk) stuk++;
+  console.log("  " + (maatOk && vlaagOk && cijferOk ? "goed" : "FOUT") + "  " + (S.dag + " " + S.kn + " kn, " + S.maat + " m").padEnd(26)
+    + "maat: " + hoe.padEnd(15) + "vlagen " + vh.toFixed(2) + "x " + (gusty ? "VLAGERIG" : "rustig").padEnd(9) + " cijfer " + cijf
+    + "   (voelde: " + S.gevoel + ")");
+}
 
 console.log(stuk ? "\nIJKING: " + stuk + " PROBLEMEN" : "\nIJKING: alles goed");
 process.exit(stuk ? 1 : 0);

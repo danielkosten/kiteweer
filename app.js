@@ -19,7 +19,22 @@ window.KWU_READY.then(function () {
   var DAGK = ["zo","ma","di","wo","do","vr","za"];
   var KOMPAS = ["N","NNO","NO","ONO","O","OZO","ZO","ZZO","Z","ZZW","ZW","WZW","W","WNW","NW","NNW"];
 
-  var BOARDS = { twintip:1, directional:0.8 };
+  /* Hoeveel meter je van de ideale maat aftrekt op een directional. Was een factor 0,8.
+     Daniel zegt (12-09): "ik neem altijd twee maten kleiner dan op een twintip". Dat klopt, maar het
+     gaat over de kite die hij pákt, niet over de ideale maat: hij rijdt zelf op ongeveer 1,2 keer de
+     ideale maat. Bij 23 kn pakte hij 10 m twintip, bij 24 kn 8 m directional. Twee maten kleiner in
+     zijn hand is dus ongeveer anderhalve meter van de ideale maat af.
+     Op precies 2 hier kwam zijn eigen sessie van 04-09 uit op "overpowered", terwijl hij hem
+     "nicely powered" noemde. Zijn logboek wint van het ronde getal. */
+  var KLEINER = { twintip:0, directional:1.5 };
+  /* Vlagerig: ÉÉN definitie, in verhouding en niet in knopen, want 10 kn erbij is bij 15 kn wind
+     iets heel anders dan bij 30 kn. Er stonden er vijf door elkaar (1,5 · 1,6 · 1,8 · +10 kn · +6 kn),
+     in twee verschillende eenheden, dus de pagina kon een uur tegelijk "stabiel" en "gusty" noemen.
+     De grens 1,8 is geijkt op Daniels eigen sessies: 30-08 waaide 19 kn met vlagen tot 33 (1,74) en
+     dat noemde hij zijn beste dag, met sprongen van 10 m. Bij 1,6 kreeg die dag straf.
+     Klopt ook met de meting: over 485 daglichturen aan Hoek van Holland zit een piek 1,4x de wind
+     (middelste waarde) en negen van de tien uren tussen 1,2 en 1,67. 1,8 is dus echt uitzonderlijk. */
+  var VLAGERIG = 1.8, STABIEL = 1.35, MAATJE_KLEINER = 1.6;
   var ARTHUR = KWU.modellen.filter(function (m) { return m.arthur; }).map(function (m) { return m.id; });
   var DAJK = KWU.modellen.filter(function (m) { return m.tijd; }).map(function (m) { return m.id; });
   /* Mixen: "dajk" = de DAJK-mix van docs/dajk-mix.md (fijn zolang het reikt, dan grof met optelling, ARPEGE, kans uit ensembles);
@@ -71,7 +86,7 @@ window.KWU_READY.then(function () {
     return r < 0.97 ? "weinig" : r < 1.32 ? "goed" : "perfect";
   }
   /* Bij welke wind een bepaalde druk hoort: voor de legenda en de uitleg. */
-  function knBij(r) { return Math.round(r * 2.2 * st.kg * BOARDS[st.board] / GROOT()); }
+  function knBij(r) { return Math.round(2.2 * st.kg / (GROOT() / r + KLEINER[st.board])); }
   /* Doorlopende kleur voor staaf en vlagen: geel (12) → groen (19) → donkergroen (24). Labels blijven vijf. */
   function knKleur(kn, n) {
     if (n === "weinig" || n === "aflandig") return KLEUR[n];
@@ -262,11 +277,11 @@ window.KWU_READY.then(function () {
 
   /* ── kitemaat ──────────────────────────────────────
      ideaal = 2,2 x kg / knopen x boardfactor. Per kite uit JOUW quiver zeggen we hoe hij staat. */
-  function ideaal(kn) { return 2.2 * st.kg / kn * BOARDS[st.board]; }
+  function ideaal(kn) { return Math.max(3, 2.2 * st.kg / kn - KLEINER[st.board]); }
   /* Wind waarbij je grootste kite net trekt: 2,2 x gewicht / die maat. Bij 85 kg twintip met een
      13 m is dat 14 kn; met een 17 m 11 kn. Daaronder sta je stil, ook met alles uitgerold. Dit is
      de streep in de weekbalk, het punt waar de kleur begint, en de ondergrens van de sessiekans. */
-  function genoegKn() { return Math.round(0.97 * 2.2 * st.kg * BOARDS[st.board] / GROOT()); }
+  function genoegKn() { return knBij(0.97); }
   function staat(maat, kn) {
     var r = maat / ideaal(kn);
     // Geijkt op Daniels sessies: 10 m bij 23 kn (ratio 1,23) voelde "lekker powered", niet over.
@@ -278,7 +293,7 @@ window.KWU_READY.then(function () {
   /* Nooit een maat adviseren die je niet hebt: je grootste staat in de kop. Komt de berekening hoger
      uit, dan is er simpelweg te weinig wind en staat er een streepje in de tabel. */
   function kiteAdvies(kn, vl) {
-    var m = Math.round(ideaal(kn)), vlagerig = vl / kn >= 1.5;
+    var m = Math.round(ideaal(kn)), vlagerig = vl / kn >= MAATJE_KLEINER;
     if (m > GROOT()) return null;
     return { maat:m, klein:vlagerig ? Math.max(5, m - 2) : null, vlagerig:vlagerig };
   }
@@ -333,7 +348,8 @@ window.KWU_READY.then(function () {
     var tel = function (d, tekst) { if (d < 0) d = Math.round(d * zwaar * 2) / 2;
       score += d; som.push((d > 0 ? "+ " : "− ") + Math.abs(d).toString().replace(".", ",") + " " + tekst); (d > 0 ? pl : mn).push(tekst); };
     var vl = us.reduce(function (a,u) { return a + (u.vl - u.kn); }, 0) / n;
-    if (vl >= 10) tel(-1.5, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vl < 6) tel(0.5, "stabiele wind");
+    var vh = us.reduce(function (a,u) { return a + (u.kn ? u.vl / u.kn : 1); }, 0) / n;
+    if (vh >= VLAGERIG) tel(-1.5, "vlagerig, vlagen " + Math.round(vl) + " kn boven de wind"); else if (vh < STABIEL) tel(0.5, "stabiele wind");
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / n;
     if (c > 0.3) tel(0.5, "stroom tegen de wind, gratis hoogte"); else if (c < -0.5) tel(-0.5, "stroom mee, je zakt af");
     var g = us.filter(function (u) { return u.golf; }); var gm = g.length ? g.reduce(function (a,u) { return a + u.golf.m; }, 0) / g.length : null;
@@ -363,7 +379,7 @@ window.KWU_READY.then(function () {
       'deg);color:' + (kl||"currentColor") + '" aria-hidden="true"><path d="M8 1.5l4.2 12-4.2-2.9L3.8 13.5z"/></svg>';
   }
   function hoekWoord(hoek, s, u) {
-    var vl = u.vl - u.kn, vlaag = vl >= 10 ? "vlagerig: " + u.kn + " kn met uitschieters naar " + u.vl : vl >= 6 ? "wat vlagen, tot " + u.vl + " kn" : "stabiel, vlagen tot " + u.vl + " kn";
+    var vh = u.kn ? u.vl / u.kn : 1, vlaag = vh >= VLAGERIG ? "vlagerig: " + u.kn + " kn met uitschieters naar " + u.vl : vh >= STABIEL ? "wat vlagen, tot " + u.vl + " kn" : "stabiel, vlagen tot " + u.vl + " kn";
     var r = hoek > 90 ? (veilig(s, u.dir)
       ? { kop:"Aflandig op het gewone strand", punten:["op deze spot heb je een veilige kant (" + esc(s.vorm) + "), daar duwt de wind je naar het land"] }
       : { kop:"Aflandig", punten:["de wind blaast van het strand de zee op", "gaat je kite neer, dan drijf je weg van de kant"] })
@@ -477,7 +493,7 @@ window.KWU_READY.then(function () {
     var n = niveau(u); if (n === "weinig" || n === "aflandig") return null;
     var sc = startCijfer(druk(u.kn)), c = stroomC(blokBij(u.t), u.dir);
     if (c > 0.3) sc += 0.5; else if (c < -0.5) sc -= 0.5;
-    if (u.vl / u.kn >= 1.8) sc -= 1;                     // alleen echt vlagerig; 1,6 hakte een venster in losse uren
+    if (u.vl / u.kn >= VLAGERIG) sc -= 1;                // zelfde grens als overal; 1,6 hakte een venster in losse uren
     return sc;
   }
   function runs(us) { var out = [], nu = null; us.forEach(function (u) { if (!nu || +u.t.slice(11,13) !== +nu[nu.length-1].t.slice(11,13) + 1) { nu = [u]; out.push(nu); } else nu.push(u); }); return out; }
@@ -486,7 +502,7 @@ window.KWU_READY.then(function () {
     var c = us.reduce(function (a,u) { return a + stroomC(blokBij(u.t), u.dir); }, 0) / us.length, vl = us.reduce(function (a,u) { return a + u.vl/u.kn; }, 0) / us.length;
     var p = [];
     p.push(c > 0.3 ? "stroom tegen de wind, gratis hoogte" : c < -0.5 ? "stroom mee, je zakt af" : "stroom dwars");
-    if (vl >= 1.8) p.push("vlagerig");
+    if (vl >= VLAGERIG) p.push("vlagerig");
     return p.join(", ");
   }
   /* Kentering: het uur waarop de stroom van mee naar tegen draait (of andersom). Bron is per 3 uur,
@@ -674,7 +690,7 @@ window.KWU_READY.then(function () {
            De kleur volgt het oordeel van dat uur, niet de vlaag: anders kleurt 9 kn wind groen
            omdat de vlaag 16 haalt. */
         var extra = Math.max(0, Math.round(u.vl - u.kn)), verhouding = u.kn ? u.vl / u.kn : 0;
-        var vlagerig = u.kn >= genoegKn() && verhouding >= 1.6;
+        var vlagerig = u.kn >= genoegKn() && verhouding >= VLAGERIG;
         /* Sommige grove modellen leveren geen vlagen: dan is vlaag = wind en zou er "+0" staan.
            Een streepje is eerlijker dan een nul die op windstil lijkt. */
         return td(u, "tv", '<span class="vp">' + u.vl + '</span>' +
@@ -734,7 +750,7 @@ window.KWU_READY.then(function () {
     $("sheet-b").innerHTML = '<p class="sheet-een">' + c.een + '</p><ul class="redenen">' +
       c.plus.map(function (p) { return '<li class="p">' + vet(p) + '</li>'; }).join("") + c.min.map(function (p) { return '<li class="m">' + vet(p) + '</li>'; }).join("") + '</ul>' +
       [["wind", w.lo + "–" + w.hi + " kn uit " + kompas(top(w.uren).dir)], ["vlagen tot", Math.max.apply(null, w.uren.map(function (u) { return u.vl; })) + " kn"],
-       ["duur", w.uren.length + " uur"], ["kite", kiteBereik(w.lo, w.hi, vlMax(w.uren)) + " bij " + st.kg + " kg, " + st.board + ". Maat op de gemiddelde wind; vlagen tot " + vlMax(w.uren) + " kn" + (vlMax(w.uren) / w.hi >= 1.5 ? ", dat is 1,5× de wind: neem de kleine" : ", dat kan de kite hebben")],
+       ["duur", w.uren.length + " uur"], ["kite", kiteBereik(w.lo, w.hi, vlMax(w.uren)) + " bij " + st.kg + " kg, " + st.board + ". Maat op de gemiddelde wind; vlagen tot " + vlMax(w.uren) + " kn" + (vlMax(w.uren) / w.hi >= MAATJE_KLEINER ? ", dat is " + MAATJE_KLEINER.toString().replace(".", ",") + "× de wind: neem de kleine" : ", dat kan de kite hebben")],
        ["cijfer", c.som],
        ["modellen", st.modellen.length + " aangevinkt, " + mixNaam() + (w.uren[0].off ? ", grof +" + w.uren[0].off + " kn" : "")]
       ].map(function (r) { return '<div class="rij"><span>' + r[0] + '</span><span>' + r[1] + '</span></div>'; }).join("");
