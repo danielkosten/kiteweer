@@ -20,9 +20,11 @@ const FIJN = [
 ];
 const BANDEN = [[0, 10, "< 10"], [10, 14, "10-14"], [14, 20, "14-20"], [20, 25, "20-25"], [25, 99, "> 25"]];
 const SECTOREN = [[0, 45, "N-NO"], [45, 90, "NO-O"], [90, 135, "O-ZO"], [135, 180, "ZO-Z"], [180, 225, "Z-ZW"], [225, 270, "ZW-W"], [270, 315, "W-NW"], [315, 360, "NW-N"]];
-const CACHE = "/private/tmp/claude-501/-Users-danielunravel-Code-personal-kiteweer/eb4cf35d-f251-46be-93ce-533c22cdac00/scratchpad/fijn-uren.json";
+const CACHE = path.join(os.tmpdir(), "kiteweer-toets", "fijn-uren.json");
 
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 // gewogen middelste waarde, zelfde kern als verifieer.mjs en de pagina
 const wmed = (paren) => { const p = paren.filter(x => x[0] != null).sort((a, b) => a[0] - b[0]);
   const tot = p.reduce((a, x) => a + x[1], 0); if (!tot) return null; let acc = 0;

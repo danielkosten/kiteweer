@@ -40,7 +40,7 @@ werkt die pagina zichzelf vanzelf bij zodra er iets naar `main` gaat. De routeri
 | wind, golven, weer, zon (tijdens het bezoek) | `laad.js`, in de browser | Open-Meteo | niets, blijft in de browser | elk bezoek, 30 min bewaard |
 | terugval-wind, 4 spots | `gen-uur.mjs` | Open-Meteo | `uur.js` | elke nacht 02:20 UTC, via `stroom.yml` op GitHub |
 | getijstroom, 35 spots | `gen-stroom.mjs` | Rijkswaterstaat MATROOS, alleen astronomisch getij | `stroom.js` | elke nacht 02:20 UTC, via `stroom.yml` op GitHub |
-| echte metingen van de palen | `gen-meting.mjs` | Rijkswaterstaat MATROOS | `meting.js` | **elke 10 minuten op de eigen VPS srv1410799**: `/opt/kiteweer/ververs.sh`, klok in `/etc/cron.d/kiteweer`, log in `/var/log/kiteweer.log` |
+| echte metingen van de palen | `gen-meting.mjs` | Rijkswaterstaat MATROOS | `meting.js` | **elke 10 minuten op de eigen VPS**: `/opt/kiteweer/ververs.sh`, klok in `/etc/cron.d/kiteweer`, log in `/var/log/kiteweer.log` |
 
 - `.github/workflows/meting.yml` heeft **geen klok meer**, alleen nog een knop om het met de hand te
   starten. De gratis klok van GitHub startte maar een run per 2 tot 5 uur, en de palen meten elk kwartier.
@@ -117,7 +117,7 @@ ideaal is.** Alles hieronder hangt daar weer aan.
 ## 5. Hoe je een wijziging veilig doorvoert
 
 ```
-cd /Users/danielunravel/Code/personal/kiteweer
+cd ~/Code/personal/kiteweer
 node ijk.mjs                                          # rekentoets, 1 seconde, geen browser
 node dubbel.mjs                                       # staat elke regel nog maar op een plek
 node qa.mjs http://localhost:8899/                     # of tegen de live URL, zie hieronder
@@ -129,10 +129,10 @@ node qa.mjs https://danielkosten.github.io/kiteweer/
 Daarna hetzelfde naar papa's repo:
 
 ```
-cd /Users/danielunravel/Code/personal/windcalendar
+cd ~/Code/personal/windcalendar
 git checkout daniel-view
-cp /Users/danielunravel/Code/personal/kiteweer/{index.html,app.js,stijl.css,laad.js,data.js} static/daniel/
-cp /Users/danielunravel/Code/personal/kiteweer/{gen-uur.mjs,gen-stroom.mjs,gen-meting.mjs,qa.mjs} docs/daniel-view/
+cp ~/Code/personal/kiteweer/{index.html,app.js,stijl.css,laad.js,data.js} static/daniel/
+cp ~/Code/personal/kiteweer/{gen-uur.mjs,gen-stroom.mjs,gen-meting.mjs,qa.mjs} docs/daniel-view/
 git commit -am "..." && git push
 ```
 
@@ -180,7 +180,7 @@ Wat de twee toetsen echt controleren:
 ## 7. De tabel op de VPS
 
 Sinds 12-09-2026 schrijft elke ververs-ronde ook weg wat er gezegd en gemeten is, in
-`/opt/kiteweer-log/kiteweer.db` op srv1410799. SQLite zit in node zelf, er is niets geinstalleerd.
+`/opt/kiteweer-log/kiteweer.db` op de VPS. SQLite zit in node zelf, er is niets geinstalleerd.
 De pagina leest deze tabel NIET; hij verandert niets aan wat de site rekent of toont.
 
 | tabel | wat erin gaat | hoe vaak |

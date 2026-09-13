@@ -27,9 +27,11 @@ const VEEL = 30, TEVEEL = 40;                         // de twee grenzen van de 
 const MIN_MODEL = 3;                                  // onder 3 kn is de verhouding echt/model onzin (delen door bijna nul)
 const STORMGAT = 6;                                   // uren stilte die twee periodes tot losse "stormen" maakt
 const WINTER = [10,11,12,1,2,3];                      // winter = oktober t/m maart
-const CACHE = "/private/tmp/claude-501/-Users-danielunravel-Code-personal-kiteweer/eb4cf35d-f251-46be-93ce-533c22cdac00/scratchpad";
+const CACHE = path.join(os.tmpdir(), "kiteweer-toets");
 
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 fs.mkdirSync(CACHE, { recursive: true });
 const slaap = ms => new Promise(r => setTimeout(r, ms));
 
