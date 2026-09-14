@@ -27,7 +27,7 @@ elke handmatige wijziging is de volgende run weg.
 De map `/opt/kiteweer` op de VPS is niet alleen de klok, hij wordt ook rechtstreeks geserveerd op
 https://danielskiing.cloud/kiteweer/. Omdat `ververs.sh` elke tien minuten met `git pull` begint,
 werkt die pagina zichzelf vanzelf bij zodra er iets naar `main` gaat. De routering staat in
-`~/Code/personal/DanielsBrewhouse/ops/danielskiing-hub/`. GitHub Pages blijft daarnaast gewoon staan.
+`~/Code/personal/DanielsBrewhouse/ops/danielskiing-hub/`. GitHub Pages staat uit sinds 2026-09-14.
 | `.github/workflows/meting.yml`, `stroom.yml` | opdrachten die op GitHub kunnen draaien, zie hieronder | met de hand |
 | `ververs.sh` | wat de klok op de VPS elke 10 minuten draait: metingen ophalen, de tabel bijwerken, committen | met de hand |
 | `qa-*.png` | schermafdrukken die `qa.mjs` bij elke run overschrijft | **door de machine** |
@@ -122,8 +122,8 @@ node ijk.mjs                                          # rekentoets, 1 seconde, g
 node dubbel.mjs                                       # staat elke regel nog maar op een plek
 node qa.mjs http://localhost:8899/                     # of tegen de live URL, zie hieronder
 git pull --rebase && git commit -am "..." && git push
-# wacht tot GitHub Pages de nieuwe pagina serveert (ongeveer een minuut)
-node qa.mjs https://danielkosten.github.io/kiteweer/
+# wacht tot de VPS hem ophaalt (hooguit tien minuten)
+node qa.mjs https://danielskiing.cloud/kiteweer/
 ```
 
 Daarna hetzelfde naar papa's repo:

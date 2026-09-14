@@ -10,7 +10,7 @@ zien is: een drempel die half hard-coded blijft staan.
 
 ```bash
 node qa.mjs                                     # tegen de lokale server
-node qa.mjs https://danielkosten.github.io/kiteweer/   # tegen de echte site
+node qa.mjs https://danielskiing.cloud/kiteweer/      # tegen de echte site
 ```
 
 Vereist Playwright. Staat die er niet, dan eerst `npm i playwright && npx playwright install chromium`

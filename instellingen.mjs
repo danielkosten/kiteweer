@@ -7,7 +7,7 @@
 // Deze toets zet zes verschillende instellingen in de browser en kijkt of de pagina heel blijft.
 import { chromium } from "playwright";
 
-const URL = process.argv[2] || "https://danielkosten.github.io/kiteweer/";
+const URL = process.argv[2] || "https://danielskiing.cloud/kiteweer/";
 const COMBIS = [
   ["Daniel",            { board:"twintip",     kg:85,  groot:13, spot:"kijkduin" }],
   ["lichte rijder",     { board:"twintip",     kg:55,  groot:9,  spot:"zandmotor" }],
